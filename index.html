@@ -320,6 +320,18 @@ const pad=(n)=>String(n).padStart(2,"0");
 const LVORD="ABCDEFG";
 const M={produk:[],lokasi:[],rak:[],set:{}};          // master
 const L=new Map();                                   // kode lokasi -> info
+const LINK=new Map();                                // ID file Drive (QR label rak) -> kode lokasi
+/** Ubah hasil scan label rak menjadi kode lokasi. Mengenali: kode (FG17-01-09-A, spasi/garis miring/tanpa tanda), atau link PDF Drive. */
+function resolveLoc(txt){
+  const t=String(txt||"").trim();
+  const m=t.match(/\/d\/([A-Za-z0-9_-]{10,})/)||t.match(/[?&]id=([A-Za-z0-9_-]{10,})/);
+  if(m)return LINK.get(m[1])||"";
+  const u=t.toUpperCase();if(L.has(u))return u;
+  const k=u.match(/^FG\s*[-_\/. ]?\s*(\d{2})\s*[-_\/. ]?\s*(\d{1,2})\s*[-_\/. ]?\s*(\d{1,2})\s*[-_\/. ]?\s*([A-G])$/);
+  if(k){const c=`FG${k[1]}-${String(k[2]).padStart(2,"0")}-${String(k[3]).padStart(2,"0")}-${k[4]}`;if(L.has(c))return c;}
+  return "";
+}
+function locErr(txt){return /drive\.google|\/d\//.test(String(txt))?"Label rak ini (link Drive) belum terdaftar di Master Lokasi kolom H (Link PDF Lokasi).":"Bukan kode rak yang dikenal: "+String(txt).slice(0,60);}
 let ORDER={};                                        // gudang|fungsi -> [kode lokasi berurutan]
 const S={pal:new Map(),out:[],batal:[],cari:new Set(),gud:"SD18"};
 const lsGet=(k)=>{try{return localStorage.getItem(k);}catch(e){return null;}};
@@ -342,8 +354,8 @@ function applyData(d){if(!d)return;const m=new Map();(d.rows||[]).forEach(o=>{co
   $("conn").textContent="Tersambung · data di Google Sheets · diperbarui "+new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"});}
 function applyMaster(m){
   M.produk=m.produk||[];M.lokasi=m.lokasi||[];M.rak=m.rak||[];M.set=m.set||{};
-  L.clear();const rk=new Map();M.rak.forEach(r=>rk.set(r.gedung+"|"+r.rak,r));
-  M.lokasi.forEach(([code,ged,rak,kol,lv])=>{const r=rk.get(ged+"|"+rak)||{fungsi:"Simpan",urutan:99};
+  L.clear();LINK.clear();const rk=new Map();M.rak.forEach(r=>rk.set(r.gedung+"|"+r.rak,r));
+  M.lokasi.forEach(([code,ged,rak,kol,lv,link])=>{const r=rk.get(ged+"|"+rak)||{fungsi:"Simpan",urutan:99};if(link)LINK.set(link,code);
     L.set(code,{code,ged,rak,kol,lv,li:LVORD.indexOf(lv),fungsi:r.fungsi,urutan:r.urutan});});
   ORDER={};
   [...L.values()].sort((a,b)=>a.urutan-b.urutan||+a.rak-+b.rak||a.li-b.li||+a.kol-+b.kol)
@@ -353,7 +365,7 @@ function applyMaster(m){
   $("segGud").innerHTML=geds.map(g=>`<button data-gud="${g}" aria-pressed="${g===S.gud}">${g}</button>`).join("");
   $("pItem").innerHTML=M.produk.map(p=>`<option value="${esc(p.item)}">${esc(p.item)} — ${esc(p.nama)}</option>`).join("");
   const last=lsGet("lastItem");if(last&&M.produk.some(p=>p.item===last))$("pItem").value=last;
-  $("masterInfo").innerHTML=`<b>${M.produk.length}</b> produk · <b>${M.lokasi.length}</b> lokasi · gudang ${geds.join(", ")} · rak reject: ${M.rak.filter(r=>r.fungsi==="Reject").map(r=>r.gedung+"-"+r.rak).join(", ")||"-"}`;
+  $("masterInfo").innerHTML=`<b>${M.produk.length}</b> produk · <b>${M.lokasi.length}</b> lokasi (<b>${LINK.size}</b> sudah punya link QR label) · gudang ${geds.join(", ")} · rak reject: ${M.rak.filter(r=>r.fungsi==="Reject").map(r=>r.gedung+"-"+r.rak).join(", ")||"-"}`;
   onItemChange(true);render();
 }
 async function loadMaster(){try{applyMaster(await apiGet("master"));}catch(e){$("conn").textContent="Master data gagal dimuat. Cek link server lalu muat ulang.";}}
@@ -392,7 +404,8 @@ function buildQR(p){return ["PLT",p.item,p.batch,p.palet,p.mat,p.jumlah,p.satuan
 function parseQR(raw){
   const t=String(raw||"").trim();
   if(!t)return {err:"QR kosong"};
-  if(L.has(t.toUpperCase()))return {err:"Ini barcode RAK ("+t+"), bukan QR palet"};
+  if(resolveLoc(t))return {err:"Ini label RAK ("+resolveLoc(t)+"), bukan QR palet"};
+  if(/drive\.google|\/d\//.test(t))return {err:"Ini label RAK (link Drive), bukan QR palet"};
   const f=t.split("|").map(x=>x.trim());
   if(f[0]==="PLT"){
     if(!f[2]||!f[3]||!matNums(f[4]))return {err:"QR label tidak lengkap"};
@@ -477,7 +490,8 @@ $("cClear").addEventListener("click",()=>{$("cBatch").value="";$("cMat").value="
 $("cariList").addEventListener("click",e=>{
   if(!e.target.closest("[data-move]"))return;const id=e.target.closest("[data-cid]").dataset.cid,p=S.pal.get(id);if(!p)return;
   openScanner({title:"Pindah lokasi",sub:`${p.batch} no ${p.mat} · sekarang ${p.lokasi}`,continuous:false,onCode:(txt)=>{
-    const loc=String(txt).trim().toUpperCase(),chk=checkLoc(p,loc,true);
+    const loc=resolveLoc(txt);if(!loc)return {ok:false,html:`GAGAL<small>${esc(locErr(txt))}</small>`};
+    const chk=checkLoc(p,loc,true);
     if(chk)return {ok:false,html:`GAGAL<small>${esc(chk)}</small>`};
     setTimeout(async()=>{const r=await act({action:"move",id,lokasi:loc},"cariMsg");if(r.ok)msg("cariMsg","ok",`Dipindah: ${palTxt(p)} ke <span class="loc sm done">${loc}</span>`);},50);
     return {ok:true};
@@ -587,7 +601,8 @@ $("listWait").addEventListener("click",async e=>{
   if(b.dataset.act==="cancel"){const r=await act({action:"unreceive",id},"msgIn");if(r.ok)msg("msgIn","wait",`${palTxt(p)} dikembalikan ke status belum diterima.`);}
   if(b.dataset.act==="place")await place(id,rek);
   if(b.dataset.act==="rak")openScanner({title:"Scan label rak",sub:`${p.batch} no ${p.mat} → ${rek}`,continuous:false,onCode:(txt)=>{
-    const loc=String(txt).trim().toUpperCase(),chk=checkLoc(p,loc,false);
+    const loc=resolveLoc(txt);if(!loc)return {ok:false,html:`GAGAL<small>${esc(locErr(txt))}</small>`};
+    const chk=checkLoc(p,loc,false);
     if(chk)return {ok:false,html:`GAGAL<small>${esc(chk)}</small>`};
     setTimeout(()=>{
       if(loc!==rek){const c=card.querySelector("[data-confirm]");
