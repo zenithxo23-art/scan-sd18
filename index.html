@@ -129,40 +129,28 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
 .scanner .btn{background:#26323D;color:#fff;border-color:#33414E}
 .scanner .btn.ok{background:var(--accent);color:#111;border-color:var(--accent)}
 .setup{background:var(--wait-bg);border-radius:12px;padding:14px;margin-bottom:14px;display:grid;gap:8px}
-/* ---------- LABEL CETAK ---------- */
+/* ---------- LABEL CETAK (layout C) ---------- */
 #printArea{display:none}
-.sheet{display:flex;background:#fff;color:#000;page-break-after:always;break-after:page;overflow:hidden}
-.sheet.a5{width:148mm;height:209.5mm}
-.sheet.a4{width:296.5mm;height:209.5mm}
-.lab{width:148mm;height:209.5mm;padding:7mm;font-family:Arial,"Barlow",sans-serif;color:#000;display:flex;flex-direction:column;gap:2.4mm}
-.sheet.a4 .lab+.lab{border-left:0.3mm dashed #999}
-.lab table{border-collapse:collapse;width:100%}
-.lab td,.lab th{border:0.35mm solid #000;padding:1.2mm 1.8mm;vertical-align:middle}
-.lab .hd td{font-size:2.6mm;height:6mm}
-.lab .logo{width:26mm;text-align:center;font-weight:700;font-size:3.4mm}
-.lab .logo img{max-width:22mm;max-height:16mm}
-.lab .ttl{text-align:center;font-weight:700;font-size:5.4mm;letter-spacing:.3mm}
-.lab .prod{background:#1E5B34;color:#fff;font-weight:700;font-size:5.2mm;text-align:center;padding:2.4mm;border:0.35mm solid #000}
-.lab .kv td{width:50%;height:15mm}
-.lab .kv .k{display:block;font-size:2.9mm;color:#333}
-.lab .kv .v{display:block;font-size:5.6mm;font-weight:700;font-family:"JetBrains Mono",Consolas,monospace;margin-top:.6mm}
-.lab .mid{display:flex;gap:3mm;align-items:stretch}
-.lab .qrb{width:52mm;flex:none;border:0.35mm solid #000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2mm}
-.lab .qrb svg{width:46mm;height:46mm}
-.lab .qrb span{font-size:2.5mm;margin-top:1mm;font-family:"JetBrains Mono",monospace}
-.lab .det{flex:1;font-size:3mm}
-.lab .det td{padding:1mm 1.6mm}
-.lab .det td:first-child{width:28mm;color:#333}
-.lab .qcb td{text-align:center;font-weight:700;font-size:3.6mm;height:21mm;vertical-align:top;padding-top:1.4mm;width:33.3%}
-.lab .qch td{font-size:3mm;font-weight:700;text-align:left;background:#eee;height:auto}
-.lab .foot{font-size:2.8mm;display:flex;justify-content:space-between}
+.sheet{width:148mm;height:209.5mm;background:#fff;color:#000;page-break-after:always;break-after:page;overflow:hidden;padding:9mm 8mm;box-sizing:border-box}
+.lab{width:100%;height:100%;border-collapse:collapse;table-layout:fixed;font-family:Arial,Helvetica,sans-serif;color:#000}
+.lab td{border:0.45mm solid #000;padding:0 2.6mm;vertical-align:middle;text-align:left}
+.lab .g{background:#1C6A3F;color:#fff;font-weight:700;text-align:center;font-size:6mm;line-height:1.15;padding:1.5mm}
+.lab .g.i{font-style:italic;font-size:5.4mm}
+.lab .k{font-size:4.3mm;border-bottom:none;padding-top:1.4mm}
+.lab .v{font-size:6.6mm;font-weight:700;border-top:none;padding-bottom:1.4mm;white-space:nowrap;overflow:hidden}
+.lab .v.sm{font-size:5mm;white-space:normal;line-height:1.1}
+.lab .qr{text-align:center;padding:1.5mm}
+.lab .qr svg{width:100%;height:auto;display:block;margin:0 auto}
+.lab .qr span{display:block;font-size:2.8mm;margin-top:1.2mm;word-break:break-all}
+.lab .st{text-align:center;font-weight:700;font-size:5mm;border-bottom:none}
+.lab .box{border-top:none}
 @media print{
   html,body{background:#fff!important}
   body>*:not(#printArea){display:none!important}
   #printArea{display:block!important}
 }
 </style>
-<style id="pageStyle">@page{size:A5 portrait;margin:0}</style>
+<style>@page{size:A5 portrait;margin:0}</style>
 </head>
 <body>
 
@@ -198,7 +186,7 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
     <div class="or">atau isi manual</div>
     <div class="form2">
       <label>No Batch<input id="oBatch" placeholder="BOLF382056" autocomplete="off" autocapitalize="characters"></label>
-      <label>No Material<input id="oMat" placeholder="01-14 atau 07" autocomplete="off"></label>
+      <label>No Material (opsional)<input id="oMat" placeholder="01-14 atau 07" autocomplete="off"></label>
       <button class="btn pri" id="oFind">Cari</button>
     </div>
     <div id="outResult"></div>
@@ -213,7 +201,7 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
     <div class="or">atau isi manual</div>
     <div class="form2">
       <label>No Batch<input id="cBatch" placeholder="BOLF382041" autocomplete="off" autocapitalize="characters"></label>
-      <label>No Material<input id="cMat" placeholder="01-14 atau 07" autocomplete="off"></label>
+      <label>No Material (opsional)<input id="cMat" placeholder="01-14 atau 07" autocomplete="off"></label>
       <button class="btn ghost" id="cClear">Hapus</button>
     </div>
     <div id="cariMsg"></div>
@@ -256,15 +244,19 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
         <label>Waktu Pengemasan<input id="pKemas" autocomplete="off" placeholder="12:20 WIB - 13:30 WIB"></label>
         <label>Diinput Oleh<input id="pOleh" autocomplete="off" placeholder="Nama admin"></label>
         <label class="full">Keterangan<input id="pKet" autocomplete="off" placeholder="-"></label>
-        <label class="full">Kertas cetak<select id="pPaper"><option value="a4">A4 · 2 label A5 per lembar (dipotong)</option><option value="a5">A5 · 1 label per lembar</option></select></label>
       </div>
-      <div class="sec"><h3><span>Akan dibuat</span><span id="pCountTxt"></span></h3><div id="pPreview"></div></div>
+      <div class="sec"><h3><span>Akan disimpan</span><span id="pCountTxt"></span></h3>
+        <p class="small" style="margin:0 0 8px">Nomor Palet dan Nomor Material bisa diubah per baris. Nomor loncat ditulis dengan koma, misalnya <b class="mono">01-11, 13</b>.</p>
+        <div id="pPreview"></div><div id="pCheck"></div></div>
       <div id="msgProd"></div>
-      <button class="big" id="btnCreate">Simpan &amp; Cetak label</button>
+      <button class="big" id="btnSave">Simpan label</button>
 
-      <div class="sec"><h3><span>Label terakhir</span><input id="hFilter" placeholder="filter batch" style="width:160px;padding:6px 10px;font-size:14px"></h3>
-        <div class="acts" style="margin-bottom:8px"><button class="btn sm" id="hPrintAll">Cetak semua yang tampil</button></div>
-        <div class="tw"><table class="t"><thead><tr><th>Batch</th><th>Palet</th><th>No Mat</th><th>Status</th><th></th></tr></thead><tbody id="hBody"></tbody></table></div>
+      <div class="sec"><h3><span>Cetak label (A5)</span><span id="prCount"></span></h3>
+        <div class="form2" style="grid-template-columns:1fr auto;margin-top:0"><input id="hFilter" placeholder="Filter No Batch" autocomplete="off" autocapitalize="characters">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap"><input type="checkbox" id="hShowAll" style="width:18px;height:18px"> Tampilkan yang sudah dicetak</label></div>
+        <div class="acts" style="margin:10px 0"><button class="btn sm" id="hAll">Pilih semua</button><button class="btn sm ghost" id="hNone">Batal pilih</button><button class="btn sm pri" id="hPrint">Cetak terpilih</button></div>
+        <div class="tw"><table class="t"><thead><tr><th></th><th>Batch</th><th>Palet</th><th>No Material</th><th>Cetak</th><th></th></tr></thead><tbody id="hBody"></tbody></table></div>
+        <p class="small">Setelan print: kertas A5, Margins None, Scale 100%, centang Background graphics.</p>
       </div>
     </div>
 
@@ -343,7 +335,8 @@ const ts=(v)=>{if(!v)return 0;const t=Date.parse(String(v).replace(" ","T"));ret
 function fromRow(o){return {id:o.ID,item:o.Item,nama:o.NamaProduk,batch:o.Batch,palet:o.NoPalet,mat:o.NoMaterial,matA:+o.MatAwal,matZ:+o.MatAkhir,
   jumlah:o.Jumlah,satuan:o.Satuan,gudang:o.Gudang,prod:o.TglProduksi,exp:o.TglKadaluarsa,lot:o.NoLot,mesin:o.KodeMesin,kemas:o.WaktuKemas,
   ket:o.Keterangan,oleh:o.DiinputOleh,qr:o.QR,status:o.Status,qc:o.StatusQC||"Inkubasi",lokasi:o.Lokasi,alasan:o.AlasanBatal,
-  tLabel:ts(o.WaktuLabel),tMasuk:ts(o.WaktuMasuk),tSimpan:ts(o.WaktuSimpan),tKeluar:ts(o.WaktuKeluar)};}
+  tLabel:ts(o.WaktuLabel),tMasuk:ts(o.WaktuMasuk),tSimpan:ts(o.WaktuSimpan),tKeluar:ts(o.WaktuKeluar),
+  nums:matNums(o.NoMaterial)||[],cetak:+o.JmlCetak||0,tCetak:ts(o.WaktuCetak)};}
 function applyData(d){if(!d)return;const m=new Map();(d.rows||[]).forEach(o=>{const p=fromRow(o);m.set(p.id,p);});
   S.pal=m;S.out=(d.out||[]).map(fromRow);S.batal=(d.batal||[]).map(fromRow);render();
   $("conn").textContent="Tersambung · data di Google Sheets · diperbarui "+new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"});}
@@ -384,8 +377,17 @@ function toISO(s){let m=String(s).match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$
 function parseRange(s){const t=String(s||"").trim().replace(/\s/g,"").replace(/[–—]/g,"-");
   let m=t.match(/^(\d{1,5})-(\d{1,5})$/);if(m)return {text:t,a:+m[1],z:+m[2]};
   m=t.match(/^(\d{1,5})$/);if(m)return {text:t,a:+m[1],z:+m[1]};return null;}
-const matText=(a,z)=>`${pad(a)}-${pad(z)}`;
-const makeId=(batch,a,z)=>`${String(batch).toUpperCase()}_${a}-${z}`;
+const matText=(a,z)=>a===z?pad(a):`${pad(a)}-${pad(z)}`;
+function matNums(txt){
+  const out=[];let bad=false;
+  String(txt||"").split(",").forEach(part=>{const t=part.replace(/\s/g,"").replace(/[–—]/g,"-");if(!t)return;
+    let m=t.match(/^(\d{1,5})-(\d{1,5})$/);if(m&&+m[1]<=+m[2]){for(let i=+m[1];i<=+m[2];i++)out.push(i);return;}
+    m=t.match(/^(\d{1,5})$/);if(m){out.push(+m[1]);return;}bad=true;});
+  return bad||!out.length?null:[...new Set(out)].sort((a,b)=>a-b);
+}
+const normMat=(txt)=>String(txt||"").split(",").map(x=>x.replace(/\s/g,"").replace(/[–—]/g,"-")).filter(Boolean).join(", ");
+function compress(nums){const r=[];for(let i=0;i<nums.length;){let j=i;while(j+1<nums.length&&nums[j+1]===nums[j]+1)j++;r.push(matText(nums[i],nums[j]));i=j+1;}return r.join(", ");}
+const makeId=(batch,palet)=>`${String(batch).trim().toUpperCase()}_P${pad(String(palet).trim())}`;
 function buildQR(p){return ["PLT",p.item,p.batch,p.palet,p.mat,p.jumlah,p.satuan,ddmmyyyy(p.prod),ddmmyyyy(p.exp)].join("|");}
 function parseQR(raw){
   const t=String(raw||"").trim();
@@ -393,27 +395,27 @@ function parseQR(raw){
   if(L.has(t.toUpperCase()))return {err:"Ini barcode RAK ("+t+"), bukan QR palet"};
   const f=t.split("|").map(x=>x.trim());
   if(f[0]==="PLT"){
-    const g=parseRange(f[4]);
-    if(!f[2]||!g)return {err:"QR label tidak lengkap"};
-    return {id:makeId(f[2],g.a,g.z),item:f[1],batch:f[2].toUpperCase(),palet:f[3],mat:g.text,matA:g.a,matZ:g.z};
+    if(!f[2]||!f[3]||!matNums(f[4]))return {err:"QR label tidak lengkap"};
+    return {id:makeId(f[2],f[3]),item:f[1],batch:f[2].toUpperCase(),palet:pad(f[3]),mat:normMat(f[4])};
   }
-  // format lama / bebas: kenali pola
-  const toks=t.split(/[|;\t\r\n,]+/).map(x=>x.trim()).filter(Boolean);
-  let batch="",g=null,item="";
+  // format lain: kenali pola batch + nomor material
+  const toks=t.split(/[|;\t\r\n]+/).map(x=>x.trim()).filter(Boolean);
+  let batch="",mat="";
   for(const k of toks){
     if(toISO(k))continue;
-    if(!g&&/^\d{1,5}\s*[-–]\s*\d{1,5}$/.test(k)){g=parseRange(k);continue;}
-    if(!item&&/^\d{6,10}$/.test(k)){item=k;continue;}
+    if(!mat&&/\d/.test(k)&&/^[\d\s,\-–]+$/.test(k)&&/[-,]/.test(k)&&matNums(k)){mat=normMat(k);continue;}
     if(!batch&&/[A-Za-z]/.test(k)&&/\d/.test(k)&&/^[A-Za-z0-9._\/-]{4,30}$/.test(k)){batch=k.toUpperCase();continue;}
   }
   if(!batch)return {err:"Format QR tidak dikenali (No Batch tidak ada)"};
-  if(!g)return {err:"Format QR tidak dikenali (No Material tidak ada)"};
-  return {id:makeId(batch,g.a,g.z),item,batch,mat:g.text,matA:g.a,matZ:g.z};
+  if(!mat)return {err:"Format QR tidak dikenali (No Material tidak ada)"};
+  const c=findPal(batch,mat,null,true);
+  return {id:c.length===1?c[0].id:null,batch,mat};
 }
-function findPal(batch,matStr,statuses){
-  const b=String(batch||"").trim().toUpperCase(),g=parseRange(matStr);
+function findPal(batch,matStr,statuses,exact){
+  const b=String(batch||"").trim().toUpperCase(),q=String(matStr||"").trim(),qn=q?matNums(q):null,qt=normMat(q);
+  if(q&&!qn)return [];
   return [...S.pal.values()].filter(p=>(!statuses||statuses.includes(p.status))&&String(p.batch).toUpperCase()===b&&
-    (!g||p.mat===g.text||(g.a>=p.matA&&g.z<=p.matZ)))
+    (!q||p.mat===qt||(!exact&&qn.every(n=>p.nums.includes(n)))))
     .sort((a,c)=>(a.prod||"").localeCompare(c.prod||"")||(+a.palet||0)-(+c.palet||0));
 }
 
@@ -572,6 +574,7 @@ $("cam").addEventListener("change",async()=>{
 async function scanInOne(text){
   const p=parseQR(text);
   if(p.err)return {ok:false,html:`GAGAL<small>${esc(p.err)}</small>`,short:"GAGAL · "+esc(p.err)};
+  if(!p.id)return {ok:false,html:`GAGAL<small>${esc(p.batch)} no ${esc(p.mat)}: label tidak ditemukan</small>`,short:`GAGAL · ${esc(p.batch)} no ${esc(p.mat)}`};
   const r=await act({action:"receive",id:p.id},null,true);
   if(!r.ok)return {ok:false,html:`GAGAL<small>${esc(p.batch)} no ${esc(p.mat)}: ${esc(r.msg)}</small>`,short:`GAGAL · ${esc(p.batch)} no ${esc(p.mat)} · ${esc(r.msg)}`};
   const loc=D.rek.get(p.id),q=S.pal.get(p.id);
@@ -623,13 +626,13 @@ $("outResult").addEventListener("click",async e=>{
 });
 $("btnScanOut").addEventListener("click",()=>openScanner({title:"Scan keluar",sub:"Scan QR palet yang diambil",continuous:false,onCode:(txt)=>{
   const p=parseQR(txt);if(p.err)return {ok:false,html:`GAGAL<small>${esc(p.err)}</small>`};
-  setTimeout(()=>{$("oBatch").value=p.batch;$("oMat").value=p.mat;const ex=S.pal.get(p.id);showOut(ex?[ex]:findPal(p.batch,p.mat),`Batch ${esc(p.batch)} no ${esc(p.mat)}`);},50);
+  setTimeout(()=>{$("oBatch").value=p.batch;$("oMat").value=p.mat;const ex=p.id&&S.pal.get(p.id);showOut(ex?[ex]:findPal(p.batch,p.mat),`Batch ${esc(p.batch)} no ${esc(p.mat)}`);},50);
   return {ok:true};
 }}));
 $("oFind").addEventListener("click",()=>{const b=$("oBatch").value.trim(),g=$("oMat").value.trim();
-  if(!b||!g){$("outResult").innerHTML=`<div class="msg bad">Isi No Batch dan No Material.</div>`;return;}
-  if(!parseRange(g)){$("outResult").innerHTML=`<div class="msg bad">No Material ditulis seperti 01-14 atau 07.</div>`;return;}
-  showOut(findPal(b,g),`Batch ${esc(b)} no ${esc(g)}`);});
+  if(!b){$("outResult").innerHTML=`<div class="msg bad">Isi No Batch (No Material boleh kosong).</div>`;return;}
+  if(g&&!matNums(g)){$("outResult").innerHTML=`<div class="msg bad">No Material ditulis seperti 01-14, 07, atau 01-11, 13.</div>`;return;}
+  showOut(findPal(b,g,g?null:["simpan"]),g?`Batch ${esc(b)} no ${esc(g)}`:`Batch ${esc(b)} di rak`);});
 
 $("btnScanFind").addEventListener("click",()=>openScanner({title:"Scan untuk cari",sub:"Scan QR palet di lapangan",continuous:false,onCode:(txt)=>{
   const p=parseQR(txt);if(p.err)return {ok:false,html:`GAGAL<small>${esc(p.err)}</small>`};
@@ -640,85 +643,134 @@ $("btnScanFind").addEventListener("click",()=>openScanner({title:"Scan untuk car
 const prodOf=(item)=>M.produk.find(p=>p.item===item);
 function addMonths(iso,n){if(!iso)return"";const [y,m,d]=iso.split("-").map(Number);const dt=new Date(Date.UTC(y,m-1+n,d));
   if(dt.getUTCDate()!==d)dt.setUTCDate(0);return dt.toISOString().slice(0,10);}
-function batchSeq(batch){
-  const b=String(batch||"").trim().toUpperCase();
-  const all=[...S.pal.values(),...S.out,...S.batal.filter(()=>false)].filter(p=>String(p.batch).toUpperCase()===b);
-  return {maxPal:all.reduce((m,p)=>Math.max(m,+p.palet||0),0),maxMat:all.reduce((m,p)=>Math.max(m,+p.matZ||0),0)};
-}
+function batchRows(batch){const b=String(batch||"").trim().toUpperCase();return [...S.pal.values(),...S.out].filter(p=>String(p.batch).toUpperCase()===b);}
+function batchSeq(batch){const all=batchRows(batch);
+  return {maxPal:all.reduce((m,p)=>Math.max(m,+p.palet||0),0),maxMat:all.reduce((m,p)=>Math.max(m,...(p.nums.length?p.nums:[0])),0)};}
+let DRAFT=[];   // [{palet, mat}] baris yang akan disimpan (bisa diedit)
 function onItemChange(keepNums){
   const pr=prodOf($("pItem").value);if(!pr){$("pInfo").textContent="Pilih item.";return;}
   lsSet("lastItem",pr.item);
-  $("pInfo").innerHTML=`<b>${esc(pr.nama)}</b><br>Satuan palet: <b>${esc(pr.satPal)}</b> · Standar <b>${pr.qtyPal}</b> ${esc(pr.satPal)}/palet · Isi ${esc(pr.isi)} ${esc(pr.satIsi)} · Gudang <b>${esc(pr.gudang)}</b> · Masa simpan ${pr.masa} bulan`;
+  $("pInfo").innerHTML=`<b>${esc(pr.nama)}</b><br>Satuan palet: <b>${esc(pr.satPal)}</b> · Standar <b>${pr.qtyPal}</b> ${esc(pr.satPal)}/palet · Gudang <b>${esc(pr.gudang)}</b> · Masa simpan ${pr.masa} bulan`;
   if(!keepNums||!$("pPer").value)$("pPer").value=pr.qtyPal||"";
   if($("pProd").value)$("pExp").value=addMonths($("pProd").value,pr.masa);
+  regenDraft();
+}
+function suggestSeq(){const s=batchSeq($("pBatch").value);$("pPal").value=pad(s.maxPal+1);$("pMatStart").value=s.maxMat+1;regenDraft();}
+function regenDraft(){
+  const n=Math.min(40,Math.max(1,+$("pCount").value||1)),per=Math.max(1,+$("pPer").value||0),pal0=Math.max(1,+$("pPal").value||1),mat0=Math.max(1,+$("pMatStart").value||1);
+  DRAFT=[];for(let i=0;i<n;i++){const a=mat0+i*per;DRAFT.push({palet:pad(pal0+i),mat:per?matText(a,a+per-1):""});}
   renderPreview();
 }
-function suggestSeq(){const s=batchSeq($("pBatch").value);$("pPal").value=pad(s.maxPal+1);$("pMatStart").value=s.maxMat+1;renderPreview();}
 function draftLabels(){
-  const pr=prodOf($("pItem").value),batch=$("pBatch").value.trim().toUpperCase(),n=Math.min(40,Math.max(1,+$("pCount").value||1));
-  const per=Math.max(1,+$("pPer").value||0),pal0=Math.max(1,+$("pPal").value||1),mat0=Math.max(1,+$("pMatStart").value||1);
-  if(!pr||!batch||!$("pProd").value||!per)return [];
-  const out=[];
-  for(let i=0;i<n;i++){const a=mat0+i*per,z=a+per-1;
-    const l={item:pr.item,nama:pr.nama,batch,palet:pad(pal0+i),mat:matText(a,z),matA:a,matZ:z,jumlah:String(per),satuan:pr.satPal,gudang:pr.gudang,
-      prod:$("pProd").value,exp:$("pExp").value||addMonths($("pProd").value,pr.masa),lot:$("pLot").value.trim()||"-",mesin:$("pMesin").value.trim()||"-",
-      kemas:$("pKemas").value.trim()||"-",ket:$("pKet").value.trim()||"-",oleh:$("pOleh").value.trim()||"-",tLabel:Date.now(),qc:"Inkubasi",status:"label"};
-    l.id=makeId(batch,a,z);l.qr=buildQR(l);out.push(l);}
-  return out;
+  const pr=prodOf($("pItem").value),batch=$("pBatch").value.trim().toUpperCase();
+  if(!pr||!batch||!$("pProd").value)return [];
+  return DRAFT.map(d=>{const nums=matNums(d.mat)||[];
+    const l={item:pr.item,nama:pr.nama,batch,palet:pad(String(d.palet).trim()),mat:normMat(d.mat),nums,matA:nums[0]||0,matZ:nums[nums.length-1]||0,jumlah:String(nums.length),
+      satuan:pr.satPal,gudang:pr.gudang,prod:$("pProd").value,exp:$("pExp").value||addMonths($("pProd").value,pr.masa),lot:$("pLot").value.trim()||"-",
+      mesin:$("pMesin").value.trim()||"-",kemas:$("pKemas").value.trim()||"-",ket:$("pKet").value.trim()||"-",oleh:$("pOleh").value.trim()||"-",
+      tLabel:Date.now(),qc:"Inkubasi",status:"label",cetak:0};
+    l.id=makeId(batch,l.palet);l.qr=buildQR(l);return l;});
+}
+function checkDraft(d){
+  const errs=[],info=[];if(!d.length)return {errs,info};
+  const exist=batchRows(d[0].batch),used=new Map();
+  exist.forEach(p=>p.nums.forEach(n=>used.set(n,"palet "+p.palet)));
+  const pals=new Set(exist.map(p=>pad(p.palet)));
+  d.forEach(l=>{
+    if(!l.nums.length)errs.push(`Palet ${l.palet}: No Material belum benar (contoh 01-14 atau 01-11, 13).`);
+    if(pals.has(l.palet))errs.push(`Palet ${l.palet} untuk batch ini sudah ada.`);pals.add(l.palet);
+    l.nums.forEach(n=>{if(used.has(n))errs.push(`No ${pad(n)} dobel: sudah ada di ${used.get(n)}.`);else used.set(n,"palet "+l.palet);});
+  });
+  const all=[...used.keys()].sort((a,b)=>a-b);
+  if(all.length){const miss=[];for(let n=1;n<=all[all.length-1];n++)if(!used.has(n))miss.push(n);
+    if(miss.length)info.push(`Nomor yang belum ada di palet mana pun untuk batch ini: ${compress(miss)}.`);}
+  return {errs:[...new Set(errs)],info};
 }
 function renderPreview(){
-  if(!$("pPreview"))return;const d=draftLabels();
-  $("pCountTxt").textContent=d.length?d.length+" label":"";
-  if(!d.length){$("pPreview").innerHTML=`<div class="empty">Isi Item, Nomor Batch, dan Tanggal Produksi.</div>`;return;}
-  const dup=d.filter(l=>S.pal.has(l.id));
-  $("pPreview").innerHTML=`<div class="tw"><table class="t"><thead><tr><th>Palet</th><th>No Material</th><th>Jumlah</th><th>Kadaluarsa</th></tr></thead><tbody>${
-    d.map(l=>`<tr><td class="mono">${l.palet}</td><td class="mono">${l.mat}</td><td>${l.jumlah} ${esc(l.satuan)}</td><td>${fmtDate(l.exp)}</td></tr>`).join("")}</tbody></table></div>`+
-    (dup.length?`<div class="msg bad">No Material ${dup.map(l=>l.mat).join(", ")} untuk batch ini sudah ada. Ubah Nomor Material mulai.</div>`:"");
+  if(!$("pPreview"))return;
+  const pr=prodOf($("pItem").value),sat=pr?pr.satPal:"";
+  $("pCountTxt").textContent=DRAFT.length?DRAFT.length+" palet":"";
+  if(!DRAFT.length){$("pPreview").innerHTML=`<div class="info">Label sebelumnya sudah disimpan. <button class="btn sm pri" id="pNext">Siapkan palet berikutnya</button></div>`;$("pCheck").innerHTML="";
+    $("pNext").onclick=regenDraft;return;}
+  if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#pPreview")){updateCheck();return;}
+  $("pPreview").innerHTML=`<div class="tw"><table class="t"><thead><tr><th style="width:70px">Palet</th><th>No Material</th><th style="width:90px">Jumlah</th></tr></thead><tbody>${
+    DRAFT.map((d,i)=>`<tr><td><input data-dp="${i}" value="${esc(d.palet)}" inputmode="numeric" style="padding:6px 8px"></td>
+      <td><input data-dm="${i}" value="${esc(d.mat)}" style="padding:6px 8px;font-family:var(--mono)"></td>
+      <td data-dj="${i}" class="mono">${(matNums(d.mat)||[]).length} ${esc(sat)}</td></tr>`).join("")}</tbody></table></div>`;
+  updateCheck();
 }
-$("pItem").addEventListener("change",()=>onItemChange(false));
-$("pProd").addEventListener("change",()=>{const pr=prodOf($("pItem").value);if(pr)$("pExp").value=addMonths($("pProd").value,pr.masa);renderPreview();});
-$("pBatch").addEventListener("change",suggestSeq);
-["pBatch","pExp","pCount","pPal","pMatStart","pPer"].forEach(id=>$(id).addEventListener("input",renderPreview));
-$("pOleh").value=lsGet("pOleh")||"";$("pOleh").addEventListener("change",()=>lsSet("pOleh",$("pOleh").value));
-$("pPaper").value=lsGet("pPaper")||"a4";$("pPaper").addEventListener("change",()=>lsSet("pPaper",$("pPaper").value));
-$("btnCreate").addEventListener("click",async()=>{
+function updateCheck(){
+  const pr=prodOf($("pItem").value),sat=pr?pr.satPal:"";
+  DRAFT.forEach((d,i)=>{const c=document.querySelector(`[data-dj="${i}"]`);if(c){const n=matNums(d.mat);c.textContent=n?`${n.length} ${sat}`:"salah";c.style.color=n?"":"var(--bad)";}});
   const d=draftLabels();
-  if(!d.length){msg("msgProd","bad","Lengkapi Item, Nomor Batch, Tanggal Produksi, dan Isi per palet.");return;}
-  if(!$("pPal").value||!$("pMatStart").value){suggestSeq();}
+  if(!d.length){$("pCheck").innerHTML=`<div class="empty">Isi Item, Nomor Batch, dan Tanggal Produksi.</div>`;return;}
+  const c=checkDraft(d);
+  $("pCheck").innerHTML=(c.errs.length?`<div class="msg bad">${c.errs.map(esc).join("<br>")}</div>`:"")+(c.info.length?`<div class="msg wait">${c.info.map(esc).join("<br>")}</div>`:"");
+}
+$("pPreview").addEventListener("input",e=>{const t=e.target;
+  if(t.dataset.dp!=null)DRAFT[+t.dataset.dp].palet=t.value;
+  if(t.dataset.dm!=null)DRAFT[+t.dataset.dm].mat=t.value;
+  updateCheck();});
+$("pPreview").addEventListener("focusout",()=>setTimeout(()=>{if(!document.activeElement.closest||!document.activeElement.closest("#pPreview"))renderPreview();},0));
+$("pItem").addEventListener("change",()=>onItemChange(false));
+$("pProd").addEventListener("change",()=>{const pr=prodOf($("pItem").value);if(pr)$("pExp").value=addMonths($("pProd").value,pr.masa);updateCheck();});
+$("pBatch").addEventListener("change",suggestSeq);
+$("pBatch").addEventListener("input",updateCheck);
+["pCount","pPal","pMatStart","pPer"].forEach(id=>$(id).addEventListener("input",regenDraft));
+$("pOleh").value=lsGet("pOleh")||"";$("pOleh").addEventListener("change",()=>lsSet("pOleh",$("pOleh").value));
+$("btnSave").addEventListener("click",async()=>{
+  const d=draftLabels();
+  if(!DRAFT.length){msg("msgProd","bad","Klik <b>Siapkan palet berikutnya</b> dulu.");return;}
+  if(!d.length){msg("msgProd","bad","Lengkapi Item, Nomor Batch, dan Tanggal Produksi.");return;}
+  const c=checkDraft(d);if(c.errs.length){msg("msgProd","bad","Belum bisa disimpan:<br>"+c.errs.map(esc).join("<br>"));return;}
   const items=d.map(l=>({id:l.id,item:l.item,nama:l.nama,batch:l.batch,noPalet:l.palet,noMaterial:l.mat,matA:l.matA,matZ:l.matZ,jumlah:l.jumlah,satuan:l.satuan,
     gudang:l.gudang,tglProduksi:l.prod,tglKadaluarsa:l.exp,noLot:l.lot,kodeMesin:l.mesin,waktuKemas:l.kemas,keterangan:l.ket,diinputOleh:l.oleh,qr:l.qr}));
   const r=await act({action:"create",items},"msgProd");
   if(!r.ok)return;
-  msg("msgProd","ok",`${d.length} label tersimpan. Jendela cetak terbuka.`);
-  printLabels(d.map(l=>S.pal.get(l.id)||l));
-  $("pPal").value=pad(+d[d.length-1].palet+1);$("pMatStart").value=d[d.length-1].matZ+1;renderPreview();
+  msg("msgProd","ok",`${d.length} label disimpan. Sudah masuk ke tabel <b>Cetak label</b> di bawah dan sudah tercentang, tinggal klik <b>Cetak terpilih</b>.`);
+  hSel.clear();d.forEach(l=>hSel.add(l.id));$("hFilter").value=d[0].batch;renderHistory();
+  const last=d[d.length-1];$("pPal").value=pad(+last.palet+1);$("pMatStart").value=(last.matZ||0)+1;DRAFT=[];renderPreview();
 });
+
+/* ---------- tabel cetak ---------- */
+const hSel=new Set();
 function histRows(){
-  const f=$("hFilter").value.trim().toUpperCase();
-  return [...S.pal.values(),...S.batal].filter(p=>!f||String(p.batch).toUpperCase().includes(f))
-    .sort((a,b)=>b.tLabel-a.tLabel||String(a.batch).localeCompare(b.batch)||(+a.palet)-(+b.palet)).slice(0,f?200:15);
+  const f=$("hFilter").value.trim().toUpperCase(),all=$("hShowAll").checked;
+  return [...S.pal.values()].filter(p=>(!f||String(p.batch).toUpperCase().includes(f))&&(all||p.cetak===0||hSel.has(p.id)))
+    .sort((a,b)=>b.tLabel-a.tLabel||String(a.batch).localeCompare(b.batch)||(+a.palet)-(+b.palet)).slice(0,200);
 }
 function renderHistory(){
   const rows=histRows();
-  $("hBody").innerHTML=rows.length?rows.map(p=>`<tr data-hid="${esc(p.id)}"><td><b>${esc(p.batch)}</b><br><span class="small">${esc(p.item)}</span></td><td class="mono">${esc(p.palet)}</td><td class="mono">${esc(p.mat)}</td>
-    <td>${p.status==="batal"?`<span class="qc Reject">Batal</span><br><span class="small">${esc(p.alasan)}</span>`:`${qcB(p.qc)}<br><span class="small">${esc(where(p))}</span>`}</td>
-    <td style="white-space:nowrap">${p.status!=="batal"?`<button class="btn sm" data-print>Cetak</button>`:""} ${p.status==="label"?`<button class="btn sm ghost" data-void>Batalkan</button>`:""}</td></tr>`).join("")
-    :`<tr><td colspan="5" class="empty">Belum ada label.</td></tr>`;
+  $("prCount").textContent=hSel.size?hSel.size+" dipilih":"";
+  $("hBody").innerHTML=rows.length?rows.map(p=>`<tr data-hid="${esc(p.id)}"><td><input type="checkbox" data-h ${hSel.has(p.id)?"checked":""} style="width:20px;height:20px"></td>
+    <td><b>${esc(p.batch)}</b><br><span class="small">${esc(p.nama)}</span></td><td class="mono">${esc(p.palet)}</td>
+    <td><span class="mono">${esc(p.mat)}</span><br><span class="small">${esc(p.jumlah)} ${esc(p.satuan)}</span></td>
+    <td>${p.cetak?`<span class="qc Release">Sudah ${p.cetak}×</span>`:`<span class="qc Inkubasi">Belum</span>`}<br><span class="small">${esc(where(p))}</span></td>
+    <td>${p.status==="label"?`<button class="btn sm ghost" data-void>Batalkan</button>`:""}</td></tr>`).join("")
+    :`<tr><td colspan="6" class="empty">Tidak ada label yang belum dicetak. Centang "Tampilkan yang sudah dicetak" untuk cetak ulang.</td></tr>`;
 }
 $("hFilter").addEventListener("input",renderHistory);
-$("hPrintAll").addEventListener("click",()=>{const r=histRows().filter(p=>p.status!=="batal");if(r.length)printLabels(r.slice().sort((a,b)=>String(a.batch).localeCompare(b.batch)||(+a.palet)-(+b.palet)));});
+$("hShowAll").addEventListener("change",renderHistory);
+$("hAll").addEventListener("click",()=>{histRows().forEach(p=>hSel.add(p.id));renderHistory();});
+$("hNone").addEventListener("click",()=>{hSel.clear();renderHistory();});
+$("hBody").addEventListener("change",e=>{const c=e.target.closest("[data-h]");if(!c)return;const id=c.closest("[data-hid]").dataset.hid;c.checked?hSel.add(id):hSel.delete(id);$("prCount").textContent=hSel.size?hSel.size+" dipilih":"";});
+$("hPrint").addEventListener("click",async()=>{
+  const list=[...hSel].map(id=>S.pal.get(id)).filter(Boolean).sort((a,b)=>String(a.batch).localeCompare(b.batch)||(+a.palet)-(+b.palet));
+  if(!list.length){msg("msgProd","bad","Centang label yang mau dicetak dulu.");return;}
+  printLabels(list);
+  const ids=list.map(p=>p.id);hSel.clear();
+  await act({action:"printed",ids},"msgProd",true);
+  msg("msgProd","ok",`${ids.length} label dikirim ke printer.`);
+});
 $("hBody").addEventListener("click",async e=>{
-  const tr=e.target.closest("[data-hid]");if(!tr)return;const p=S.pal.get(tr.dataset.hid);if(!p)return;
-  if(e.target.closest("[data-print]"))printLabels([p]);
-  if(e.target.closest("[data-void]")){
-    const cell=e.target.closest("td");
-    cell.innerHTML=`<input placeholder="Alasan batal" style="min-width:140px;padding:6px 8px;font-size:14px"> <button class="btn sm red" data-yes>OK</button>`;
-    cell.querySelector("[data-yes]").onclick=async()=>{const al=cell.querySelector("input").value.trim()||"-";
-      const r=await act({action:"void",id:p.id,alasan:al},"msgProd");if(r.ok)msg("msgProd","wait",`Label ${esc(p.batch)} palet ${esc(p.palet)} dibatalkan.`);};
-  }
+  const tr=e.target.closest("[data-hid]");if(!tr||!e.target.closest("[data-void]"))return;const p=S.pal.get(tr.dataset.hid);if(!p)return;
+  const cell=e.target.closest("td");
+  cell.innerHTML=`<input placeholder="Alasan" style="min-width:110px;padding:6px 8px;font-size:14px"> <button class="btn sm red" data-yes>OK</button>`;
+  cell.querySelector("[data-yes]").onclick=async()=>{const al=cell.querySelector("input").value.trim()||"-";hSel.delete(p.id);
+    const r=await act({action:"void",id:p.id,alasan:al},"msgProd");if(r.ok)msg("msgProd","wait",`Label ${esc(p.batch)} palet ${esc(p.palet)} dibatalkan.`);};
 });
 
-/* ---------- cetak label A5 ---------- */
+/* ---------- cetak label A5 (layout C) ---------- */
 function qrSvg(text){
   if(!window.qrcode)return `<div style="font-size:3mm">QR gagal dimuat</div>`;
   const q=qrcode(0,"M");q.addData(text);q.make();const n=q.getModuleCount();let d="";
@@ -726,39 +778,25 @@ function qrSvg(text){
   return `<svg viewBox="-2 -2 ${n+4} ${n+4}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"><rect x="-2" y="-2" width="${n+4}" height="${n+4}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
 }
 function labelHtml(p){
-  const s=M.set,logo=s["Link Logo"]?`<img src="${esc(s["Link Logo"])}" alt="">`:esc(s["Nama Perusahaan"]||"LOGO");
-  const tgl=new Date(p.tLabel||Date.now()).toLocaleDateString("en-GB");
-  const kv=(k,v)=>`<td><span class="k">${k}</span><span class="v">${esc(v||"-")}</span></td>`;
-  return `<div class="lab">
-    <table class="hd"><tr><td class="logo" rowspan="3">${logo}</td><td class="ttl" rowspan="3">LABEL PALET</td>
-      <td>Tanggal Terbit</td><td>${esc(s["Tanggal Terbit"]||"...")}</td><td>Nomor Terbit</td><td>${esc(s["Nomor Terbit"]||"...")}</td></tr>
-      <tr><td>Tanggal Revisi</td><td>${esc(s["Tanggal Revisi"]||"...")}</td><td>Nomor Revisi</td><td>${esc(s["Nomor Revisi"]||"...")}</td></tr>
-      <tr><td>Nomor Dokumen</td><td>${esc(s["Nomor Dokumen"]||"...")}</td><td>Area</td><td>${esc(s["Area"]||"Pengemasan")}</td></tr></table>
-    <div class="prod">${esc(p.nama)}</div>
-    <table class="kv">
-      <tr>${kv("Item Code",p.item)}${kv("Nomor Batch",p.batch)}</tr>
-      <tr>${kv("Nomor Palet",p.palet)}${kv("Nomor Material",p.mat)}</tr>
-      <tr>${kv("Jumlah",p.jumlah)}${kv("Satuan",p.satuan)}</tr>
-      <tr>${kv("Tanggal Produksi",ddmmyyyy(p.prod))}${kv("Tanggal Kadaluarsa",ddmmyyyy(p.exp))}</tr></table>
-    <div class="mid">
-      <div class="qrb">${qrSvg(p.qr||buildQR(p))}<span>${esc(p.batch)} · ${esc(p.mat)}</span></div>
-      <table class="det">
-        <tr><td>Tanggal</td><td>${tgl}</td></tr><tr><td>Nomor Lot</td><td>${esc(p.lot||"-")}</td></tr>
-        <tr><td>Kode Mesin</td><td>${esc(p.mesin||"-")}</td></tr><tr><td>Waktu Pengemasan</td><td>${esc(p.kemas||"-")}</td></tr>
-        <tr><td>Keterangan</td><td>${esc(p.ket||"-")}</td></tr><tr><td>Diinput Oleh</td><td>${esc(p.oleh||"-")}</td></tr>
-        <tr><td>Gudang</td><td>${esc(p.gudang||"-")}</td></tr></table>
-    </div>
-    <table class="qcb"><tr class="qch"><td colspan="3">STATUS QC (cap oleh QC)</td></tr><tr><td>INKUBASI</td><td>RELEASE</td><td>REJECT</td></tr></table>
-    <div class="foot"><span>Tanggal QC: ____________</span><span>Paraf QC: ____________</span></div>
-  </div>`;
+  const v=(x,cls)=>`<td class="v${cls?" "+cls:""}" colspan="2">${esc(x||"-")}</td>`,k=(x)=>`<td class="k" colspan="2">${x}</td>`;
+  const matCls=String(p.mat).length>11?"sm":"";
+  return `<table class="lab">
+    <colgroup><col style="width:15.7%"><col style="width:15.7%"><col style="width:15.7%"><col style="width:21.4%"><col style="width:15.75%"><col style="width:15.75%"></colgroup>
+    <tr style="height:9%"><td class="g" colspan="4">${esc(p.nama)}</td><td class="g i" colspan="2">Barcode</td></tr>
+    <tr style="height:6%">${k("Item Code")}${k("Nomor Batch")}<td class="qr" colspan="2" rowspan="8">${qrSvg(p.qr||buildQR(p))}<span>${esc(p.batch)} · P${esc(p.palet)}</span></td></tr>
+    <tr style="height:7.5%">${v(p.item)}${v(p.batch)}</tr>
+    <tr style="height:6%">${k("Nomor Palet")}${k("Nomor Material")}</tr>
+    <tr style="height:7.5%">${v(p.palet)}${v(p.mat,matCls)}</tr>
+    <tr style="height:6%">${k("Jumlah")}${k("Satuan")}</tr>
+    <tr style="height:7.5%">${v(p.jumlah)}${v(p.satuan)}</tr>
+    <tr style="height:6%">${k("Tanggal Produksi")}${k("Tanggal Kadaluwarsa")}</tr>
+    <tr style="height:7.5%">${v(ddmmyyyy(p.prod))}${v(ddmmyyyy(p.exp))}</tr>
+    <tr style="height:6.5%"><td class="st" colspan="2">Inkubasi</td><td class="st" colspan="2">Release</td><td class="st" colspan="2">Reject</td></tr>
+    <tr style="height:30.5%"><td class="box" colspan="2"></td><td class="box" colspan="2"></td><td class="box" colspan="2"></td></tr>
+  </table>`;
 }
 function printLabels(list){
-  const paper=$("pPaper").value||"a4";
-  $("pageStyle").textContent=paper==="a4"?"@page{size:A4 landscape;margin:0}":"@page{size:A5 portrait;margin:0}";
-  let h="";
-  if(paper==="a4"){for(let i=0;i<list.length;i+=2)h+=`<div class="sheet a4">${labelHtml(list[i])}${list[i+1]?labelHtml(list[i+1]):""}</div>`;}
-  else list.forEach(p=>h+=`<div class="sheet a5">${labelHtml(p)}</div>`);
-  $("printArea").innerHTML=h;
+  $("printArea").innerHTML=list.map(p=>`<div class="sheet">${labelHtml(p)}</div>`).join("");
   setTimeout(()=>window.print(),400);
 }
 
@@ -784,7 +822,7 @@ document.querySelectorAll("[data-qc]").forEach(b=>b.addEventListener("click",asy
 }));
 $("btnScanQC").addEventListener("click",()=>openScanner({title:"Scan untuk QC",sub:"Scan QR palet",continuous:false,onCode:(txt)=>{
   const p=parseQR(txt);if(p.err)return {ok:false,html:`GAGAL<small>${esc(p.err)}</small>`};
-  setTimeout(()=>{$("qBatch").value=p.batch;qSel.clear();if(S.pal.has(p.id))qSel.add(p.id);renderQC();},50);return {ok:true};
+  setTimeout(()=>{$("qBatch").value=p.batch;qSel.clear();if(p.id&&S.pal.has(p.id))qSel.add(p.id);renderQC();},50);return {ok:true};
 }}));
 
 /* =================== PENGATURAN =================== */
