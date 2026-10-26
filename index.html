@@ -411,6 +411,25 @@ async function act(body,el,quiet){
 /** Teks daftar palet yang gagal diproses server pada aksi borongan. */
 function failTxt(f){return (f||[]).map(x=>{const p=S.pal.get(x.id);return esc((p?p.batch+" no "+p.mat:x.id)+": "+x.msg);}).join("<br>");}
 
+/** Aksi borongan. Kalau server (code.gs) belum di-Deploy versi baru ("Aksi tidak dikenal"), otomatis diproses satu per satu. */
+const SINGLE={receiveBatch:"receive",placeBatch:"place",outBatch:"out"};
+async function batchAct(body,el){
+  const r=await act(body,null);
+  if(r.ok||!/tidak dikenal/i.test(r.msg||"")){if(!r.ok&&el)msg(el,"bad",esc(r.msg));return r;}
+  const items=body.items||body.ids.map(id=>({id})),done=[],failed=[];
+  $("busy").hidden=false;
+  for(let i=0;i<items.length;i++){
+    $("busy").textContent=`Memproses ${i+1} dari ${items.length}…`;
+    const it=items[i],q={action:SINGLE[body.action],id:it.id};if(it.lokasi)q.lokasi=it.lokasi;
+    const x=await act(q,null,true);
+    if(x.ok)done.push(it.id);else failed.push({id:it.id,msg:x.msg});
+  }
+  $("busy").hidden=true;$("busy").textContent="Memproses…";
+  if(!done.length&&el)msg(el,"bad",esc((failed[0]&&failed[0].msg)||"Gagal."));
+  return {ok:done.length>0,msg:"",done,failed,legacy:true};
+}
+const legacyNote=(r)=>r&&r.legacy?`<br><span class="small">Server masih versi lama (belum Deploy versi baru), jadi diproses satu per satu.</span>`:"";
+
 /* =================== QR =================== */
 const ddmmyyyy=(iso)=>{if(!iso)return"";const [y,m,d]=String(iso).split("-");return `${d}/${m}/${y}`;};
 function toISO(s){let m=String(s).match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);if(m)return `${m[3]}-${pad(m[2])}-${pad(m[1])}`;
@@ -466,7 +485,8 @@ let D={occ:new Map(),wait:[],stored:[],rek:new Map(),rekLoc:new Map(),pick:new M
 function derive(){
   const occ=new Map(),wait=[],stored=[];
   for(const p of S.pal.values()){if(p.status==="simpan"&&p.lokasi){occ.set(p.lokasi,p.id);stored.push(p);}else if(p.status==="tunggu")wait.push(p);}
-  wait.sort((a,b)=>a.tMasuk-b.tMasuk||a.id.localeCompare(b.id));
+  const ord=(id)=>{const i=LASTIN.indexOf(id);return i<0?1e9:i;};
+  wait.sort((a,b)=>a.tMasuk-b.tMasuk||ord(a.id)-ord(b.id)||a.id.localeCompare(b.id));
   const used=new Set(occ.keys()),rek=new Map(),rekLoc=new Map(),ptr={};
   wait.forEach((p,i)=>{
     const key=(p.gudang||"SD18")+"|"+(p.qc==="Reject"?"Reject":"Simpan"),list=ORDER[key]||[];
@@ -525,12 +545,15 @@ function renderQ(){
     :`<div class="empty">Daftar kosong. Scan atau cari palet yang akan diambil.</div>`;
 }
 function renderInResult(){
-  const items=LASTIN.map(id=>S.pal.get(id)).filter(p=>p&&p.status==="tunggu");
+  const items=LASTIN.map(id=>S.pal.get(id)).filter(p=>p&&(p.status==="tunggu"||p.status==="simpan"));
   if(!items.length){$("inResult").innerHTML="";return;}
-  $("inResult").innerHTML=`<div class="sec"><h3><span>Rekomendasi peletakan</span><span>${items.length} palet</span></h3>
-    <div class="tw"><table class="t"><thead><tr><th>#</th><th>Palet</th><th>QC</th><th>Taruh di</th></tr></thead><tbody>${items.map((p,i)=>{const loc=D.rek.get(p.id);
-      return `<tr><td class="num">${i+1}</td><td>${palTxt(p)}</td><td>${qcB(p.qc)}</td><td>${loc?`<span class="loc sm">${esc(loc)}</span>`:`<span class="qc Reject">Rak penuh</span>`}</td></tr>`;}).join("")}</tbody></table></div>
-    <div class="acts" style="margin-top:10px"><button class="btn" id="btnMapRek">Lihat di peta</button><button class="btn ok" id="btnPlaceAll">Sudah ditaruh semua sesuai rekomendasi</button></div></div>`;
+  const nw=items.filter(p=>p.status==="tunggu").length;
+  $("inResult").innerHTML=`<div class="sec"><h3><span>Rekomendasi peletakan</span><span>${items.length-nw} dari ${items.length} sudah ditaruh</span></h3>
+    <p class="small" style="margin:0 0 8px">Taruh palet di lokasi kuning, lalu <b>ceklis</b> satu per satu. Di peta, kotak kuning = taruh di sini.</p>
+    <div class="tw"><table class="t"><thead><tr><th>#</th><th>Palet</th><th>QC</th><th>Taruh di</th><th>Ditaruh</th></tr></thead><tbody>${items.map((p,i)=>{const done=p.status==="simpan",loc=done?p.lokasi:D.rek.get(p.id);
+      return `<tr><td class="num">${i+1}</td><td>${palTxt(p)}</td><td>${qcB(p.qc)}</td><td>${loc?`<span class="loc sm ${done?"done":""}">${esc(loc)}</span>`:`<span class="qc Reject">Rak penuh</span>`}</td>
+        <td><input type="checkbox" data-placeck="${esc(p.id)}" ${done?"checked disabled":""} ${!done&&!loc?"disabled":""} style="width:26px;height:26px"></td></tr>`;}).join("")}</tbody></table></div>
+    <div class="acts" style="margin-top:10px"><button class="btn pri" id="btnMapRek">Lihat di peta</button>${nw?`<button class="btn ok" id="btnPlaceAll">Ceklis semua (${nw} palet)</button>`:""}</div></div>`;
 }
 function goMap(g){
   if(g)S.gud=g;
@@ -545,10 +568,15 @@ $("inResult").addEventListener("click",async e=>{
   if(e.target.closest("#btnPlaceAll")){
     const items=LASTIN.filter(id=>{const p=S.pal.get(id);return p&&p.status==="tunggu";}).map(id=>({id,lokasi:D.rek.get(id)})).filter(x=>x.lokasi);
     if(!items.length){msg("msgIn","bad","Tidak ada palet dengan rekomendasi rak.");return;}
-    const r=await act({action:"placeBatch",items},"msgIn");if(!r.ok)return;
+    const r=await batchAct({action:"placeBatch",items},"msgIn");if(!r.ok)return;
     const nf=(r.failed||[]).length;
-    msg("msgIn",nf?"wait":"ok",`${r.done.length} palet tersimpan di rak sesuai rekomendasi.`+(nf?`<br>Gagal ${nf}:<br>${failTxt(r.failed)}`:""));
+    msg("msgIn",nf?"wait":"ok",`${r.done.length} palet tersimpan di rak sesuai rekomendasi.`+(nf?`<br>Gagal ${nf}:<br>${failTxt(r.failed)}`:"")+legacyNote(r));
   }
+});
+$("inResult").addEventListener("change",async e=>{
+  const c=e.target.closest("[data-placeck]");if(!c)return;const id=c.dataset.placeck,loc=D.rek.get(id);
+  if(!c.checked||!loc){c.checked=false;return;}
+  c.disabled=true;await place(id,loc);renderInResult();
 });
 $("listOutQ").addEventListener("click",e=>{const b=e.target.closest("[data-rmout]");if(!b)return;Q.out=Q.out.filter(x=>x!==b.dataset.rmout);saveQ();render();});
 $("btnClearOut").addEventListener("click",()=>{Q.out=[];saveQ();render();});
@@ -690,10 +718,10 @@ $("btnScanIn").addEventListener("click",()=>openScanner({title:"Scan masuk",sub:
 async function confirmIn(){
   const ids=Q.inn.filter(id=>{const p=S.pal.get(id);return p&&p.status==="label";});
   if(!ids.length){msg("msgIn","bad","Antrean kosong.");return;}
-  const r=await act({action:"receiveBatch",ids},"msgIn");if(!r.ok)return;
+  const r=await batchAct({action:"receiveBatch",ids},"msgIn");if(!r.ok)return;
   LASTIN=r.done||[];Q.inn=Q.inn.filter(id=>!LASTIN.includes(id));saveQ();render();
   const nf=(r.failed||[]).length;
-  msg("msgIn",nf?"wait":"ok",`${LASTIN.length} palet diterima. Rekomendasi peletakan ada di bawah.`+(nf?`<br>Gagal ${nf}:<br>${failTxt(r.failed)}`:""));
+  msg("msgIn",nf?"wait":"ok",`${LASTIN.length} palet diterima. Rekomendasi peletakan ada di bawah (kuning di peta).`+(nf?`<br>Gagal ${nf}:<br>${failTxt(r.failed)}`:"")+legacyNote(r));
   $("inResult").scrollIntoView({behavior:"smooth",block:"start"});
 }
 $("listWait").addEventListener("click",async e=>{
@@ -772,12 +800,12 @@ async function confirmOut(){
   const ids=Q.out.filter(id=>{const p=S.pal.get(id);return p&&p.status==="simpan";});
   if(!ids.length){$("outResult").innerHTML=`<div class="msg bad">Daftar keluar kosong.</div>`;return;}
   const snap=new Map(ids.map(id=>[id,S.pal.get(id)]));
-  const r=await act({action:"outBatch",ids},"outResult");if(!r.ok)return;
+  const r=await batchAct({action:"outBatch",ids},"outResult");if(!r.ok)return;
   OUTRES=null;
   const locs=(r.done||[]).map(id=>snap.get(id)).filter(Boolean).map(p=>`<span class="loc sm done">${esc(p.lokasi)}</span>`).join(" ");
   const nf=(r.failed||[]).length;
   $("outResult").innerHTML=`<div class="msg ok">SUKSES keluar ${(r.done||[]).length} palet. Lokasi dikosongkan:<br><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">${locs}</div></div>`+
-    (nf?`<div class="msg bad">Gagal ${nf}:<br>${failTxt(r.failed)}</div>`:"");
+    (nf?`<div class="msg bad">Gagal ${nf}:<br>${failTxt(r.failed)}</div>`:"")+(r.legacy?`<div class="small">${legacyNote(r).replace("<br>","")}</div>`:"");
 }
 
 $("btnScanFind").addEventListener("click",()=>openScanner({title:"Scan untuk cari",sub:"Scan QR palet di lapangan",continuous:false,onCode:(txt)=>{
