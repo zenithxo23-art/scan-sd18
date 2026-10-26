@@ -22,12 +22,14 @@ const API_URL = "https://script.google.com/macros/s/AKfycbw_EHZ-aSY8A9Sav6Hf63WK
   --accent:#F2B705; --accent-ink:#1B1F24; --head:#1E2A36;
   --ok:#22663B; --ok-bg:#D3ECDA; --wait-bg:#FFE9A8; --bad:#A3271A; --bad-bg:#FAD6CF;
   --find:#9A4512; --find-bg:#F9D3B6; --ink-bg:#D6E4F5; --ink-t:#1D4E89; --noloc:#8D96A0; --empty:#FFFFFF;
+  --pick:#6D28D9; --pick-bg:#E6DAFA; --pick-t:#4C1D95; --pick-ink:#FFFFFF;
   --ui:"Barlow",system-ui,-apple-system,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root{
   --bg:#12171C; --surface:#1B232B; --ink:#E8EDF2; --muted:#9BA6B1; --line:#2D3842; --head:#0B1015;
   --ok:#8FD3A4; --ok-bg:#1E3B29; --wait-bg:#4A3D0D; --bad:#F2A497; --bad-bg:#4A1F1A;
-  --find:#F6B48A; --find-bg:#4D2A14; --ink-bg:#1B3350; --ink-t:#A9C8F0; --noloc:#3A444E; --empty:#222C35; color-scheme:dark}}
+  --find:#F6B48A; --find-bg:#4D2A14; --ink-bg:#1B3350; --ink-t:#A9C8F0; --noloc:#3A444E; --empty:#222C35;
+  --pick:#9D6BFF; --pick-bg:#34234F; --pick-t:#D8C2FF; --pick-ink:#12081F; color-scheme:dark}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;min-height:100%}
@@ -54,6 +56,7 @@ input,select,textarea{font:500 16px var(--ui);color:var(--ink);background:var(--
 .btn.warn{background:#C2571A;color:#fff;border-color:#C2571A}
 .btn.red{background:#B42318;color:#fff;border-color:#B42318}
 .btn.blue{background:#1D4E89;color:#fff;border-color:#1D4E89}
+.btn.pick{background:var(--pick);color:var(--pick-ink);border-color:var(--pick)}
 .btn.ghost{background:transparent}
 .btn.sm{padding:6px 10px;font-size:13px}
 .btn:disabled{opacity:.45;cursor:not-allowed}
@@ -72,6 +75,7 @@ input,select,textarea{font:500 16px var(--ui);color:var(--ink);background:var(--
 .loc.sm{font-size:14px;padding:2px 8px;border-width:1.5px}
 .loc.done{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
 .loc.find{background:var(--find-bg);color:var(--find);border-color:var(--find)}
+.loc.pick{background:var(--pick-bg);color:var(--pick-t);border-color:var(--pick)}
 .qc{display:inline-block;font:700 11px var(--ui);letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:999px}
 .qc.Release{background:var(--ok-bg);color:var(--ok)} .qc.Inkubasi{background:var(--ink-bg);color:var(--ink-t)} .qc.Reject{background:var(--bad-bg);color:var(--bad)}
 .acts{display:flex;flex-wrap:wrap;gap:8px}
@@ -106,6 +110,7 @@ table.t th{font-size:12px;color:var(--muted);font-weight:600}
 .cell.sX{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
 .cell.r{background:var(--accent);border-color:#1B1F24;color:#1B1F24;font-weight:700}
 .cell.f{background:#C2571A;color:#fff;border-color:transparent}
+.cell.pk{background:var(--pick);color:var(--pick-ink);border-color:var(--pick-t);border-width:2px;font-weight:700}
 .cell.x{background:var(--noloc);border-color:transparent;cursor:default}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
 nav.tabs .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
@@ -171,9 +176,14 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
   <!-- MASUK -->
   <section id="tab-masuk">
     <h2>Barang masuk</h2>
-    <p class="hint">Scan QR label palet dari produksi satu per satu. Kamera tetap menyala untuk palet berikutnya.</p>
+    <p class="hint">Scan QR label semua palet dulu (kamera tetap menyala), lalu klik <b>Konfirmasi</b>. Setelah dikonfirmasi, rekomendasi tempat peletakan semua palet muncul.</p>
     <button class="big" id="btnScanIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>Scan QR palet masuk</button>
     <div id="msgIn"></div>
+    <div class="sec"><h3><span>Antrean scan (borongan)</span><span id="cntInQ">0</span></h3>
+      <div id="listInQ"></div>
+      <div class="acts" style="margin-top:10px"><button class="btn ok" id="btnConfirmIn" disabled>Konfirmasi</button><button class="btn ghost" id="btnClearIn" disabled>Kosongkan</button></div>
+    </div>
+    <div id="inResult"></div>
     <div class="sec"><h3><span>Menunggu ditaruh</span><span id="cntWait">0</span></h3><div id="listWait"></div></div>
     <div class="sec"><h3><span>Baru disimpan</span></h3><div id="listStored"></div></div>
   </section>
@@ -181,7 +191,7 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
   <!-- KELUAR -->
   <section id="tab-keluar" hidden>
     <h2>Barang keluar</h2>
-    <p class="hint">Hanya palet <b>Release</b> yang boleh keluar. Palet <b>Reject</b> boleh keluar kalau sudah di rak reject.</p>
+    <p class="hint">Hanya palet <b>Release</b> yang boleh keluar. Palet <b>Reject</b> boleh keluar kalau sudah di rak reject. Scan atau isi manual beberapa palet ke <b>Daftar keluar</b>, lihat lokasinya di peta (warna <b>Picking</b>), lalu klik Konfirmasi keluar.</p>
     <button class="big out" id="btnScanOut"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>Scan QR palet keluar</button>
     <div class="or">atau isi manual</div>
     <div class="form2">
@@ -190,6 +200,10 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
       <button class="btn pri" id="oFind">Cari</button>
     </div>
     <div id="outResult"></div>
+    <div class="sec"><h3><span>Daftar keluar (Picking)</span><span id="cntOutQ">0</span></h3>
+      <div id="listOutQ"></div>
+      <div class="acts" style="margin-top:10px"><button class="btn pick" id="btnMapOut" disabled>Lihat di peta</button><button class="btn warn" id="btnConfirmOut" disabled>Konfirmasi keluar</button><button class="btn ghost" id="btnClearOut" disabled>Kosongkan</button></div>
+    </div>
     <div class="sec"><h3><span>Riwayat keluar</span></h3><div id="listOut"></div></div>
   </section>
 
@@ -212,7 +226,7 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
   <section id="tab-peta" hidden>
     <h2>Peta rak</h2>
     <div class="seg" id="segGud"></div>
-    <div class="legend"><span><i style="background:var(--accent);border-color:#1B1F24"></i>Taruh di sini</span><span><i style="background:var(--ok-bg)"></i>Release</span><span><i style="background:var(--ink-bg)"></i>Inkubasi</span><span><i style="background:var(--bad-bg);border-color:var(--bad)"></i>Reject</span><span><i style="background:#C2571A"></i>Hasil cari</span><span><i></i>Kosong</span></div>
+    <div class="legend"><span><i style="background:var(--accent);border-color:#1B1F24"></i>Taruh di sini</span><span><i style="background:var(--pick);border-color:var(--pick-t)"></i>Picking (akan keluar)</span><span><i style="background:var(--ok-bg)"></i>Release</span><span><i style="background:var(--ink-bg)"></i>Inkubasi</span><span><i style="background:var(--bad-bg);border-color:var(--bad)"></i>Reject</span><span><i style="background:#C2571A"></i>Hasil cari</span><span><i></i>Kosong</span></div>
     <div id="cellInfo" class="msg wait" hidden></div>
     <div class="mapbox" id="map"></div>
   </section>
@@ -302,7 +316,7 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
   <div id="reader"></div>
   <div class="flash" id="flash">Arahkan kamera ke kode</div>
   <div class="scanlist" id="scanList"></div>
-  <div class="acts"><button class="btn" id="scPhoto">Ambil foto</button><button class="btn ok" id="scDone">Selesai</button></div>
+  <div class="acts"><button class="btn" id="scPhoto">Ambil foto</button><button class="btn ok" id="scDone">Selesai</button><button class="btn ok" id="scConfirm" hidden>Konfirmasi</button></div>
 </div>
 <input type="file" id="cam" accept="image/*" capture="environment" hidden>
 <div id="fileReader" hidden></div>
@@ -337,6 +351,19 @@ const S={pal:new Map(),out:[],batal:[],cari:new Set(),gud:"SD18"};
 const lsGet=(k)=>{try{return localStorage.getItem(k);}catch(e){return null;}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
 
+/* ---------- antrean borongan (tersimpan di perangkat) ---------- */
+const Q={inn:[],out:[]};            // inn: id palet yang sudah di-scan masuk (belum dikonfirmasi) · out: id palet di Daftar keluar (Picking)
+let LASTIN=[];                      // id palet yang baru dikonfirmasi masuk (untuk tabel rekomendasi)
+let OUTRES=null;                    // hasil pencarian manual keluar
+function loadQ(){["inn","out"].forEach(k=>{try{const a=JSON.parse(lsGet(k==="inn"?"sd18qIn":"sd18qOut")||"[]");if(Array.isArray(a))Q[k]=a.filter(x=>typeof x==="string");}catch(e){}});}
+function saveQ(){lsSet("sd18qIn",JSON.stringify(Q.inn));lsSet("sd18qOut",JSON.stringify(Q.out));}
+function pruneQ(){
+  Q.inn=Q.inn.filter(id=>{const p=S.pal.get(id);return p&&p.status==="label";});
+  Q.out=Q.out.filter(id=>{const p=S.pal.get(id);return p&&p.status==="simpan";});
+  saveQ();
+}
+loadQ();
+
 /* =================== server =================== */
 function apiUrl(){ if(/^https:\/\/script\.google(usercontent)?\.com\//.test(API_URL))return API_URL; return lsGet("sd18api")||""; }
 async function apiGet(action){const r=await fetch(apiUrl()+"?action="+action+"&t="+Date.now(),{redirect:"follow"});if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}
@@ -350,7 +377,7 @@ function fromRow(o){return {id:o.ID,item:o.Item,nama:o.NamaProduk,batch:o.Batch,
   tLabel:ts(o.WaktuLabel),tMasuk:ts(o.WaktuMasuk),tSimpan:ts(o.WaktuSimpan),tKeluar:ts(o.WaktuKeluar),
   nums:matNums(o.NoMaterial)||[],cetak:+o.JmlCetak||0,tCetak:ts(o.WaktuCetak)};}
 function applyData(d){if(!d)return;const m=new Map();(d.rows||[]).forEach(o=>{const p=fromRow(o);m.set(p.id,p);});
-  S.pal=m;S.out=(d.out||[]).map(fromRow);S.batal=(d.batal||[]).map(fromRow);render();
+  S.pal=m;S.out=(d.out||[]).map(fromRow);S.batal=(d.batal||[]).map(fromRow);pruneQ();render();
   $("conn").textContent="Tersambung · data di Google Sheets · diperbarui "+new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"});}
 function applyMaster(m){
   M.produk=m.produk||[];M.lokasi=m.lokasi||[];M.rak=m.rak||[];M.set=m.set||{};
@@ -381,6 +408,8 @@ async function act(body,el,quiet){
   catch(e){const m="Gagal tersambung ke server. Cek internet lalu coba lagi.";if(el)msg(el,"bad",m);return {ok:false,msg:m};}
   finally{if(!quiet)$("busy").hidden=true;}
 }
+/** Teks daftar palet yang gagal diproses server pada aksi borongan. */
+function failTxt(f){return (f||[]).map(x=>{const p=S.pal.get(x.id);return esc((p?p.batch+" no "+p.mat:x.id)+": "+x.msg);}).join("<br>");}
 
 /* =================== QR =================== */
 const ddmmyyyy=(iso)=>{if(!iso)return"";const [y,m,d]=String(iso).split("-");return `${d}/${m}/${y}`;};
@@ -433,7 +462,7 @@ function findPal(batch,matStr,statuses,exact){
 }
 
 /* =================== turunan & rekomendasi =================== */
-let D={occ:new Map(),wait:[],stored:[],rek:new Map(),rekLoc:new Map(),free:0};
+let D={occ:new Map(),wait:[],stored:[],rek:new Map(),rekLoc:new Map(),pick:new Map(),free:0};
 function derive(){
   const occ=new Map(),wait=[],stored=[];
   for(const p of S.pal.values()){if(p.status==="simpan"&&p.lokasi){occ.set(p.lokasi,p.id);stored.push(p);}else if(p.status==="tunggu")wait.push(p);}
@@ -444,8 +473,9 @@ function derive(){
     let j=ptr[key]||0;while(j<list.length&&used.has(list[j]))j++;
     const loc=list[j]||null;ptr[key]=j+1;if(loc){used.add(loc);rekLoc.set(loc,i+1);}rek.set(p.id,loc);
   });
+  const pick=new Map();Q.out.forEach((id,i)=>{const p=S.pal.get(id);if(p&&p.status==="simpan"&&p.lokasi)pick.set(p.lokasi,i+1);});
   const free=(ORDER["SD17|Simpan"]||[]).concat(ORDER["SD18|Simpan"]||[]).filter(c=>!occ.has(c)).length;
-  return {occ,wait,stored,rek,rekLoc,free};
+  return {occ,wait,stored,rek,rekLoc,pick,free};
 }
 const fmtDate=(iso)=>iso?ddmmyyyy(iso):"-";
 const fmtTime=(t)=>{if(!t)return"";const d=new Date(t);return d.toLocaleDateString("id-ID",{day:"2-digit",month:"short"})+" "+d.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});};
@@ -471,8 +501,59 @@ function render(){
   const recent=[...D.stored].sort((a,b)=>b.tSimpan-a.tSimpan).slice(0,5);
   $("listStored").innerHTML=recent.length?recent.map(p=>`<div class="card"><div class="row"><span class="meta">${palTxt(p)}</span><span class="loc sm done">${esc(p.lokasi)}</span></div></div>`).join(""):`<div class="empty">Belum ada.</div>`;
   $("listOut").innerHTML=S.out.length?S.out.map(p=>`<div class="card"><div class="row"><span class="meta">${palTxt(p)}<br><span class="small">${fmtTime(p.tKeluar)}</span></span><span class="loc sm">${esc(p.lokasi||"-")}</span></div></div>`).join(""):`<div class="empty">Belum ada palet keluar.</div>`;
+  renderQ();renderInResult();if(OUTRES)renderOutRes();
   renderCari();renderMap();renderHistory();renderQC();renderPreview();
 }
+
+/* =================== ANTREAN BORONGAN (render) =================== */
+function renderQ(){
+  const ni=Q.inn.length,no=Q.out.length;
+  $("cntInQ").textContent=ni;
+  $("btnConfirmIn").disabled=!ni;$("btnConfirmIn").textContent=ni?`Konfirmasi ${ni} palet · tampilkan rekomendasi`:"Konfirmasi";
+  $("btnClearIn").disabled=!ni;
+  $("listInQ").innerHTML=ni?`<div class="tw"><table class="t"><thead><tr><th>#</th><th>Palet</th><th>QC</th><th></th></tr></thead><tbody>${Q.inn.map((id,i)=>{const p=S.pal.get(id);
+    return `<tr><td class="num">${i+1}</td><td>${p?palTxt(p):esc(id)}</td><td>${p?qcB(p.qc):""}</td><td><button class="btn sm ghost" data-rmin="${esc(id)}">Hapus</button></td></tr>`;}).join("")}</tbody></table></div>`
+    :`<div class="empty">Belum ada palet di-scan. Tekan Scan QR palet masuk.</div>`;
+  $("cntOutQ").textContent=no;
+  $("btnConfirmOut").disabled=!no;$("btnConfirmOut").textContent=no?`Konfirmasi keluar ${no} palet`:"Konfirmasi keluar";
+  $("btnMapOut").disabled=!no;$("btnClearOut").disabled=!no;
+  $("listOutQ").innerHTML=no?Q.out.map((id,i)=>{const p=S.pal.get(id);
+    return `<div class="card"><div class="row"><span class="num">Picking #${i+1}</span>${p?qcB(p.qc):""}</div>
+      <div class="meta">${p?palTxt(p):esc(id)}${p?`<br><span class="small">${esc(p.nama)} · produksi ${fmtDate(p.prod)}</span>`:""}</div>
+      <div class="row"><span class="small">Ambil dari</span><span class="loc pick">${esc(p?p.lokasi:"-")}</span></div>
+      <div class="acts"><button class="btn sm ghost" data-rmout="${esc(id)}">Hapus dari daftar</button></div></div>`;}).join("")
+    :`<div class="empty">Daftar kosong. Scan atau cari palet yang akan diambil.</div>`;
+}
+function renderInResult(){
+  const items=LASTIN.map(id=>S.pal.get(id)).filter(p=>p&&p.status==="tunggu");
+  if(!items.length){$("inResult").innerHTML="";return;}
+  $("inResult").innerHTML=`<div class="sec"><h3><span>Rekomendasi peletakan</span><span>${items.length} palet</span></h3>
+    <div class="tw"><table class="t"><thead><tr><th>#</th><th>Palet</th><th>QC</th><th>Taruh di</th></tr></thead><tbody>${items.map((p,i)=>{const loc=D.rek.get(p.id);
+      return `<tr><td class="num">${i+1}</td><td>${palTxt(p)}</td><td>${qcB(p.qc)}</td><td>${loc?`<span class="loc sm">${esc(loc)}</span>`:`<span class="qc Reject">Rak penuh</span>`}</td></tr>`;}).join("")}</tbody></table></div>
+    <div class="acts" style="margin-top:10px"><button class="btn" id="btnMapRek">Lihat di peta</button><button class="btn ok" id="btnPlaceAll">Sudah ditaruh semua sesuai rekomendasi</button></div></div>`;
+}
+function goMap(g){
+  if(g)S.gud=g;
+  document.querySelectorAll("#segGud button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.gud===S.gud));
+  $("cellInfo").hidden=true;showTab("peta");renderMap();
+}
+$("listInQ").addEventListener("click",e=>{const b=e.target.closest("[data-rmin]");if(!b)return;Q.inn=Q.inn.filter(x=>x!==b.dataset.rmin);saveQ();renderQ();});
+$("btnClearIn").addEventListener("click",()=>{Q.inn=[];saveQ();renderQ();});
+$("btnConfirmIn").addEventListener("click",confirmIn);
+$("inResult").addEventListener("click",async e=>{
+  if(e.target.closest("#btnMapRek")){const first=LASTIN.map(id=>D.rek.get(id)).find(Boolean);goMap(first&&L.get(first)?L.get(first).ged:null);return;}
+  if(e.target.closest("#btnPlaceAll")){
+    const items=LASTIN.filter(id=>{const p=S.pal.get(id);return p&&p.status==="tunggu";}).map(id=>({id,lokasi:D.rek.get(id)})).filter(x=>x.lokasi);
+    if(!items.length){msg("msgIn","bad","Tidak ada palet dengan rekomendasi rak.");return;}
+    const r=await act({action:"placeBatch",items},"msgIn");if(!r.ok)return;
+    const nf=(r.failed||[]).length;
+    msg("msgIn",nf?"wait":"ok",`${r.done.length} palet tersimpan di rak sesuai rekomendasi.`+(nf?`<br>Gagal ${nf}:<br>${failTxt(r.failed)}`:""));
+  }
+});
+$("listOutQ").addEventListener("click",e=>{const b=e.target.closest("[data-rmout]");if(!b)return;Q.out=Q.out.filter(x=>x!==b.dataset.rmout);saveQ();render();});
+$("btnClearOut").addEventListener("click",()=>{Q.out=[];saveQ();render();});
+$("btnMapOut").addEventListener("click",()=>{const p=S.pal.get(Q.out[0]);const x=p&&L.get(p.lokasi);goMap(x?x.ged:null);});
+$("btnConfirmOut").addEventListener("click",confirmOut);
 
 /* =================== CARI =================== */
 function renderCari(){
@@ -519,7 +600,8 @@ function renderMap(){
       for(let k=1;k<=R.maxK;k++){const c=`${pre}-${r}-${pad(k)}-${lv}`;
         if(!R.cells.has(c)){h+=`<span class="cell x"></span>`;continue;}
         let cls="",t=pad(k);const id=D.occ.get(c);
-        if(S.cari.has(c))cls="f";else if(id){const q=S.pal.get(id).qc;cls=q==="Release"?"sR":q==="Reject"?"sX":"sI";}
+        if(D.pick.has(c)){cls="pk";t="P"+D.pick.get(c);}
+        else if(S.cari.has(c))cls="f";else if(id){const q=S.pal.get(id).qc;cls=q==="Release"?"sR":q==="Reject"?"sX":"sI";}
         else if(D.rekLoc.has(c)){cls="r";t="#"+D.rekLoc.get(c);}
         h+=`<button class="cell ${cls}" data-loc="${c}" aria-label="${c}">${t}</button>`;}
       h+=`</div>`;});
@@ -530,7 +612,7 @@ $("segGud").addEventListener("click",e=>{const b=e.target.closest("[data-gud]");
   document.querySelectorAll("#segGud button").forEach(x=>x.setAttribute("aria-pressed",x===b));$("cellInfo").hidden=true;renderMap();});
 $("map").addEventListener("click",e=>{
   const b=e.target.closest("[data-loc]");if(!b)return;const c=b.dataset.loc,id=D.occ.get(c),info=$("cellInfo"),x=L.get(c);info.hidden=false;
-  if(id){const p=S.pal.get(id);info.className="msg ok";info.innerHTML=`<span class="loc sm done">${c}</span> ${palTxt(p)} ${qcB(p.qc)}<br><span class="small">${esc(p.nama)} · produksi ${fmtDate(p.prod)}</span>`;}
+  if(id){const p=S.pal.get(id);info.className="msg ok";info.innerHTML=`<span class="loc sm done">${c}</span> ${palTxt(p)} ${qcB(p.qc)}<br><span class="small">${esc(p.nama)} · produksi ${fmtDate(p.prod)}</span>${D.pick.has(c)?`<br><b>PICKING #${D.pick.get(c)}</b> · akan diambil, belum dikonfirmasi keluar`:""}`;}
   else{info.className="msg wait";info.innerHTML=`<span class="loc sm">${c}</span> Kosong · rak ${esc(x?x.fungsi:"")}${D.rekLoc.has(c)?` · rekomendasi palet menunggu #${D.rekLoc.get(c)}`:""}`;}
 });
 
@@ -540,9 +622,14 @@ function beep(ok){try{const A=window.AudioContext||window.webkitAudioContext;if(
   o.frequency.value=ok?1250:330;o.connect(g);g.connect(c.destination);g.gain.value=.12;o.start();o.stop(c.currentTime+(ok?.09:.28));}catch(e){}
   if(navigator.vibrate)navigator.vibrate(ok?60:[80,60,80]);}
 function flash(cls,html){const f=$("flash");f.className="flash "+cls;f.innerHTML=html;}
+/** Tombol Konfirmasi di layar scan (hanya untuk mode borongan masuk). */
+function updScan(){const b=$("scConfirm");
+  if(mode&&mode.confirm){const n=mode.count();b.hidden=false;b.textContent=`Konfirmasi (${n})`;b.disabled=!n;$("scSub").textContent=`Antrean: ${n} palet`;$("scDone").className="btn";}
+  else{b.hidden=true;$("scDone").className="btn ok";}}
 async function openScanner(opt){
   mode=opt;onCode=opt.onCode;lastText="";lastAt=0;coolUntil=0;busyScan=false;
   $("scTitle").textContent=opt.title;$("scSub").textContent=opt.sub||"";$("scanList").innerHTML="";
+  updScan();
   flash("","Membuka kamera…");$("scanner").hidden=false;
   try{const A=window.AudioContext||window.webkitAudioContext;if(A&&!beep.ctx)beep.ctx=new A();}catch(e){}
   if(!window.Html5Qrcode){flash("bad","Pemindai gagal dimuat. Cek internet, lalu buka ulang halaman.");return;}
@@ -566,7 +653,7 @@ async function handleDecode(text){
     const r=await onCode(text);beep(r.ok);flash(r.ok?"ok":"bad",r.html);
     const row=document.createElement("div");
     row.innerHTML=`<span class="${r.ok?"g":"r"}">${r.ok?"✔":"✖"} ${r.short}</span><span>${new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}</span>`;
-    $("scanList").prepend(row);busyScan=false;
+    $("scanList").prepend(row);busyScan=false;updScan();
   }else{
     const r=onCode(text);
     if(r&&r.ok===false){beep(false);flash("bad",r.html);return;}
@@ -575,6 +662,7 @@ async function handleDecode(text){
 }
 async function closeScanner(){$("scanner").hidden=true;mode=null;try{if(qr&&qr.isScanning)await qr.stop();}catch(e){}}
 $("scDone").addEventListener("click",closeScanner);
+$("scConfirm").addEventListener("click",async()=>{const m=mode;await closeScanner();if(m&&m.onConfirm)m.onConfirm();});
 $("scPhoto").addEventListener("click",async()=>{try{if(qr&&qr.isScanning)await qr.stop();}catch(e){}$("cam").value="";$("cam").click();});
 $("cam").addEventListener("change",async()=>{
   const f=$("cam").files&&$("cam").files[0];if(!f||!mode)return;$("busy").hidden=false;let text=null;
@@ -584,17 +672,30 @@ $("cam").addEventListener("change",async()=>{
   else{beep(false);flash("bad","GAGAL: kode tidak terbaca dari foto. Coba lagi lebih dekat.");}
 });
 
-/* =================== MASUK =================== */
-async function scanInOne(text){
+/* =================== MASUK (borongan) =================== */
+/** Scan satu palet: hanya dicatat ke antrean. Belum dikirim ke server sebelum Konfirmasi. */
+function scanInOne(text){
   const p=parseQR(text);
   if(p.err)return {ok:false,html:`GAGAL<small>${esc(p.err)}</small>`,short:"GAGAL · "+esc(p.err)};
   if(!p.id)return {ok:false,html:`GAGAL<small>${esc(p.batch)} no ${esc(p.mat)}: label tidak ditemukan</small>`,short:`GAGAL · ${esc(p.batch)} no ${esc(p.mat)}`};
-  const r=await act({action:"receive",id:p.id},null,true);
-  if(!r.ok)return {ok:false,html:`GAGAL<small>${esc(p.batch)} no ${esc(p.mat)}: ${esc(r.msg)}</small>`,short:`GAGAL · ${esc(p.batch)} no ${esc(p.mat)} · ${esc(r.msg)}`};
-  const loc=D.rek.get(p.id),q=S.pal.get(p.id);
-  return {ok:true,html:`SUKSES · ${esc(p.batch)} no ${esc(p.mat)}<small>${q&&q.qc==="Reject"?"REJECT · ":""}Taruh di ${loc||"-"}</small>`,short:`${esc(p.batch)} no ${esc(p.mat)} → ${loc||"-"}`};
+  const tag=`${esc(p.batch)} no ${esc(p.mat)}`,q=S.pal.get(p.id);
+  if(!q)return {ok:false,html:`GAGAL<small>${tag}: label tidak ditemukan / sudah keluar / dibatalkan</small>`,short:`GAGAL · ${tag} · tidak ditemukan`};
+  if(Q.inn.includes(p.id))return {ok:false,html:`SUDAH ADA<small>${tag} sudah di antrean</small>`,short:`DOBEL · ${tag}`};
+  if(q.status!=="label"){const w=q.status==="tunggu"?"sudah diterima, menunggu ditaruh":"sudah tersimpan di "+q.lokasi;
+    return {ok:false,html:`GAGAL<small>${tag}: ${esc(w)}</small>`,short:`GAGAL · ${tag} · ${esc(w)}`};}
+  Q.inn.push(p.id);saveQ();renderQ();
+  return {ok:true,html:`SUKSES · ${tag}<small>${q.qc==="Reject"?"REJECT · ":""}Masuk antrean #${Q.inn.length}</small>`,short:`${tag} → antrean #${Q.inn.length}`};
 }
-$("btnScanIn").addEventListener("click",()=>openScanner({title:"Scan masuk",sub:"Scan QR label palet satu per satu",continuous:true,onCode:scanInOne}));
+$("btnScanIn").addEventListener("click",()=>openScanner({title:"Scan masuk",sub:"",continuous:true,confirm:true,count:()=>Q.inn.length,onCode:scanInOne,onConfirm:confirmIn}));
+async function confirmIn(){
+  const ids=Q.inn.filter(id=>{const p=S.pal.get(id);return p&&p.status==="label";});
+  if(!ids.length){msg("msgIn","bad","Antrean kosong.");return;}
+  const r=await act({action:"receiveBatch",ids},"msgIn");if(!r.ok)return;
+  LASTIN=r.done||[];Q.inn=Q.inn.filter(id=>!LASTIN.includes(id));saveQ();render();
+  const nf=(r.failed||[]).length;
+  msg("msgIn",nf?"wait":"ok",`${LASTIN.length} palet diterima. Rekomendasi peletakan ada di bawah.`+(nf?`<br>Gagal ${nf}:<br>${failTxt(r.failed)}`:""));
+  $("inResult").scrollIntoView({behavior:"smooth",block:"start"});
+}
 $("listWait").addEventListener("click",async e=>{
   const b=e.target.closest("[data-act]");if(!b)return;
   const card=b.closest("[data-id]"),id=card.dataset.id,p=S.pal.get(id),rek=D.rek.get(id);if(!p)return;
@@ -615,39 +716,69 @@ $("listWait").addEventListener("click",async e=>{
 async function place(id,loc){const p=S.pal.get(id);if(!p||!loc)return;
   const r=await act({action:"place",id,lokasi:loc},"msgIn");if(r.ok)msg("msgIn","ok",`Tersimpan: ${palTxt(p)} di <span class="loc sm done">${loc}</span>`);}
 
-/* =================== KELUAR =================== */
+/* =================== KELUAR (borongan + Picking) =================== */
 function outReason(p){
   if(p.status!=="simpan")return where(p);
   if(p.qc==="Release")return "";
   if(p.qc==="Reject"){const x=L.get(p.lokasi);return x&&x.fungsi==="Reject"?"":"Palet REJECT harus dipindah ke rak reject dulu (menu Cari → Pindah lokasi).";}
   return `Status QC ${p.qc}: belum boleh keluar (harus Release).`;
 }
+/** Scan satu palet keluar: ditambah ke Daftar keluar (Picking), belum keluar sebelum Konfirmasi. */
+function scanOutOne(text){
+  const p=parseQR(text);
+  if(p.err)return {ok:false,html:`GAGAL<small>${esc(p.err)}</small>`,short:"GAGAL · "+esc(p.err)};
+  let ex=p.id?S.pal.get(p.id):null;
+  if(!ex){const c=findPal(p.batch,p.mat);
+    if(c.length===1)ex=c[0];
+    else return {ok:false,html:`GAGAL<small>${esc(p.batch)} no ${esc(p.mat)}: ${c.length?"lebih dari satu palet cocok":"tidak ditemukan"}</small>`,short:`GAGAL · ${esc(p.batch)} no ${esc(p.mat)}`};}
+  const tag=`${esc(ex.batch)} no ${esc(ex.mat)}`;
+  if(Q.out.includes(ex.id))return {ok:false,html:`SUDAH ADA<small>${tag} sudah di daftar keluar</small>`,short:`DOBEL · ${tag}`};
+  const why=outReason(ex);
+  if(why)return {ok:false,html:`GAGAL<small>${tag}: ${esc(why)}</small>`,short:`GAGAL · ${tag} · ${esc(why)}`};
+  Q.out.push(ex.id);saveQ();render();
+  return {ok:true,html:`SUKSES · ${tag}<small>Ambil dari ${esc(ex.lokasi)} · Picking #${Q.out.length}</small>`,short:`${tag} ← ${esc(ex.lokasi)}`};
+}
+$("btnScanOut").addEventListener("click",()=>openScanner({title:"Scan keluar",sub:"Scan semua palet yang diambil, lalu Selesai",continuous:true,onCode:scanOutOne}));
 function showOut(list,label){
-  if(!list.length){$("outResult").innerHTML=`<div class="msg bad">GAGAL: ${label} tidak ditemukan.</div>`;return;}
-  $("outResult").innerHTML=list.map(ex=>{const why=outReason(ex);
+  if(!list.length){OUTRES=null;$("outResult").innerHTML=`<div class="msg bad">GAGAL: ${label} tidak ditemukan.</div>`;return;}
+  OUTRES={ids:list.map(p=>p.id)};renderOutRes();
+}
+function renderOutRes(){
+  if(!OUTRES)return;
+  const list=OUTRES.ids.map(id=>S.pal.get(id)).filter(Boolean);
+  if(!list.length){OUTRES=null;$("outResult").innerHTML="";return;}
+  const can=list.filter(p=>!outReason(p)&&!Q.out.includes(p.id));
+  $("outResult").innerHTML=(can.length>1?`<div class="acts" style="margin-top:12px"><button class="btn pri" data-addall>Tambah semua yang bisa keluar (${can.length})</button></div>`:"")+
+  list.map(ex=>{const why=outReason(ex),inQ=Q.out.includes(ex.id);
     const older=(why||ex.qc!=="Release")?[]:D.stored.filter(q=>q.id!==ex.id&&q.item===ex.item&&q.qc==="Release"&&(q.prod||"")<(ex.prod||"")).sort((a,b)=>(a.prod||"").localeCompare(b.prod||""));
     return `<div class="card" style="margin-top:12px" data-out="${esc(ex.id)}">
       <div class="row"><span class="small">Ambil dari</span>${ex.lokasi?`<span class="loc find">${esc(ex.lokasi)}</span>`:"-"}</div>
       <div class="meta">${palTxt(ex)} ${qcB(ex.qc)}<br><span class="small">${esc(ex.nama)} · produksi ${fmtDate(ex.prod)}</span></div>
       ${why?`<div class="msg bad" style="margin:0">GAGAL: ${esc(why)}</div>`:""}
       ${older.length?`<div class="msg wait" style="margin:0">FIFO: masih ada ${older.length} palet Release lebih lama, mis. ${esc(older[0].batch)} no ${esc(older[0].mat)} di ${esc(older[0].lokasi)}.</div>`:""}
-      <div class="acts"><button class="btn ok" data-ok ${why?"disabled":""}>Konfirmasi keluar</button><button class="btn" data-no>Batal</button></div></div>`;}).join("");
+      <div class="acts"><button class="btn pick" data-add ${why||inQ?"disabled":""}>${inQ?"Sudah di daftar":"Tambah ke daftar keluar"}</button><button class="btn" data-no>Tutup</button></div></div>`;}).join("");
 }
-$("outResult").addEventListener("click",async e=>{
-  const card=e.target.closest("[data-out]");if(!card)return;const id=card.dataset.out,q=S.pal.get(id);
-  if(e.target.closest("[data-no]")){$("outResult").innerHTML="";return;}
-  if(e.target.closest("[data-ok]")&&q){const r=await act({action:"out",id},"outResult");
-    if(r.ok)$("outResult").innerHTML=`<div class="msg ok">SUKSES keluar: ${palTxt(q)} dari ${esc(q.lokasi)}. Lokasi sekarang kosong.</div>`;}
+$("outResult").addEventListener("click",e=>{
+  if(e.target.closest("[data-addall]")&&OUTRES){OUTRES.ids.map(id=>S.pal.get(id)).filter(p=>p&&!outReason(p)&&!Q.out.includes(p.id)).forEach(p=>Q.out.push(p.id));saveQ();render();return;}
+  const card=e.target.closest("[data-out]");if(!card)return;
+  if(e.target.closest("[data-no]")){OUTRES=null;$("outResult").innerHTML="";return;}
+  if(e.target.closest("[data-add]")){const id=card.dataset.out;if(!Q.out.includes(id)){Q.out.push(id);saveQ();}render();}
 });
-$("btnScanOut").addEventListener("click",()=>openScanner({title:"Scan keluar",sub:"Scan QR palet yang diambil",continuous:false,onCode:(txt)=>{
-  const p=parseQR(txt);if(p.err)return {ok:false,html:`GAGAL<small>${esc(p.err)}</small>`};
-  setTimeout(()=>{$("oBatch").value=p.batch;$("oMat").value=p.mat;const ex=p.id&&S.pal.get(p.id);showOut(ex?[ex]:findPal(p.batch,p.mat),`Batch ${esc(p.batch)} no ${esc(p.mat)}`);},50);
-  return {ok:true};
-}}));
 $("oFind").addEventListener("click",()=>{const b=$("oBatch").value.trim(),g=$("oMat").value.trim();
   if(!b){$("outResult").innerHTML=`<div class="msg bad">Isi No Batch (No Material boleh kosong).</div>`;return;}
   if(g&&!matNums(g)){$("outResult").innerHTML=`<div class="msg bad">No Material ditulis seperti 01-14, 07, atau 01-11, 13.</div>`;return;}
   showOut(findPal(b,g,g?null:["simpan"]),g?`Batch ${esc(b)} no ${esc(g)}`:`Batch ${esc(b)} di rak`);});
+async function confirmOut(){
+  const ids=Q.out.filter(id=>{const p=S.pal.get(id);return p&&p.status==="simpan";});
+  if(!ids.length){$("outResult").innerHTML=`<div class="msg bad">Daftar keluar kosong.</div>`;return;}
+  const snap=new Map(ids.map(id=>[id,S.pal.get(id)]));
+  const r=await act({action:"outBatch",ids},"outResult");if(!r.ok)return;
+  OUTRES=null;
+  const locs=(r.done||[]).map(id=>snap.get(id)).filter(Boolean).map(p=>`<span class="loc sm done">${esc(p.lokasi)}</span>`).join(" ");
+  const nf=(r.failed||[]).length;
+  $("outResult").innerHTML=`<div class="msg ok">SUKSES keluar ${(r.done||[]).length} palet. Lokasi dikosongkan:<br><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">${locs}</div></div>`+
+    (nf?`<div class="msg bad">Gagal ${nf}:<br>${failTxt(r.failed)}</div>`:"");
+}
 
 $("btnScanFind").addEventListener("click",()=>openScanner({title:"Scan untuk cari",sub:"Scan QR palet di lapangan",continuous:false,onCode:(txt)=>{
   const p=parseQR(txt);if(p.err)return {ok:false,html:`GAGAL<small>${esc(p.err)}</small>`};
