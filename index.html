@@ -143,26 +143,28 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
 .scanner .btn{background:#26323D;color:#fff;border-color:#33414E}
 .scanner .btn.ok{background:var(--accent);color:#111;border-color:var(--accent)}
 .setup{background:var(--wait-bg);border-radius:12px;padding:14px;margin-bottom:14px;display:grid;gap:8px}
-/* ---------- LABEL CETAK ---------- */
+/* ---------- LABEL CETAK: A4, 4 label per lembar ---------- */
 #printArea{display:none}
-.sheet{width:148mm;height:209.5mm;background:#fff;color:#000;page-break-after:always;break-after:page;overflow:hidden;padding:9mm 8mm;box-sizing:border-box}
+.page{width:210mm;height:297mm;display:grid;grid-template-columns:105mm 105mm;grid-template-rows:148.5mm 148.5mm;page-break-after:always;break-after:page;background:#fff;overflow:hidden}
+.page:last-child{page-break-after:auto;break-after:auto}
+.sheet{width:105mm;height:148.5mm;background:#fff;color:#000;padding:7mm 6mm;box-sizing:border-box;overflow:hidden;outline:0.2mm dashed #aaa;outline-offset:-3mm}
 .lab{width:100%;height:100%;border-collapse:collapse;table-layout:fixed;font-family:Arial,Helvetica,sans-serif;color:#000}
-.lab td{border:0.45mm solid #000;padding:0 2.6mm;vertical-align:middle;text-align:left}
-.lab .g{background:#1C6A3F;color:#fff;font-weight:700;text-align:center;font-size:6mm;line-height:1.15;padding:1.5mm}
-.lab .g.i{font-style:italic;font-size:5.4mm}
-.lab .k{font-size:4.3mm;border-bottom:none;padding-top:1.4mm}
-.lab .v{font-size:6.6mm;font-weight:700;border-top:none;padding-bottom:1.4mm;white-space:nowrap;overflow:hidden}
-.lab .v.sm{font-size:5mm;white-space:normal;line-height:1.1}
-.lab .qr{text-align:center;padding:1.5mm}
+.lab td{border:0.35mm solid #000;padding:0 1.8mm;vertical-align:middle;text-align:left}
+.lab .g{background:#1C6A3F;color:#fff;font-weight:700;text-align:center;font-size:4.3mm;line-height:1.15;padding:1mm}
+.lab .g.i{font-style:italic;font-size:3.8mm}
+.lab .k{font-size:3.1mm;border-bottom:none;padding-top:1mm}
+.lab .v{font-size:4.6mm;font-weight:700;border-top:none;padding-bottom:1mm;white-space:nowrap;overflow:hidden}
+.lab .v.sm{font-size:3.5mm;white-space:normal;line-height:1.1}
+.lab .qr{text-align:center;padding:1mm}
 .lab .qr svg{width:100%;height:auto;display:block;margin:0 auto}
-.lab .qr span{display:block;font-size:2.8mm;margin-top:1.2mm;word-break:break-all}
+.lab .qr span{display:block;font-size:2mm;margin-top:.8mm;word-break:break-all}
 @media print{
   html,body{background:#fff!important}
   body>*:not(#printArea){display:none!important}
   #printArea{display:block!important}
 }
 </style>
-<style>@page{size:A5 portrait;margin:0}</style>
+<style>@page{size:A4 portrait;margin:0}</style>
 </head>
 <body>
 
@@ -235,6 +237,11 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
     </div>
     <div id="cariMsg"></div>
     <div id="cariList"></div>
+    <div class="sec"><h3><span>Antrean pindah (borongan)</span><span id="cntMvQ">0</span></h3>
+      <p class="small" style="margin:0 0 8px">Tambahkan palet dari hasil cari, lalu isi rak tujuan: <b>scan berurutan</b> (palet pertama di antrean dapat rak yang pertama di-scan, dst.) atau <b>ketik kode rak</b> manual. Lalu Konfirmasi.</p>
+      <div id="listMvQ"></div>
+      <div class="acts" style="margin-top:10px"><button class="btn pick" id="btnScanMvTo" disabled>Scan rak tujuan berurutan</button><button class="btn ok" id="btnConfirmMv" disabled>Konfirmasi pindah</button><button class="btn ghost" id="btnClearMv" disabled>Kosongkan</button></div>
+    </div>
   </section>
 
   <!-- PETA -->
@@ -280,12 +287,12 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
       <div id="msgProd"></div>
       <button class="big" id="btnSave">Simpan label</button>
 
-      <div class="sec"><h3><span>Cetak label (A5)</span><span id="prCount"></span></h3>
+      <div class="sec"><h3><span>Cetak label (A4, 4 label per lembar)</span><span id="prCount"></span></h3>
         <div class="form2" style="grid-template-columns:1fr auto;margin-top:0"><input id="hFilter" placeholder="Filter No Batch" autocomplete="off" autocapitalize="characters">
           <label style="display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap"><input type="checkbox" id="hShowAll" style="width:18px;height:18px"> Tampilkan yang sudah dicetak</label></div>
         <div class="acts" style="margin:10px 0"><button class="btn sm" id="hAll">Pilih semua</button><button class="btn sm ghost" id="hNone">Batal pilih</button><button class="btn sm pri" id="hPrint">Cetak terpilih</button></div>
         <div class="tw"><table class="t"><thead><tr><th></th><th>Batch</th><th>Palet</th><th>No Material</th><th>Cetak</th><th></th></tr></thead><tbody id="hBody"></tbody></table></div>
-        <p class="small">Setelan print: kertas A5, Margins None, Scale 100%, centang Background graphics.</p>
+        <p class="small">Setelan print: kertas A4, Margins None, Scale 100%, centang Background graphics.</p>
       </div>
     </div>
 
@@ -388,14 +395,18 @@ function locRule(qc,to,from){
 }
 
 /* ---------- antrean borongan ---------- */
-const Q={inn:[],out:[]};
+const Q={inn:[],out:[],mv:[]};
+let MVT={};                         // id palet -> rak tujuan (antrean pindah)
 let LASTIN=[];
 let OUTRES=null,INRES=null;
-function loadQ(){["inn","out"].forEach(k=>{try{const a=JSON.parse(lsGet(k==="inn"?"sd18qIn":"sd18qOut")||"[]");if(Array.isArray(a))Q[k]=a.filter(x=>typeof x==="string");}catch(e){}});}
-function saveQ(){lsSet("sd18qIn",JSON.stringify(Q.inn));lsSet("sd18qOut",JSON.stringify(Q.out));}
+function loadQ(){[["inn","sd18qIn"],["out","sd18qOut"],["mv","sd18qMv"]].forEach(([k,key])=>{try{const a=JSON.parse(lsGet(key)||"[]");if(Array.isArray(a))Q[k]=a.filter(x=>typeof x==="string");}catch(e){}});
+  try{const t=JSON.parse(lsGet("sd18tMv")||"{}");if(t&&typeof t==="object")MVT=t;}catch(e){}}
+function saveQ(){lsSet("sd18qIn",JSON.stringify(Q.inn));lsSet("sd18qOut",JSON.stringify(Q.out));lsSet("sd18qMv",JSON.stringify(Q.mv));lsSet("sd18tMv",JSON.stringify(MVT));}
 function pruneQ(){
   Q.inn=Q.inn.filter(id=>{const p=S.pal.get(id);return p&&p.status==="label";});
   Q.out=Q.out.filter(id=>{const p=S.pal.get(id);return p&&p.status==="simpan";});
+  Q.mv=Q.mv.filter(id=>{const p=S.pal.get(id);return p&&p.status==="simpan";});
+  Object.keys(MVT).forEach(k=>{if(!Q.mv.includes(k))delete MVT[k];});
   saveQ();
 }
 loadQ();
@@ -446,7 +457,7 @@ async function act(body,el,quiet){
 }
 function failTxt(f){return (f||[]).map(x=>{const p=S.pal.get(x.id);return esc((p?p.batch+" no "+p.mat:x.id)+": "+x.msg);}).join("<br>");}
 
-const SINGLE={receiveBatch:"receive",placeBatch:"place",outBatch:"out"};
+const SINGLE={receiveBatch:"receive",placeBatch:"place",outBatch:"out",moveBatch:"move"};
 async function batchAct(body,el){
   const r=await act(body,null);
   if(r.ok||!/tidak dikenal/i.test(r.msg||"")){if(!r.ok&&el)msg(el,"bad",esc(r.msg));return r;}
@@ -567,7 +578,7 @@ function render(){
   $("listStored").innerHTML=recent.length?recent.map(p=>`<div class="card"><div class="row"><span class="meta">${palTxt(p)}</span><span class="loc sm done">${esc(p.lokasi)}</span></div></div>`).join(""):`<div class="empty">Belum ada.</div>`;
   $("listOut").innerHTML=S.out.length?S.out.map(p=>`<div class="card"><div class="row"><span class="meta">${palTxt(p)}<br><span class="small">${fmtTime(p.tKeluar)}</span></span><span class="loc sm">${esc(p.lokasi||"-")}</span></div></div>`).join(""):`<div class="empty">Belum ada palet keluar.</div>`;
   renderQ();renderInResult();if(OUTRES)renderOutRes();renderInRes();
-  renderCari();renderMap();renderHistory();renderQC();renderPreview();
+  renderCari();renderMv();renderMap();renderHistory();renderQC();renderPreview();
 }
 
 /* =================== ANTREAN BORONGAN (render) =================== */
@@ -636,8 +647,9 @@ function renderCari(){
   if(!res.length){msg("cariMsg","bad","TIDAK DITEMUKAN. Cek lagi No Batch dan No Material.");$("cariList").innerHTML="";return;}
   const inRak=res.filter(p=>p.status==="simpan");
   msg("cariMsg","find",res.length===1?(inRak.length?`Ada di <span class="loc sm find">${esc(res[0].lokasi)}</span>`:esc(where(res[0]))):`${res.length} palet ditemukan, ${inRak.length} di rak. Urut FIFO.`);
-  $("cariList").innerHTML=res.map((p,i)=>`<div class="card" data-cid="${esc(p.id)}"><div class="row"><span class="meta"><span class="num">${i+1}.</span> ${palTxt(p)}<br><span class="small">${esc(p.nama)} · produksi ${fmtDate(p.prod)}</span></span><span>${qcP(p)}</span></div>
-    <div class="row">${p.status==="simpan"?`<span class="loc sm find">${esc(p.lokasi)}</span><button class="btn sm" data-move>Pindah lokasi</button>`:`<span class="small">${esc(where(p))}</span>`}</div></div>`).join("");
+  const addable=inRak.filter(p=>!Q.mv.includes(p.id));
+  $("cariList").innerHTML=(addable.length>1?`<div class="acts" style="margin-bottom:10px"><button class="btn pick" data-mvall>Tambah semua ke antrean pindah (${addable.length})</button></div>`:"")+res.map((p,i)=>`<div class="card" data-cid="${esc(p.id)}"><div class="row"><span class="meta"><span class="num">${i+1}.</span> ${palTxt(p)}<br><span class="small">${esc(p.nama)} · produksi ${fmtDate(p.prod)}</span></span><span>${qcP(p)}</span></div>
+    <div class="row">${p.status==="simpan"?`<span class="loc sm find">${esc(p.lokasi)}</span><button class="btn sm" data-move>Pindah lokasi</button><button class="btn sm pick" data-mvadd ${Q.mv.includes(p.id)?"disabled":""}>${Q.mv.includes(p.id)?"Sudah di antrean":"+ Antrean pindah"}</button>`:`<span class="small">${esc(where(p))}</span>`}</div></div>`).join("");
 }
 ["cBatch","cMat"].forEach(id=>$(id).addEventListener("input",()=>{renderCari();renderMap();}));
 $("cClear").addEventListener("click",()=>{$("cBatch").value="";$("cMat").value="";renderCari();renderMap();});
@@ -653,8 +665,58 @@ function startMove(id,el){
   }});
 }
 $("cariList").addEventListener("click",e=>{
-  if(!e.target.closest("[data-move]"))return;startMove(e.target.closest("[data-cid]").dataset.cid,"cariMsg");
+  if(e.target.closest("[data-mvall]")){
+    findPal($("cBatch").value.trim(),$("cMat").value).filter(p=>p.status==="simpan"&&!Q.mv.includes(p.id)).forEach(p=>Q.mv.push(p.id));
+    saveQ();renderMv();renderCari();return;}
+  const card=e.target.closest("[data-cid]");if(!card)return;
+  if(e.target.closest("[data-mvadd]")){const id=card.dataset.cid;if(!Q.mv.includes(id))Q.mv.push(id);saveQ();renderMv();renderCari();return;}
+  if(e.target.closest("[data-move]"))startMove(card.dataset.cid,"cariMsg");
 });
+
+/* =================== CARI: ANTREAN PINDAH (borongan) =================== */
+function mvErr(id){
+  const p=S.pal.get(id),t=MVT[id];if(!p||!t)return "";
+  const e=checkLoc(p,t,true);if(e)return e;
+  if(Q.mv.some(o=>o!==id&&MVT[o]===t))return t+" dobel dengan palet lain di antrean";
+  return "";
+}
+function renderMv(){
+  const n=Q.mv.length,ready=Q.mv.filter(id=>MVT[id]&&!mvErr(id)).length,noT=Q.mv.filter(id=>!MVT[id]).length;
+  $("cntMvQ").textContent=n;
+  $("btnConfirmMv").disabled=!ready;$("btnConfirmMv").textContent=ready?`Konfirmasi pindah ${ready} palet`:"Konfirmasi pindah";
+  $("btnScanMvTo").disabled=!noT;$("btnClearMv").disabled=!n;
+  if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#listMvQ"))return;
+  $("listMvQ").innerHTML=n?`<div class="tw"><table class="t"><thead><tr><th>#</th><th>Palet</th><th>Dari</th><th>Ke (scan / ketik)</th><th></th></tr></thead><tbody>${Q.mv.map((id,i)=>{const p=S.pal.get(id),e=mvErr(id);
+    return `<tr><td class="num">${i+1}</td><td>${p?palTxt(p):esc(id)}<br>${p?qcP(p):""}</td><td><span class="loc sm">${esc(p?p.lokasi:"-")}</span></td>
+    <td><input data-mvt="${esc(id)}" value="${esc(MVT[id]||"")}" placeholder="FG17-01-09-A" autocomplete="off" autocapitalize="characters" style="padding:6px 8px;font-family:var(--mono);min-width:130px">${e?`<div class="small" style="color:var(--bad)">${esc(e)}</div>`:""}</td>
+    <td><button class="btn sm ghost" data-rmmv="${esc(id)}">Hapus</button></td></tr>`;}).join("")}</tbody></table></div>`
+    :`<div class="empty">Belum ada palet di antrean pindah. Cari palet lalu tekan + Antrean pindah.</div>`;
+}
+$("listMvQ").addEventListener("change",e=>{const i=e.target.closest("[data-mvt]");if(!i)return;const id=i.dataset.mvt,v=i.value.trim(),loc=v?resolveLoc(v):"";
+  MVT[id]=loc;saveQ();if(v&&!loc)msg("cariMsg","bad",esc(locErr(v)));else msg("cariMsg","","");renderMv();});
+$("listMvQ").addEventListener("click",e=>{const b=e.target.closest("[data-rmmv]");if(!b)return;
+  Q.mv=Q.mv.filter(x=>x!==b.dataset.rmmv);delete MVT[b.dataset.rmmv];saveQ();renderMv();renderCari();});
+$("btnClearMv").addEventListener("click",()=>{Q.mv=[];MVT={};saveQ();renderMv();renderCari();});
+function scanMvTo(text){
+  const loc=resolveLoc(text);if(!loc)return {ok:false,html:`GAGAL<small>${esc(locErr(text))}</small>`,short:"GAGAL · "+esc(locErr(text))};
+  const id=Q.mv.find(x=>!MVT[x]);if(!id)return {ok:false,html:`SEMUA SUDAH PUNYA TUJUAN<small>Tekan Konfirmasi</small>`,short:"Semua palet sudah punya tujuan"};
+  const p=S.pal.get(id),tag=`${esc(p.batch)} no ${esc(p.mat)}`;
+  const e=checkLoc(p,loc,true)||(Q.mv.some(o=>MVT[o]===loc)?loc+" sudah dipakai palet lain di antrean":"");
+  if(e)return {ok:false,html:`GAGAL<small>${tag}: ${esc(e)}</small>`,short:`GAGAL · ${tag} · ${esc(e)}`};
+  MVT[id]=loc;saveQ();renderMv();
+  const nx=S.pal.get(Q.mv.find(x=>!MVT[x]));
+  return {ok:true,html:`SUKSES · ${tag} → ${loc}<small>${nx?"Berikutnya: "+esc(nx.batch)+" no "+esc(nx.mat):"Semua sudah punya tujuan, tekan Konfirmasi"}</small>`,short:`${tag} → ${loc}`};
+}
+$("btnScanMvTo").addEventListener("click",()=>openScanner({title:"Scan rak tujuan",sub:"",continuous:true,confirm:true,count:()=>Q.mv.filter(id=>MVT[id]).length,onCode:scanMvTo,onConfirm:confirmMv}));
+async function confirmMv(){
+  const items=Q.mv.filter(id=>MVT[id]&&!mvErr(id)).map(id=>({id,lokasi:MVT[id]}));
+  if(!items.length){msg("cariMsg","bad","Belum ada palet dengan rak tujuan yang valid.");return;}
+  const r=await batchAct({action:"moveBatch",items},"cariMsg");if(!r.ok)return;
+  const done=r.done||[];Q.mv=Q.mv.filter(id=>!done.includes(id));done.forEach(id=>delete MVT[id]);saveQ();renderMv();renderCari();
+  const nf=(r.failed||[]).length;
+  msg("cariMsg",nf?"wait":"ok",`${done.length} palet dipindah.`+(nf?`<br>Gagal ${nf}:<br>${failTxt(r.failed)}`:"")+legacyNote(r));
+}
+$("btnConfirmMv").addEventListener("click",confirmMv);
 $("listMis").addEventListener("click",async e=>{
   const b=e.target.closest("[data-mv]");if(!b)return;const id=b.closest("[data-mid]").dataset.mid,p=S.pal.get(id),rec=D.misRec.get(id);if(!p)return;
   if(b.dataset.mv==="scan")startMove(id,"msgIn");
@@ -1026,7 +1088,7 @@ $("hBody").addEventListener("click",async e=>{
     const r=await act({action:"void",id:p.id,alasan:al},"msgProd");if(r.ok)msg("msgProd","wait",`Label ${esc(p.batch)} palet ${esc(p.palet)} dibatalkan.`);};
 });
 
-/* ---------- cetak label A5 (tanpa kotak Inkubasi/Release/Reject) ---------- */
+/* ---------- cetak label A4 x4 (tanpa kotak Inkubasi/Release/Reject) ---------- */
 function qrSvg(text){
   if(!window.qrcode)return `<div style="font-size:3mm">QR gagal dimuat</div>`;
   const q=qrcode(0,"M");q.addData(text);q.make();const n=q.getModuleCount();let d="";
@@ -1050,7 +1112,8 @@ function labelHtml(p){
   </table>`;
 }
 function printLabels(list){
-  $("printArea").innerHTML=list.map(p=>`<div class="sheet">${labelHtml(p)}</div>`).join("");
+  let pg="";for(let i=0;i<list.length;i+=4)pg+=`<div class="page">${list.slice(i,i+4).map(p=>`<div class="sheet">${labelHtml(p)}</div>`).join("")}</div>`;
+  $("printArea").innerHTML=pg;
   setTimeout(()=>window.print(),400);
 }
 
