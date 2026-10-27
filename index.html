@@ -10,10 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap">
 <script>
-/* =====================================================================
-   GANTI BARIS DI BAWAH INI dengan link Web App Google Apps Script Anda
-   (berakhiran /exec), di antara tanda kutip.
-   ===================================================================== */
+/* GANTI link di bawah dengan link Web App Google Apps Script Anda (berakhiran /exec). */
 const API_URL = "https://script.google.com/macros/s/AKfycbw_EHZ-aSY8A9Sav6Hf63WKiEaDJ1w1rEB5cAuaMmZGYI1HXOMYSspw4-ExPcopPw2z/exec";
 </script>
 <style>
@@ -23,13 +20,15 @@ const API_URL = "https://script.google.com/macros/s/AKfycbw_EHZ-aSY8A9Sav6Hf63WK
   --ok:#22663B; --ok-bg:#D3ECDA; --wait-bg:#FFE9A8; --bad:#A3271A; --bad-bg:#FAD6CF;
   --find:#9A4512; --find-bg:#F9D3B6; --ink-bg:#D6E4F5; --ink-t:#1D4E89; --noloc:#8D96A0; --empty:#FFFFFF;
   --pick:#6D28D9; --pick-bg:#E6DAFA; --pick-t:#4C1D95; --pick-ink:#FFFFFF;
+  --ov:#0E7490; --ov-bg:#CFF0F7;
   --ui:"Barlow",system-ui,-apple-system,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root{
   --bg:#12171C; --surface:#1B232B; --ink:#E8EDF2; --muted:#9BA6B1; --line:#2D3842; --head:#0B1015;
   --ok:#8FD3A4; --ok-bg:#1E3B29; --wait-bg:#4A3D0D; --bad:#F2A497; --bad-bg:#4A1F1A;
   --find:#F6B48A; --find-bg:#4D2A14; --ink-bg:#1B3350; --ink-t:#A9C8F0; --noloc:#3A444E; --empty:#222C35;
-  --pick:#9D6BFF; --pick-bg:#34234F; --pick-t:#D8C2FF; --pick-ink:#12081F; color-scheme:dark}}
+  --pick:#9D6BFF; --pick-bg:#34234F; --pick-t:#D8C2FF; --pick-ink:#12081F;
+  --ov:#22D3EE; --ov-bg:#0E3A44; color-scheme:dark}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;min-height:100%}
@@ -76,8 +75,10 @@ input,select,textarea{font:500 16px var(--ui);color:var(--ink);background:var(--
 .loc.done{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
 .loc.find{background:var(--find-bg);color:var(--find);border-color:var(--find)}
 .loc.pick{background:var(--pick-bg);color:var(--pick-t);border-color:var(--pick)}
+.loc.ov{background:var(--ov-bg);color:var(--ov);border-color:var(--ov)}
 .qc{display:inline-block;font:700 11px var(--ui);letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:999px}
-.qc.Release{background:var(--ok-bg);color:var(--ok)} .qc.Inkubasi{background:var(--ink-bg);color:var(--ink-t)} .qc.Reject{background:var(--bad-bg);color:var(--bad)}
+.qc.Release{background:var(--ok-bg);color:var(--ok)} .qc.Inkubasi{background:var(--ink-bg);color:var(--ink-t)} .qc.Reject{background:var(--bad-bg);color:var(--bad)} .qc.Campur{background:var(--wait-bg);color:var(--ink)}
+.ovb{display:inline-block;font:700 10px var(--ui);letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:999px;background:var(--ov-bg);color:var(--ov);border:1px solid var(--ov);margin-left:6px;vertical-align:1px}
 .acts{display:flex;flex-wrap:wrap;gap:8px}
 .acts .btn{flex:1 1 auto}
 .empty{color:var(--muted);font-size:14px;padding:10px 0}
@@ -93,6 +94,7 @@ input,select,textarea{font:500 16px var(--ui);color:var(--ink);background:var(--
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
 .info{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--muted)}
 .info b{color:var(--ink)}
+.info ul{margin:6px 0 0;padding-left:18px}
 table.t{width:100%;border-collapse:collapse;font-size:14px}
 table.t th,table.t td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
 table.t th{font-size:12px;color:var(--muted);font-weight:600}
@@ -107,11 +109,18 @@ table.t th{font-size:12px;color:var(--muted);font-weight:600}
 .cell{width:30px;height:24px;flex:none;border-radius:3px;border:1px solid var(--line);background:var(--empty);font:600 9px var(--mono);display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;padding:0}
 .cell.sR{background:var(--ok-bg);border-color:transparent;color:var(--ok)}
 .cell.sI{background:var(--ink-bg);border-color:transparent;color:var(--ink-t)}
+.cell.sC{background:var(--wait-bg);border-color:transparent;color:var(--ink)}
 .cell.sX{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
 .cell.r{background:var(--accent);border-color:#1B1F24;color:#1B1F24;font-weight:700}
 .cell.f{background:#C2571A;color:#fff;border-color:transparent}
 .cell.pk{background:var(--pick);color:var(--pick-ink);border-color:var(--pick-t);border-width:2px;font-weight:700}
 .cell.x{background:var(--noloc);border-color:transparent;cursor:default}
+.cell.ov{border-color:var(--ov);box-shadow:inset 0 0 0 2px var(--ov)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-width:46px;height:38px;border-radius:8px;border:2px solid transparent;font:700 14px var(--mono);cursor:pointer;padding:0 8px}
+.chip.cR{background:var(--ok-bg);color:var(--ok)} .chip.cI{background:var(--ink-bg);color:var(--ink-t)} .chip.cX{background:var(--bad-bg);color:var(--bad)}
+.chip.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--accent)}
+.chip.on::after{content:" ✓"}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
 nav.tabs .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
 nav.tabs button{border:0;background:none;padding:10px 2px 12px;font:600 13px var(--ui);color:var(--muted);cursor:pointer;display:grid;justify-items:center;gap:3px}
@@ -134,7 +143,7 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
 .scanner .btn{background:#26323D;color:#fff;border-color:#33414E}
 .scanner .btn.ok{background:var(--accent);color:#111;border-color:var(--accent)}
 .setup{background:var(--wait-bg);border-radius:12px;padding:14px;margin-bottom:14px;display:grid;gap:8px}
-/* ---------- LABEL CETAK (layout C) ---------- */
+/* ---------- LABEL CETAK ---------- */
 #printArea{display:none}
 .sheet{width:148mm;height:209.5mm;background:#fff;color:#000;page-break-after:always;break-after:page;overflow:hidden;padding:9mm 8mm;box-sizing:border-box}
 .lab{width:100%;height:100%;border-collapse:collapse;table-layout:fixed;font-family:Arial,Helvetica,sans-serif;color:#000}
@@ -147,8 +156,6 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
 .lab .qr{text-align:center;padding:1.5mm}
 .lab .qr svg{width:100%;height:auto;display:block;margin:0 auto}
 .lab .qr span{display:block;font-size:2.8mm;margin-top:1.2mm;word-break:break-all}
-.lab .st{text-align:center;font-weight:700;font-size:5mm;border-bottom:none}
-.lab .box{border-top:none}
 @media print{
   html,body{background:#fff!important}
   body>*:not(#printArea){display:none!important}
@@ -176,15 +183,23 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
   <!-- MASUK -->
   <section id="tab-masuk">
     <h2>Barang masuk</h2>
-    <p class="hint">Scan QR label semua palet dulu (kamera tetap menyala), lalu klik <b>Konfirmasi</b>. Setelah dikonfirmasi, rekomendasi tempat peletakan semua palet muncul.</p>
+    <p class="hint">Scan QR label semua palet dulu (kamera tetap menyala), lalu klik <b>Konfirmasi</b>. Kalau QR tidak bisa dibaca, isi No Batch dan No Material secara manual. Setelah dikonfirmasi, rekomendasi tempat peletakan muncul.</p>
     <button class="big" id="btnScanIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>Scan QR palet masuk</button>
+    <div class="or">atau isi manual</div>
+    <div class="form2">
+      <label>No Batch<input id="iBatch" placeholder="BOLF382056" autocomplete="off" autocapitalize="characters"></label>
+      <label>No Material (opsional)<input id="iMat" placeholder="01-14 atau 07" autocomplete="off"></label>
+      <button class="btn pri" id="iFind">Cari</button>
+    </div>
+    <div id="inFindResult"></div>
     <div id="msgIn"></div>
-    <div class="sec"><h3><span>Antrean scan (borongan)</span><span id="cntInQ">0</span></h3>
+    <div class="sec"><h3><span>Antrean masuk (borongan)</span><span id="cntInQ">0</span></h3>
       <div id="listInQ"></div>
       <div class="acts" style="margin-top:10px"><button class="btn ok" id="btnConfirmIn" disabled>Konfirmasi</button><button class="btn ghost" id="btnClearIn" disabled>Kosongkan</button></div>
     </div>
     <div id="inResult"></div>
     <div class="sec"><h3><span>Menunggu ditaruh</span><span id="cntWait">0</span></h3><div id="listWait"></div></div>
+    <div class="sec" id="secMis" hidden><h3><span>Perlu dipindahkan (status QC berubah)</span><span id="cntMis">0</span></h3><div id="listMis"></div></div>
     <div class="sec"><h3><span>Baru disimpan</span></h3><div id="listStored"></div></div>
   </section>
 
@@ -226,7 +241,7 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
   <section id="tab-peta" hidden>
     <h2>Peta rak</h2>
     <div class="seg" id="segGud"></div>
-    <div class="legend"><span><i style="background:var(--accent);border-color:#1B1F24"></i>Taruh di sini</span><span><i style="background:var(--pick);border-color:var(--pick-t)"></i>Picking (akan keluar)</span><span><i style="background:var(--ok-bg)"></i>Release</span><span><i style="background:var(--ink-bg)"></i>Inkubasi</span><span><i style="background:var(--bad-bg);border-color:var(--bad)"></i>Reject</span><span><i style="background:#C2571A"></i>Hasil cari</span><span><i></i>Kosong</span></div>
+    <div class="legend"><span><i style="background:var(--accent);border-color:#1B1F24"></i>Taruh di sini</span><span><i style="background:var(--pick);border-color:var(--pick-t)"></i>Picking (akan keluar)</span><span><i style="background:var(--ok-bg)"></i>Release</span><span><i style="background:var(--ink-bg)"></i>Inkubasi</span><span><i style="background:var(--wait-bg)"></i>Campur</span><span><i style="background:var(--bad-bg);border-color:var(--bad)"></i>Reject</span><span><i style="background:#C2571A"></i>Hasil cari</span><span><i style="box-shadow:inset 0 0 0 2px var(--ov);border-color:var(--ov)"></i>Overstock (beda gudang asal)</span><span><i></i>Kosong</span></div>
     <div id="cellInfo" class="msg wait" hidden></div>
     <div class="mapbox" id="map"></div>
   </section>
@@ -277,12 +292,14 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
     <!-- QC -->
     <div id="adm-qc" hidden>
       <h2>Status QC</h2>
-      <p class="hint">Pilih palet, lalu ubah statusnya. Setelah itu cap label fisik sesuai status di sistem.</p>
+      <p class="hint">Scan QR atau isi No Batch. <b>Centang palet</b> untuk memilih semua isinya, atau <b>ketuk nomor material</b> tertentu kalau hanya sebagian yang statusnya berbeda. Lalu tekan Release, Reject, atau Inkubasi.</p>
+      <div class="info" style="margin-bottom:10px">Kalau sebagian isi palet di-<b>Reject</b>, item itu otomatis <b>dipisah jadi palet baru</b> (nomor palet berakhiran R) yang harus ditaruh di rak reject. Cetak ulang label kedua palet.</div>
       <button class="big dark" id="btnScanQC">Scan QR palet</button>
       <div class="form2" style="grid-template-columns:1fr auto"><label>No Batch<input id="qBatch" autocomplete="off" autocapitalize="characters" placeholder="BOLF382043"></label><button class="btn ghost" id="qClear">Hapus</button></div>
       <div id="qcMsg"></div>
       <div class="acts" style="margin:10px 0"><button class="btn sm" id="qAll">Pilih semua</button><button class="btn sm ghost" id="qNone">Batal pilih</button></div>
-      <div class="tw"><table class="t"><thead><tr><th></th><th>Palet</th><th>No Mat</th><th>Posisi</th><th>QC</th></tr></thead><tbody id="qBody"></tbody></table></div>
+      <div id="qcList"></div>
+      <div class="small" id="qSum" style="margin-top:6px"></div>
       <div class="acts" style="margin-top:12px"><button class="btn ok" data-qc="Release">Release</button><button class="btn red" data-qc="Reject">Reject</button><button class="btn blue" data-qc="Inkubasi">Inkubasi</button></div>
     </div>
 
@@ -291,6 +308,16 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
       <h2>Pengaturan</h2>
       <div class="info" id="apiInfo"></div>
       <div class="acts" style="margin-top:10px"><button class="btn" id="btnChangeApi">Ganti link server</button><button class="btn" id="btnReloadMaster">Muat ulang master data</button></div>
+      <div class="sec"><h3><span>Aturan pemindahan rak</span></h3>
+        <div class="info"><ul>
+          <li><b>Rak Reject</b>: hanya palet berstatus Reject. Palet Reject tidak boleh ditaruh di rak lain.</li>
+          <li><b>Keluar dari rak Reject</b>: hanya setelah status QC diubah (Release / Inkubasi) lewat Admin &gt; QC. Setelah itu muncul di daftar "Perlu dipindahkan".</li>
+          <li><b>Rak Preloading</b>: hanya palet Release (semua isi Release). Palet Inkubasi / Campur tidak boleh.</li>
+          <li><b>Preloading ke rak Simpan</b>: boleh (dikembalikan). Kalau status QC palet di preloading berubah bukan Release, wajib dikembalikan ke rak Simpan.</li>
+          <li><b>Reject ke Preloading</b>: tidak bisa langsung. Ubah QC ke Release dulu.</li>
+          <li><b>Gedung</b>: bebas. Palet boleh di SD17 atau SD18 (overstock), hanya diberi tanda warna biru-hijau.</li>
+        </ul></div>
+      </div>
       <div class="sec"><h3><span>Data contoh</span></h3>
         <p class="small">Palet bertanda contoh di Google Sheet hanya untuk demo. Hapus kalau mau mulai dari gudang kosong.</p>
         <button class="btn warn" id="btnReset">Hapus data contoh</button> <span id="resetMsg" class="small"></span>
@@ -331,11 +358,12 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
 const $=(id)=>document.getElementById(id);
 const esc=(s)=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const pad=(n)=>String(n).padStart(2,"0");
+const palNum=(p)=>parseInt(p.palet,10)||0;
 const LVORD="ABCDEFG";
-const M={produk:[],lokasi:[],rak:[],set:{}};          // master
-const L=new Map();                                   // kode lokasi -> info
-const LINK=new Map();                                // ID file Drive (QR label rak) -> kode lokasi
-/** Ubah hasil scan label rak menjadi kode lokasi. Mengenali: kode (FG17-01-09-A, spasi/garis miring/tanpa tanda), atau link PDF Drive. */
+const M={produk:[],lokasi:[],rak:[],set:{}};
+const L=new Map();
+const LINK=new Map();
+let GEDS=[];
 function resolveLoc(txt){
   const t=String(txt||"").trim();
   const m=t.match(/\/d\/([A-Za-z0-9_-]{10,})/)||t.match(/[?&]id=([A-Za-z0-9_-]{10,})/);
@@ -346,15 +374,23 @@ function resolveLoc(txt){
   return "";
 }
 function locErr(txt){return /drive\.google|\/d\//.test(String(txt))?"Label rak ini (link Drive) belum terdaftar di Master Lokasi kolom H (Link PDF Lokasi).":"Bukan kode rak yang dikenal: "+String(txt).slice(0,60);}
-let ORDER={};                                        // gudang|fungsi -> [kode lokasi berurutan]
+let ORDER={};
 const S={pal:new Map(),out:[],batal:[],cari:new Set(),gud:"SD18"};
 const lsGet=(k)=>{try{return localStorage.getItem(k);}catch(e){return null;}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
 
-/* ---------- antrean borongan (tersimpan di perangkat) ---------- */
-const Q={inn:[],out:[]};            // inn: id palet yang sudah di-scan masuk (belum dikonfirmasi) · out: id palet di Daftar keluar (Picking)
-let LASTIN=[];                      // id palet yang baru dikonfirmasi masuk (untuk tabel rekomendasi)
-let OUTRES=null;                    // hasil pencarian manual keluar
+/* ---------- aturan rak (sama dengan server) ---------- */
+function locRule(qc,to,from){
+  if(to==="Reject"&&qc!=="Reject")return "Rak reject hanya untuk palet Reject";
+  if(qc==="Reject"&&to!=="Reject")return from==="Reject"?"Palet masih Reject. Ubah status QC dulu (Admin > QC) sebelum dipindah dari rak reject":"Palet REJECT harus di rak reject";
+  if(to==="Preloading"&&qc!=="Release")return `Rak preloading hanya untuk palet Release (status: ${qc})`;
+  return "";
+}
+
+/* ---------- antrean borongan ---------- */
+const Q={inn:[],out:[]};
+let LASTIN=[];
+let OUTRES=null,INRES=null;
 function loadQ(){["inn","out"].forEach(k=>{try{const a=JSON.parse(lsGet(k==="inn"?"sd18qIn":"sd18qOut")||"[]");if(Array.isArray(a))Q[k]=a.filter(x=>typeof x==="string");}catch(e){}});}
 function saveQ(){lsSet("sd18qIn",JSON.stringify(Q.inn));lsSet("sd18qOut",JSON.stringify(Q.out));}
 function pruneQ(){
@@ -373,7 +409,7 @@ function send(body){const p=queue.then(()=>apiPost(body));queue=p.catch(()=>{});
 const ts=(v)=>{if(!v)return 0;const t=Date.parse(String(v).replace(" ","T"));return isNaN(t)?0:t;};
 function fromRow(o){return {id:o.ID,item:o.Item,nama:o.NamaProduk,batch:o.Batch,palet:o.NoPalet,mat:o.NoMaterial,matA:+o.MatAwal,matZ:+o.MatAkhir,
   jumlah:o.Jumlah,satuan:o.Satuan,gudang:o.Gudang,prod:o.TglProduksi,exp:o.TglKadaluarsa,lot:o.NoLot,mesin:o.KodeMesin,kemas:o.WaktuKemas,
-  ket:o.Keterangan,oleh:o.DiinputOleh,qr:o.QR,status:o.Status,qc:o.StatusQC||"Inkubasi",lokasi:o.Lokasi,alasan:o.AlasanBatal,
+  ket:o.Keterangan,oleh:o.DiinputOleh,qr:o.QR,status:o.Status,qc:o.StatusQC||"Inkubasi",qcItem:o.QCItem||"",lokasi:o.Lokasi,alasan:o.AlasanBatal,
   tLabel:ts(o.WaktuLabel),tMasuk:ts(o.WaktuMasuk),tSimpan:ts(o.WaktuSimpan),tKeluar:ts(o.WaktuKeluar),
   nums:matNums(o.NoMaterial)||[],cetak:+o.JmlCetak||0,tCetak:ts(o.WaktuCetak)};}
 function applyData(d){if(!d)return;const m=new Map();(d.rows||[]).forEach(o=>{const p=fromRow(o);m.set(p.id,p);});
@@ -387,7 +423,7 @@ function applyMaster(m){
   ORDER={};
   [...L.values()].sort((a,b)=>a.urutan-b.urutan||+a.rak-+b.rak||a.li-b.li||+a.kol-+b.kol)
     .forEach(x=>{const k=x.ged+"|"+x.fungsi;(ORDER[k]=ORDER[k]||[]).push(x.code);});
-  const geds=[...new Set(M.lokasi.map(x=>x[1]))].sort();
+  const geds=[...new Set(M.lokasi.map(x=>x[1]))].sort();GEDS=geds;
   if(!geds.includes(S.gud))S.gud=geds[geds.length-1]||"SD18";
   $("segGud").innerHTML=geds.map(g=>`<button data-gud="${g}" aria-pressed="${g===S.gud}">${g}</button>`).join("");
   $("pItem").innerHTML=M.produk.map(p=>`<option value="${esc(p.item)}">${esc(p.item)} — ${esc(p.nama)}</option>`).join("");
@@ -408,10 +444,8 @@ async function act(body,el,quiet){
   catch(e){const m="Gagal tersambung ke server. Cek internet lalu coba lagi.";if(el)msg(el,"bad",m);return {ok:false,msg:m};}
   finally{if(!quiet)$("busy").hidden=true;}
 }
-/** Teks daftar palet yang gagal diproses server pada aksi borongan. */
 function failTxt(f){return (f||[]).map(x=>{const p=S.pal.get(x.id);return esc((p?p.batch+" no "+p.mat:x.id)+": "+x.msg);}).join("<br>");}
 
-/** Aksi borongan. Kalau server (code.gs) belum di-Deploy versi baru ("Aksi tidak dikenal"), otomatis diproses satu per satu. */
 const SINGLE={receiveBatch:"receive",placeBatch:"place",outBatch:"out"};
 async function batchAct(body,el){
   const r=await act(body,null);
@@ -434,9 +468,6 @@ const legacyNote=(r)=>r&&r.legacy?`<br><span class="small">Server masih versi la
 const ddmmyyyy=(iso)=>{if(!iso)return"";const [y,m,d]=String(iso).split("-");return `${d}/${m}/${y}`;};
 function toISO(s){let m=String(s).match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);if(m)return `${m[3]}-${pad(m[2])}-${pad(m[1])}`;
   m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?s:"";}
-function parseRange(s){const t=String(s||"").trim().replace(/\s/g,"").replace(/[–—]/g,"-");
-  let m=t.match(/^(\d{1,5})-(\d{1,5})$/);if(m)return {text:t,a:+m[1],z:+m[2]};
-  m=t.match(/^(\d{1,5})$/);if(m)return {text:t,a:+m[1],z:+m[1]};return null;}
 const matText=(a,z)=>a===z?pad(a):`${pad(a)}-${pad(z)}`;
 function matNums(txt){
   const out=[];let bad=false;
@@ -459,7 +490,6 @@ function parseQR(raw){
     if(!f[2]||!f[3]||!matNums(f[4]))return {err:"QR label tidak lengkap"};
     return {id:makeId(f[2],f[3]),item:f[1],batch:f[2].toUpperCase(),palet:pad(f[3]),mat:normMat(f[4])};
   }
-  // format lain: kenali pola batch + nomor material
   const toks=t.split(/[|;\t\r\n]+/).map(x=>x.trim()).filter(Boolean);
   let batch="",mat="";
   for(const k of toks){
@@ -477,51 +507,66 @@ function findPal(batch,matStr,statuses,exact){
   if(q&&!qn)return [];
   return [...S.pal.values()].filter(p=>(!statuses||statuses.includes(p.status))&&String(p.batch).toUpperCase()===b&&
     (!q||p.mat===qt||(!exact&&qn.every(n=>p.nums.includes(n)))))
-    .sort((a,c)=>(a.prod||"").localeCompare(c.prod||"")||(+a.palet||0)-(+c.palet||0));
+    .sort((a,c)=>(a.prod||"").localeCompare(c.prod||"")||palNum(a)-palNum(c));
 }
 
 /* =================== turunan & rekomendasi =================== */
-let D={occ:new Map(),wait:[],stored:[],rek:new Map(),rekLoc:new Map(),pick:new Map(),free:0};
+let D={occ:new Map(),wait:[],stored:[],rek:new Map(),rekLoc:new Map(),pick:new Map(),free:0,mis:[],misRec:new Map()};
+/** Lokasi kosong pertama untuk palet: gedung asal dulu, kalau penuh pindah ke gedung lain (overstock). */
+function freeLoc(p,used){
+  const key=p.qc==="Reject"?"Reject":"Simpan",home=p.gudang||"SD18";
+  const gs=[home,...GEDS.filter(g=>g!==home)];
+  for(const g of gs){const list=ORDER[g+"|"+key]||[];for(const c of list)if(!used.has(c))return c;}
+  return null;
+}
 function derive(){
   const occ=new Map(),wait=[],stored=[];
   for(const p of S.pal.values()){if(p.status==="simpan"&&p.lokasi){occ.set(p.lokasi,p.id);stored.push(p);}else if(p.status==="tunggu")wait.push(p);}
   const ord=(id)=>{const i=LASTIN.indexOf(id);return i<0?1e9:i;};
   wait.sort((a,b)=>a.tMasuk-b.tMasuk||ord(a.id)-ord(b.id)||a.id.localeCompare(b.id));
-  const used=new Set(occ.keys()),rek=new Map(),rekLoc=new Map(),ptr={};
-  wait.forEach((p,i)=>{
-    const key=(p.gudang||"SD18")+"|"+(p.qc==="Reject"?"Reject":"Simpan"),list=ORDER[key]||[];
-    let j=ptr[key]||0;while(j<list.length&&used.has(list[j]))j++;
-    const loc=list[j]||null;ptr[key]=j+1;if(loc){used.add(loc);rekLoc.set(loc,i+1);}rek.set(p.id,loc);
-  });
+  const used=new Set(occ.keys()),rek=new Map(),rekLoc=new Map();
+  wait.forEach((p,i)=>{const loc=freeLoc(p,used);if(loc){used.add(loc);rekLoc.set(loc,{n:i+1,p});}rek.set(p.id,loc);});
+  const mis=stored.filter(p=>{const x=L.get(p.lokasi);return x&&locRule(p.qc,x.fungsi,x.fungsi);});
+  const misRec=new Map();mis.forEach(p=>{const loc=freeLoc(p,used);if(loc){used.add(loc);misRec.set(p.id,loc);}});
   const pick=new Map();Q.out.forEach((id,i)=>{const p=S.pal.get(id);if(p&&p.status==="simpan"&&p.lokasi)pick.set(p.lokasi,i+1);});
-  const free=(ORDER["SD17|Simpan"]||[]).concat(ORDER["SD18|Simpan"]||[]).filter(c=>!occ.has(c)).length;
-  return {occ,wait,stored,rek,rekLoc,pick,free};
+  let free=0;Object.keys(ORDER).forEach(k=>{if(k.endsWith("|Simpan"))free+=ORDER[k].filter(c=>!occ.has(c)).length;});
+  return {occ,wait,stored,rek,rekLoc,pick,free,mis,misRec};
 }
 const fmtDate=(iso)=>iso?ddmmyyyy(iso):"-";
 const fmtTime=(t)=>{if(!t)return"";const d=new Date(t);return d.toLocaleDateString("id-ID",{day:"2-digit",month:"short"})+" "+d.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});};
 function msg(el,cls,text){$(el).innerHTML=text?`<div class="msg ${cls}">${text}</div>`:"";}
 const qcB=(q)=>`<span class="qc ${esc(q)}">${esc(q)}</span>`;
-const palTxt=(p)=>`<b>${esc(p.batch)}</b> · palet <span class="mono">${esc(p.palet)}</span> · no <span class="mono">${esc(p.mat)}</span>`;
+const qcP=(p)=>qcB(p.qc)+(p.qc==="Campur"&&p.qcItem?`<div class="small">${esc(p.qcItem)}</div>`:"");
+const ovB=(p)=>{if(p.status!=="simpan"||!p.lokasi)return"";const x=L.get(p.lokasi);return x&&p.gudang&&x.ged!==p.gudang?`<span class="ovb">Overstock ${esc(x.ged)}</span>`:"";};
+const palTxt=(p)=>`<b>${esc(p.batch)}</b> · palet <span class="mono">${esc(p.palet)}</span> · no <span class="mono">${esc(p.mat)}</span>${ovB(p)}`;
 const where=(p)=>p.status==="label"?"Belum diterima gudang":p.status==="tunggu"?"Menunggu ditaruh":(p.lokasi||"-");
 
 function render(){
   D=derive();
   $("stTerisi").textContent=D.occ.size;$("stKosong").textContent=D.free;$("stTunggu").textContent=D.wait.length;
   $("cntWait").textContent=D.wait.length;
-  $("listWait").innerHTML=D.wait.length?D.wait.map((p,i)=>{const loc=D.rek.get(p.id);
+  $("listWait").innerHTML=D.wait.length?D.wait.map((p,i)=>{const loc=D.rek.get(p.id),x=loc&&L.get(loc),ov=x&&p.gudang&&x.ged!==p.gudang;
     return `<div class="card" data-id="${esc(p.id)}">
-      <div class="row"><span class="num">#${i+1} · ${esc(p.gudang)}</span>${qcB(p.qc)}</div>
+      <div class="row"><span class="num">#${i+1} · ${esc(p.gudang)}</span><span>${qcP(p)}</span></div>
       <div class="meta">${palTxt(p)}<br><span class="small">${esc(p.nama)}</span></div>
-      <div class="row"><span class="small">Taruh di</span>${loc?`<span class="loc">${loc}</span>`:`<span class="msg bad" style="margin:0">Rak penuh</span>`}</div>
+      <div class="row"><span class="small">Taruh di</span>${loc?`<span><span class="loc ${ov?"ov":""}">${loc}</span>${ov?`<span class="ovb">Overstock ${esc(x.ged)}</span>`:""}</span>`:`<span class="msg bad" style="margin:0">Rak penuh</span>`}</div>
       <div data-confirm></div>
       <div class="acts"><button class="btn pri" data-act="rak" ${loc?"":"disabled"}>Scan label rak</button>
         <button class="btn" data-act="place" ${loc?"":"disabled"}>Sudah ditaruh</button>
         <button class="btn ghost" data-act="cancel">Batal terima</button></div></div>`;}).join("")
     :`<div class="empty">Tidak ada palet yang menunggu ditaruh.</div>`;
+  $("secMis").hidden=!D.mis.length;$("cntMis").textContent=D.mis.length;
+  $("listMis").innerHTML=D.mis.map(p=>{const x=L.get(p.lokasi),why=locRule(p.qc,x.fungsi,x.fungsi),rec=D.misRec.get(p.id);
+    return `<div class="card" data-mid="${esc(p.id)}">
+      <div class="row"><span class="num">Sekarang di ${esc(p.lokasi)} (rak ${esc(x.fungsi)})</span><span>${qcP(p)}</span></div>
+      <div class="meta">${palTxt(p)}</div>
+      <div class="msg bad" style="margin:0">${esc(why)}</div>
+      <div class="row"><span class="small">Pindah ke</span>${rec?`<span class="loc">${rec}</span>`:`<span class="msg bad" style="margin:0">Rak penuh</span>`}</div>
+      <div class="acts"><button class="btn pri" data-mv="scan">Scan label rak</button><button class="btn" data-mv="ok" ${rec?"":"disabled"}>Sudah dipindah</button></div></div>`;}).join("");
   const recent=[...D.stored].sort((a,b)=>b.tSimpan-a.tSimpan).slice(0,5);
   $("listStored").innerHTML=recent.length?recent.map(p=>`<div class="card"><div class="row"><span class="meta">${palTxt(p)}</span><span class="loc sm done">${esc(p.lokasi)}</span></div></div>`).join(""):`<div class="empty">Belum ada.</div>`;
   $("listOut").innerHTML=S.out.length?S.out.map(p=>`<div class="card"><div class="row"><span class="meta">${palTxt(p)}<br><span class="small">${fmtTime(p.tKeluar)}</span></span><span class="loc sm">${esc(p.lokasi||"-")}</span></div></div>`).join(""):`<div class="empty">Belum ada palet keluar.</div>`;
-  renderQ();renderInResult();if(OUTRES)renderOutRes();
+  renderQ();renderInResult();if(OUTRES)renderOutRes();renderInRes();
   renderCari();renderMap();renderHistory();renderQC();renderPreview();
 }
 
@@ -532,13 +577,13 @@ function renderQ(){
   $("btnConfirmIn").disabled=!ni;$("btnConfirmIn").textContent=ni?`Konfirmasi ${ni} palet · tampilkan rekomendasi`:"Konfirmasi";
   $("btnClearIn").disabled=!ni;
   $("listInQ").innerHTML=ni?`<div class="tw"><table class="t"><thead><tr><th>#</th><th>Palet</th><th>QC</th><th></th></tr></thead><tbody>${Q.inn.map((id,i)=>{const p=S.pal.get(id);
-    return `<tr><td class="num">${i+1}</td><td>${p?palTxt(p):esc(id)}</td><td>${p?qcB(p.qc):""}</td><td><button class="btn sm ghost" data-rmin="${esc(id)}">Hapus</button></td></tr>`;}).join("")}</tbody></table></div>`
-    :`<div class="empty">Belum ada palet di-scan. Tekan Scan QR palet masuk.</div>`;
+    return `<tr><td class="num">${i+1}</td><td>${p?palTxt(p):esc(id)}</td><td>${p?qcP(p):""}</td><td><button class="btn sm ghost" data-rmin="${esc(id)}">Hapus</button></td></tr>`;}).join("")}</tbody></table></div>`
+    :`<div class="empty">Belum ada palet di antrean. Scan QR atau isi manual.</div>`;
   $("cntOutQ").textContent=no;
   $("btnConfirmOut").disabled=!no;$("btnConfirmOut").textContent=no?`Konfirmasi keluar ${no} palet`:"Konfirmasi keluar";
   $("btnMapOut").disabled=!no;$("btnClearOut").disabled=!no;
   $("listOutQ").innerHTML=no?Q.out.map((id,i)=>{const p=S.pal.get(id);
-    return `<div class="card"><div class="row"><span class="num">Picking #${i+1}</span>${p?qcB(p.qc):""}</div>
+    return `<div class="card"><div class="row"><span class="num">Picking #${i+1}</span>${p?qcP(p):""}</div>
       <div class="meta">${p?palTxt(p):esc(id)}${p?`<br><span class="small">${esc(p.nama)} · produksi ${fmtDate(p.prod)}</span>`:""}</div>
       <div class="row"><span class="small">Ambil dari</span><span class="loc pick">${esc(p?p.lokasi:"-")}</span></div>
       <div class="acts"><button class="btn sm ghost" data-rmout="${esc(id)}">Hapus dari daftar</button></div></div>`;}).join("")
@@ -551,7 +596,7 @@ function renderInResult(){
   $("inResult").innerHTML=`<div class="sec"><h3><span>Rekomendasi peletakan</span><span>${items.length-nw} dari ${items.length} sudah ditaruh</span></h3>
     <p class="small" style="margin:0 0 8px">Taruh palet di lokasi kuning, lalu <b>ceklis</b> satu per satu. Di peta, kotak kuning = taruh di sini.</p>
     <div class="tw"><table class="t"><thead><tr><th>#</th><th>Palet</th><th>QC</th><th>Taruh di</th><th>Ditaruh</th></tr></thead><tbody>${items.map((p,i)=>{const done=p.status==="simpan",loc=done?p.lokasi:D.rek.get(p.id);
-      return `<tr><td class="num">${i+1}</td><td>${palTxt(p)}</td><td>${qcB(p.qc)}</td><td>${loc?`<span class="loc sm ${done?"done":""}">${esc(loc)}</span>`:`<span class="qc Reject">Rak penuh</span>`}</td>
+      return `<tr><td class="num">${i+1}</td><td>${palTxt(p)}</td><td>${qcP(p)}</td><td>${loc?`<span class="loc sm ${done?"done":""}">${esc(loc)}</span>`:`<span class="qc Reject">Rak penuh</span>`}</td>
         <td><input type="checkbox" data-placeck="${esc(p.id)}" ${done?"checked disabled":""} ${!done&&!loc?"disabled":""} style="width:26px;height:26px"></td></tr>`;}).join("")}</tbody></table></div>
     <div class="acts" style="margin-top:10px"><button class="btn pri" id="btnMapRek">Lihat di peta</button>${nw?`<button class="btn ok" id="btnPlaceAll">Ceklis semua (${nw} palet)</button>`:""}</div></div>`;
 }
@@ -591,27 +636,35 @@ function renderCari(){
   if(!res.length){msg("cariMsg","bad","TIDAK DITEMUKAN. Cek lagi No Batch dan No Material.");$("cariList").innerHTML="";return;}
   const inRak=res.filter(p=>p.status==="simpan");
   msg("cariMsg","find",res.length===1?(inRak.length?`Ada di <span class="loc sm find">${esc(res[0].lokasi)}</span>`:esc(where(res[0]))):`${res.length} palet ditemukan, ${inRak.length} di rak. Urut FIFO.`);
-  $("cariList").innerHTML=res.map((p,i)=>`<div class="card" data-cid="${esc(p.id)}"><div class="row"><span class="meta"><span class="num">${i+1}.</span> ${palTxt(p)}<br><span class="small">${esc(p.nama)} · produksi ${fmtDate(p.prod)}</span></span>${qcB(p.qc)}</div>
+  $("cariList").innerHTML=res.map((p,i)=>`<div class="card" data-cid="${esc(p.id)}"><div class="row"><span class="meta"><span class="num">${i+1}.</span> ${palTxt(p)}<br><span class="small">${esc(p.nama)} · produksi ${fmtDate(p.prod)}</span></span><span>${qcP(p)}</span></div>
     <div class="row">${p.status==="simpan"?`<span class="loc sm find">${esc(p.lokasi)}</span><button class="btn sm" data-move>Pindah lokasi</button>`:`<span class="small">${esc(where(p))}</span>`}</div></div>`).join("");
 }
 ["cBatch","cMat"].forEach(id=>$(id).addEventListener("input",()=>{renderCari();renderMap();}));
 $("cClear").addEventListener("click",()=>{$("cBatch").value="";$("cMat").value="";renderCari();renderMap();});
-$("cariList").addEventListener("click",e=>{
-  if(!e.target.closest("[data-move]"))return;const id=e.target.closest("[data-cid]").dataset.cid,p=S.pal.get(id);if(!p)return;
+/** Pindah lokasi lewat scan label rak (dipakai menu Cari dan daftar Perlu dipindahkan). */
+function startMove(id,el){
+  const p=S.pal.get(id);if(!p)return;
   openScanner({title:"Pindah lokasi",sub:`${p.batch} no ${p.mat} · sekarang ${p.lokasi}`,continuous:false,onCode:(txt)=>{
     const loc=resolveLoc(txt);if(!loc)return {ok:false,html:`GAGAL<small>${esc(locErr(txt))}</small>`};
     const chk=checkLoc(p,loc,true);
     if(chk)return {ok:false,html:`GAGAL<small>${esc(chk)}</small>`};
-    setTimeout(async()=>{const r=await act({action:"move",id,lokasi:loc},"cariMsg");if(r.ok)msg("cariMsg","ok",`Dipindah: ${palTxt(p)} ke <span class="loc sm done">${loc}</span>`);},50);
+    setTimeout(async()=>{const r=await act({action:"move",id,lokasi:loc},el);if(r.ok)msg(el,"ok",`Dipindah: ${palTxt(p)} ke <span class="loc sm done">${loc}</span>`);},50);
     return {ok:true};
   }});
+}
+$("cariList").addEventListener("click",e=>{
+  if(!e.target.closest("[data-move]"))return;startMove(e.target.closest("[data-cid]").dataset.cid,"cariMsg");
+});
+$("listMis").addEventListener("click",async e=>{
+  const b=e.target.closest("[data-mv]");if(!b)return;const id=b.closest("[data-mid]").dataset.mid,p=S.pal.get(id),rec=D.misRec.get(id);if(!p)return;
+  if(b.dataset.mv==="scan")startMove(id,"msgIn");
+  if(b.dataset.mv==="ok"&&rec){const r=await act({action:"move",id,lokasi:rec},"msgIn");if(r.ok)msg("msgIn","ok",`Dipindah: ${palTxt(p)} ke <span class="loc sm done">${rec}</span>`);}
 });
 function checkLoc(p,loc,move){
   const x=L.get(loc);
   if(!x)return "Bukan kode rak yang dikenal: "+loc;
-  if(p.gudang&&x.ged!==p.gudang)return `Palet ini untuk gudang ${p.gudang}, bukan ${x.ged}`;
-  if(p.qc==="Reject"&&x.fungsi!=="Reject")return "Palet REJECT harus di rak reject";
-  if(p.qc!=="Reject"&&x.fungsi==="Reject")return "Rak reject hanya untuk palet Reject";
+  const from=move&&p.lokasi&&L.get(p.lokasi)?L.get(p.lokasi).fungsi:"";
+  const rule=locRule(p.qc,x.fungsi,from);if(rule)return rule;
   if(move&&p.lokasi===loc)return "Palet sudah di "+loc;
   if(D.occ.has(loc))return loc+" sudah terisi palet lain";
   return "";
@@ -627,10 +680,12 @@ function renderMap(){
     lvs.forEach(lv=>{h+=`<div class="rrow"><span class="lv">${lv}</span>`;
       for(let k=1;k<=R.maxK;k++){const c=`${pre}-${r}-${pad(k)}-${lv}`;
         if(!R.cells.has(c)){h+=`<span class="cell x"></span>`;continue;}
-        let cls="",t=pad(k);const id=D.occ.get(c);
+        let cls="",t=pad(k);const id=D.occ.get(c),op=id?S.pal.get(id):null;
         if(D.pick.has(c)){cls="pk";t="P"+D.pick.get(c);}
-        else if(S.cari.has(c))cls="f";else if(id){const q=S.pal.get(id).qc;cls=q==="Release"?"sR":q==="Reject"?"sX":"sI";}
-        else if(D.rekLoc.has(c)){cls="r";t="#"+D.rekLoc.get(c);}
+        else if(S.cari.has(c))cls="f";else if(op){const q=op.qc;cls=q==="Release"?"sR":q==="Reject"?"sX":q==="Campur"?"sC":"sI";}
+        else if(D.rekLoc.has(c)){cls="r";t="#"+D.rekLoc.get(c).n;}
+        const hp=op||(D.rekLoc.has(c)?D.rekLoc.get(c).p:null);
+        if(hp&&hp.gudang&&hp.gudang!==g)cls+=" ov";
         h+=`<button class="cell ${cls}" data-loc="${c}" aria-label="${c}">${t}</button>`;}
       h+=`</div>`;});
   });
@@ -640,8 +695,8 @@ $("segGud").addEventListener("click",e=>{const b=e.target.closest("[data-gud]");
   document.querySelectorAll("#segGud button").forEach(x=>x.setAttribute("aria-pressed",x===b));$("cellInfo").hidden=true;renderMap();});
 $("map").addEventListener("click",e=>{
   const b=e.target.closest("[data-loc]");if(!b)return;const c=b.dataset.loc,id=D.occ.get(c),info=$("cellInfo"),x=L.get(c);info.hidden=false;
-  if(id){const p=S.pal.get(id);info.className="msg ok";info.innerHTML=`<span class="loc sm done">${c}</span> ${palTxt(p)} ${qcB(p.qc)}<br><span class="small">${esc(p.nama)} · produksi ${fmtDate(p.prod)}</span>${D.pick.has(c)?`<br><b>PICKING #${D.pick.get(c)}</b> · akan diambil, belum dikonfirmasi keluar`:""}`;}
-  else{info.className="msg wait";info.innerHTML=`<span class="loc sm">${c}</span> Kosong · rak ${esc(x?x.fungsi:"")}${D.rekLoc.has(c)?` · rekomendasi palet menunggu #${D.rekLoc.get(c)}`:""}`;}
+  if(id){const p=S.pal.get(id);info.className="msg ok";info.innerHTML=`<span class="loc sm done">${c}</span> ${palTxt(p)} ${qcP(p)}<br><span class="small">${esc(p.nama)} · produksi ${fmtDate(p.prod)} · gudang asal ${esc(p.gudang)}</span>${D.pick.has(c)?`<br><b>PICKING #${D.pick.get(c)}</b> · akan diambil, belum dikonfirmasi keluar`:""}`;}
+  else{info.className="msg wait";info.innerHTML=`<span class="loc sm">${c}</span> Kosong · rak ${esc(x?x.fungsi:"")}${D.rekLoc.has(c)?` · rekomendasi palet menunggu #${D.rekLoc.get(c).n}`:""}`;}
 });
 
 /* =================== PEMINDAI =================== */
@@ -650,7 +705,6 @@ function beep(ok){try{const A=window.AudioContext||window.webkitAudioContext;if(
   o.frequency.value=ok?1250:330;o.connect(g);g.connect(c.destination);g.gain.value=.12;o.start();o.stop(c.currentTime+(ok?.09:.28));}catch(e){}
   if(navigator.vibrate)navigator.vibrate(ok?60:[80,60,80]);}
 function flash(cls,html){const f=$("flash");f.className="flash "+cls;f.innerHTML=html;}
-/** Tombol Konfirmasi di layar scan (hanya untuk mode borongan masuk). */
 function updScan(){const b=$("scConfirm");
   if(mode&&mode.confirm){const n=mode.count();b.hidden=false;b.textContent=`Konfirmasi (${n})`;b.disabled=!n;$("scSub").textContent=`Antrean: ${n} palet`;$("scDone").className="btn";}
   else{b.hidden=true;$("scDone").className="btn ok";}}
@@ -701,7 +755,6 @@ $("cam").addEventListener("change",async()=>{
 });
 
 /* =================== MASUK (borongan) =================== */
-/** Scan satu palet: hanya dicatat ke antrean. Belum dikirim ke server sebelum Konfirmasi. */
 function scanInOne(text){
   const p=parseQR(text);
   if(p.err)return {ok:false,html:`GAGAL<small>${esc(p.err)}</small>`,short:"GAGAL · "+esc(p.err)};
@@ -715,11 +768,41 @@ function scanInOne(text){
   return {ok:true,html:`SUKSES · ${tag}<small>${q.qc==="Reject"?"REJECT · ":""}Masuk antrean #${Q.inn.length}</small>`,short:`${tag} → antrean #${Q.inn.length}`};
 }
 $("btnScanIn").addEventListener("click",()=>openScanner({title:"Scan masuk",sub:"",continuous:true,confirm:true,count:()=>Q.inn.length,onCode:scanInOne,onConfirm:confirmIn}));
+
+/* ---- manual (jika tidak bisa scan) ---- */
+function renderInRes(){
+  if(!INRES){$("inFindResult").innerHTML="";return;}
+  const list=INRES.ids.map(id=>S.pal.get(id)).filter(p=>p&&p.status==="label");
+  if(!list.length){INRES=null;$("inFindResult").innerHTML="";return;}
+  const can=list.filter(p=>!Q.inn.includes(p.id));
+  $("inFindResult").innerHTML=(can.length>1?`<div class="acts" style="margin-top:12px"><button class="btn pri" data-addall>Tambah semua ke antrean (${can.length})</button></div>`:"")+
+  list.map(p=>{const inQ=Q.inn.includes(p.id);
+    return `<div class="card" style="margin-top:12px" data-inid="${esc(p.id)}">
+      <div class="meta">${palTxt(p)} ${qcP(p)}<br><span class="small">${esc(p.nama)} · produksi ${fmtDate(p.prod)}</span></div>
+      <div class="acts"><button class="btn ok" data-add ${inQ?"disabled":""}>${inQ?"Sudah di antrean":"Tambah ke antrean"}</button><button class="btn" data-no>Tutup</button></div></div>`;}).join("");
+}
+$("iFind").addEventListener("click",()=>{
+  const b=$("iBatch").value.trim(),g=$("iMat").value.trim();
+  if(!b){$("inFindResult").innerHTML=`<div class="msg bad">Isi No Batch (No Material boleh kosong).</div>`;return;}
+  if(g&&!matNums(g)){$("inFindResult").innerHTML=`<div class="msg bad">No Material ditulis seperti 01-14, 07, atau 01-11, 13.</div>`;return;}
+  const res=findPal(b,g,["label"]);
+  if(!res.length){INRES=null;
+    const any=findPal(b,g,null);
+    $("inFindResult").innerHTML=`<div class="msg bad">GAGAL: ${any.length?esc(any[0].batch+" no "+any[0].mat+": "+(any[0].status==="tunggu"?"sudah diterima, menunggu ditaruh":"sudah tersimpan di "+any[0].lokasi)):"label tidak ditemukan / sudah keluar / dibatalkan"}.</div>`;return;}
+  INRES={ids:res.map(p=>p.id)};renderInRes();
+});
+$("inFindResult").addEventListener("click",e=>{
+  if(e.target.closest("[data-addall]")&&INRES){INRES.ids.map(id=>S.pal.get(id)).filter(p=>p&&p.status==="label"&&!Q.inn.includes(p.id)).forEach(p=>Q.inn.push(p.id));saveQ();renderQ();renderInRes();return;}
+  const card=e.target.closest("[data-inid]");if(!card)return;
+  if(e.target.closest("[data-no]")){INRES=null;$("inFindResult").innerHTML="";return;}
+  if(e.target.closest("[data-add]")){const id=card.dataset.inid;if(!Q.inn.includes(id)){Q.inn.push(id);saveQ();}renderQ();renderInRes();}
+});
+
 async function confirmIn(){
   const ids=Q.inn.filter(id=>{const p=S.pal.get(id);return p&&p.status==="label";});
   if(!ids.length){msg("msgIn","bad","Antrean kosong.");return;}
   const r=await batchAct({action:"receiveBatch",ids},"msgIn");if(!r.ok)return;
-  LASTIN=r.done||[];Q.inn=Q.inn.filter(id=>!LASTIN.includes(id));saveQ();render();
+  LASTIN=r.done||[];Q.inn=Q.inn.filter(id=>!LASTIN.includes(id));saveQ();INRES=null;render();
   const nf=(r.failed||[]).length;
   msg("msgIn",nf?"wait":"ok",`${LASTIN.length} palet diterima. Rekomendasi peletakan ada di bawah (kuning di peta).`+(nf?`<br>Gagal ${nf}:<br>${failTxt(r.failed)}`:"")+legacyNote(r));
   $("inResult").scrollIntoView({behavior:"smooth",block:"start"});
@@ -749,9 +832,8 @@ function outReason(p){
   if(p.status!=="simpan")return where(p);
   if(p.qc==="Release")return "";
   if(p.qc==="Reject"){const x=L.get(p.lokasi);return x&&x.fungsi==="Reject"?"":"Palet REJECT harus dipindah ke rak reject dulu (menu Cari → Pindah lokasi).";}
-  return `Status QC ${p.qc}: belum boleh keluar (harus Release).`;
+  return `Status QC ${p.qc}: belum boleh keluar (harus Release semua).`;
 }
-/** Scan satu palet keluar: ditambah ke Daftar keluar (Picking), belum keluar sebelum Konfirmasi. */
 function scanOutOne(text){
   const p=parseQR(text);
   if(p.err)return {ok:false,html:`GAGAL<small>${esc(p.err)}</small>`,short:"GAGAL · "+esc(p.err)};
@@ -781,7 +863,7 @@ function renderOutRes(){
     const older=(why||ex.qc!=="Release")?[]:D.stored.filter(q=>q.id!==ex.id&&q.item===ex.item&&q.qc==="Release"&&(q.prod||"")<(ex.prod||"")).sort((a,b)=>(a.prod||"").localeCompare(b.prod||""));
     return `<div class="card" style="margin-top:12px" data-out="${esc(ex.id)}">
       <div class="row"><span class="small">Ambil dari</span>${ex.lokasi?`<span class="loc find">${esc(ex.lokasi)}</span>`:"-"}</div>
-      <div class="meta">${palTxt(ex)} ${qcB(ex.qc)}<br><span class="small">${esc(ex.nama)} · produksi ${fmtDate(ex.prod)}</span></div>
+      <div class="meta">${palTxt(ex)} ${qcP(ex)}<br><span class="small">${esc(ex.nama)} · produksi ${fmtDate(ex.prod)}</span></div>
       ${why?`<div class="msg bad" style="margin:0">GAGAL: ${esc(why)}</div>`:""}
       ${older.length?`<div class="msg wait" style="margin:0">FIFO: masih ada ${older.length} palet Release lebih lama, mis. ${esc(older[0].batch)} no ${esc(older[0].mat)} di ${esc(older[0].lokasi)}.</div>`:""}
       <div class="acts"><button class="btn pick" data-add ${why||inQ?"disabled":""}>${inQ?"Sudah di daftar":"Tambah ke daftar keluar"}</button><button class="btn" data-no>Tutup</button></div></div>`;}).join("");
@@ -819,12 +901,12 @@ function addMonths(iso,n){if(!iso)return"";const [y,m,d]=iso.split("-").map(Numb
   if(dt.getUTCDate()!==d)dt.setUTCDate(0);return dt.toISOString().slice(0,10);}
 function batchRows(batch){const b=String(batch||"").trim().toUpperCase();return [...S.pal.values(),...S.out].filter(p=>String(p.batch).toUpperCase()===b);}
 function batchSeq(batch){const all=batchRows(batch);
-  return {maxPal:all.reduce((m,p)=>Math.max(m,+p.palet||0),0),maxMat:all.reduce((m,p)=>Math.max(m,...(p.nums.length?p.nums:[0])),0)};}
-let DRAFT=[];   // [{palet, mat}] baris yang akan disimpan (bisa diedit)
+  return {maxPal:all.reduce((m,p)=>Math.max(m,palNum(p)),0),maxMat:all.reduce((m,p)=>Math.max(m,...(p.nums.length?p.nums:[0])),0)};}
+let DRAFT=[];
 function onItemChange(keepNums){
   const pr=prodOf($("pItem").value);if(!pr){$("pInfo").textContent="Pilih item.";return;}
   lsSet("lastItem",pr.item);
-  $("pInfo").innerHTML=`<b>${esc(pr.nama)}</b><br>Satuan palet: <b>${esc(pr.satPal)}</b> · Standar <b>${pr.qtyPal}</b> ${esc(pr.satPal)}/palet · Gudang <b>${esc(pr.gudang)}</b> · Masa simpan ${pr.masa} bulan`;
+  $("pInfo").innerHTML=`<b>${esc(pr.nama)}</b><br>Satuan palet: <b>${esc(pr.satPal)}</b> · Standar <b>${pr.qtyPal}</b> ${esc(pr.satPal)}/palet · Gudang utama <b>${esc(pr.gudang)}</b> · Masa simpan ${pr.masa} bulan`;
   if(!keepNums||!$("pPer").value)$("pPer").value=pr.qtyPal||"";
   if($("pProd").value)$("pExp").value=addMonths($("pProd").value,pr.masa);
   regenDraft();
@@ -911,7 +993,7 @@ const hSel=new Set();
 function histRows(){
   const f=$("hFilter").value.trim().toUpperCase(),all=$("hShowAll").checked;
   return [...S.pal.values()].filter(p=>(!f||String(p.batch).toUpperCase().includes(f))&&(all||p.cetak===0||hSel.has(p.id)))
-    .sort((a,b)=>b.tLabel-a.tLabel||String(a.batch).localeCompare(b.batch)||(+a.palet)-(+b.palet)).slice(0,200);
+    .sort((a,b)=>b.tLabel-a.tLabel||String(a.batch).localeCompare(String(b.batch))||palNum(a)-palNum(b)||String(a.palet).localeCompare(String(b.palet))).slice(0,200);
 }
 function renderHistory(){
   const rows=histRows();
@@ -929,7 +1011,7 @@ $("hAll").addEventListener("click",()=>{histRows().forEach(p=>hSel.add(p.id));re
 $("hNone").addEventListener("click",()=>{hSel.clear();renderHistory();});
 $("hBody").addEventListener("change",e=>{const c=e.target.closest("[data-h]");if(!c)return;const id=c.closest("[data-hid]").dataset.hid;c.checked?hSel.add(id):hSel.delete(id);$("prCount").textContent=hSel.size?hSel.size+" dipilih":"";});
 $("hPrint").addEventListener("click",async()=>{
-  const list=[...hSel].map(id=>S.pal.get(id)).filter(Boolean).sort((a,b)=>String(a.batch).localeCompare(b.batch)||(+a.palet)-(+b.palet));
+  const list=[...hSel].map(id=>S.pal.get(id)).filter(Boolean).sort((a,b)=>String(a.batch).localeCompare(String(b.batch))||palNum(a)-palNum(b)||String(a.palet).localeCompare(String(b.palet)));
   if(!list.length){msg("msgProd","bad","Centang label yang mau dicetak dulu.");return;}
   printLabels(list);
   const ids=list.map(p=>p.id);hSel.clear();
@@ -944,7 +1026,7 @@ $("hBody").addEventListener("click",async e=>{
     const r=await act({action:"void",id:p.id,alasan:al},"msgProd");if(r.ok)msg("msgProd","wait",`Label ${esc(p.batch)} palet ${esc(p.palet)} dibatalkan.`);};
 });
 
-/* ---------- cetak label A5 (layout C) ---------- */
+/* ---------- cetak label A5 (tanpa kotak Inkubasi/Release/Reject) ---------- */
 function qrSvg(text){
   if(!window.qrcode)return `<div style="font-size:3mm">QR gagal dimuat</div>`;
   const q=qrcode(0,"M");q.addData(text);q.make();const n=q.getModuleCount();let d="";
@@ -956,17 +1038,15 @@ function labelHtml(p){
   const matCls=String(p.mat).length>11?"sm":"";
   return `<table class="lab">
     <colgroup><col style="width:15.7%"><col style="width:15.7%"><col style="width:15.7%"><col style="width:21.4%"><col style="width:15.75%"><col style="width:15.75%"></colgroup>
-    <tr style="height:9%"><td class="g" colspan="4">${esc(p.nama)}</td><td class="g i" colspan="2">Barcode</td></tr>
-    <tr style="height:6%">${k("Item Code")}${k("Nomor Batch")}<td class="qr" colspan="2" rowspan="8">${qrSvg(p.qr||buildQR(p))}<span>${esc(p.batch)} · P${esc(p.palet)}</span></td></tr>
-    <tr style="height:7.5%">${v(p.item)}${v(p.batch)}</tr>
-    <tr style="height:6%">${k("Nomor Palet")}${k("Nomor Material")}</tr>
-    <tr style="height:7.5%">${v(p.palet)}${v(p.mat,matCls)}</tr>
-    <tr style="height:6%">${k("Jumlah")}${k("Satuan")}</tr>
-    <tr style="height:7.5%">${v(p.jumlah)}${v(p.satuan)}</tr>
-    <tr style="height:6%">${k("Tanggal Produksi")}${k("Tanggal Kadaluwarsa")}</tr>
-    <tr style="height:7.5%">${v(ddmmyyyy(p.prod))}${v(ddmmyyyy(p.exp))}</tr>
-    <tr style="height:6.5%"><td class="st" colspan="2">Inkubasi</td><td class="st" colspan="2">Release</td><td class="st" colspan="2">Reject</td></tr>
-    <tr style="height:30.5%"><td class="box" colspan="2"></td><td class="box" colspan="2"></td><td class="box" colspan="2"></td></tr>
+    <tr style="height:14%"><td class="g" colspan="4">${esc(p.nama)}</td><td class="g i" colspan="2">Barcode</td></tr>
+    <tr style="height:9.5%">${k("Item Code")}${k("Nomor Batch")}<td class="qr" colspan="2" rowspan="8">${qrSvg(p.qr||buildQR(p))}<span>${esc(p.batch)} · P${esc(p.palet)}</span></td></tr>
+    <tr style="height:12%">${v(p.item)}${v(p.batch)}</tr>
+    <tr style="height:9.5%">${k("Nomor Palet")}${k("Nomor Material")}</tr>
+    <tr style="height:12%">${v(p.palet)}${v(p.mat,matCls)}</tr>
+    <tr style="height:9.5%">${k("Jumlah")}${k("Satuan")}</tr>
+    <tr style="height:12%">${v(p.jumlah)}${v(p.satuan)}</tr>
+    <tr style="height:9.5%">${k("Tanggal Produksi")}${k("Tanggal Kadaluwarsa")}</tr>
+    <tr style="height:12%">${v(ddmmyyyy(p.prod))}${v(ddmmyyyy(p.exp))}</tr>
   </table>`;
 }
 function printLabels(list){
@@ -974,29 +1054,51 @@ function printLabels(list){
   setTimeout(()=>window.print(),400);
 }
 
-/* =================== ADMIN: QC =================== */
-const qSel=new Set();
+/* =================== ADMIN: QC (per nomor material) =================== */
+const qSel=new Map();          // id palet -> Set nomor material terpilih
+const QCC={Release:"cR",Inkubasi:"cI",Reject:"cX"};
+function itemQC(p,n){
+  let s=p.qc==="Campur"?"Inkubasi":p.qc;
+  String(p.qcItem||"").split(";").forEach(part=>{const m=part.trim().match(/^(\w+)=(.+)$/);if(m){const a=matNums(m[2]);if(a&&a.includes(n))s=m[1];}});
+  return s;
+}
 function renderQC(){
   const b=$("qBatch").value.trim().toUpperCase();
-  if(!b){$("qBody").innerHTML=`<tr><td colspan="5" class="empty">Scan QR palet atau isi No Batch.</td></tr>`;return;}
-  const list=[...S.pal.values()].filter(p=>String(p.batch).toUpperCase()===b).sort((x,y)=>(+x.palet)-(+y.palet));
-  $("qBody").innerHTML=list.length?list.map(p=>`<tr><td><input type="checkbox" data-q="${esc(p.id)}" ${qSel.has(p.id)?"checked":""} style="width:20px;height:20px"></td>
-    <td class="mono">${esc(p.palet)}</td><td class="mono">${esc(p.mat)}</td><td class="small">${esc(where(p))}</td><td>${qcB(p.qc)}</td></tr>`).join("")
-    :`<tr><td colspan="5" class="empty">Batch tidak ditemukan.</td></tr>`;
+  for(const [id,set] of [...qSel]){const p=S.pal.get(id);if(!p){qSel.delete(id);continue;}[...set].forEach(n=>{if(!p.nums.includes(n))set.delete(n);});if(!set.size)qSel.delete(id);}
+  let total=0;qSel.forEach(s=>total+=s.size);
+  $("qSum").textContent=total?`${total} nomor material dari ${qSel.size} palet dipilih.`:"";
+  if(!b){$("qcList").innerHTML=`<div class="empty">Scan QR palet atau isi No Batch.</div>`;return;}
+  const list=[...S.pal.values()].filter(p=>String(p.batch).toUpperCase()===b).sort((x,y)=>palNum(x)-palNum(y)||String(x.palet).localeCompare(String(y.palet)));
+  $("qcList").innerHTML=list.length?list.map(p=>{
+    const set=qSel.get(p.id)||new Set(),allOn=p.nums.length>0&&set.size===p.nums.length;
+    return `<div class="card" data-qid="${esc(p.id)}">
+      <div class="row"><label style="display:flex;gap:8px;align-items:center;font-size:15px;color:var(--ink)"><input type="checkbox" data-qall ${allOn?"checked":""} style="width:22px;height:22px"><b>Palet ${esc(p.palet)}</b> <span class="small">${esc(where(p))}</span></label><span>${qcP(p)}</span></div>
+      <div class="chips">${p.nums.map(n=>`<button class="chip ${QCC[itemQC(p,n)]||"cI"}${set.has(n)?" on":""}" data-qn="${n}">${pad(n)}</button>`).join("")}</div></div>`;}).join("")
+    :`<div class="empty">Batch tidak ditemukan.</div>`;
 }
 $("qBatch").addEventListener("input",()=>{qSel.clear();renderQC();});
 $("qClear").addEventListener("click",()=>{$("qBatch").value="";qSel.clear();renderQC();msg("qcMsg","","");});
-$("qBody").addEventListener("change",e=>{const c=e.target.closest("[data-q]");if(!c)return;c.checked?qSel.add(c.dataset.q):qSel.delete(c.dataset.q);});
-$("qAll").addEventListener("click",()=>{document.querySelectorAll("#qBody [data-q]").forEach(c=>{c.checked=true;qSel.add(c.dataset.q);});});
+$("qcList").addEventListener("change",e=>{const c=e.target.closest("[data-qall]");if(!c)return;
+  const id=c.closest("[data-qid]").dataset.qid,p=S.pal.get(id);if(!p)return;
+  if(c.checked)qSel.set(id,new Set(p.nums));else qSel.delete(id);renderQC();});
+$("qcList").addEventListener("click",e=>{const b=e.target.closest("[data-qn]");if(!b)return;
+  const id=b.closest("[data-qid]").dataset.qid,n=+b.dataset.qn,set=qSel.get(id)||new Set();
+  set.has(n)?set.delete(n):set.add(n);if(set.size)qSel.set(id,set);else qSel.delete(id);renderQC();});
+$("qAll").addEventListener("click",()=>{const bt=$("qBatch").value.trim().toUpperCase();if(!bt)return;
+  [...S.pal.values()].filter(p=>String(p.batch).toUpperCase()===bt).forEach(p=>qSel.set(p.id,new Set(p.nums)));renderQC();});
 $("qNone").addEventListener("click",()=>{qSel.clear();renderQC();});
 document.querySelectorAll("[data-qc]").forEach(b=>b.addEventListener("click",async()=>{
-  if(!qSel.size){msg("qcMsg","bad","Pilih palet dulu (centang).");return;}
-  const st=b.dataset.qc,n=qSel.size,r=await act({action:"qc",ids:[...qSel],status:st},"qcMsg");
-  if(r.ok){msg("qcMsg","ok",`${n} palet diubah ke ${st}. Cap label fisik sesuai status ini.${st==="Reject"?" Palet Reject yang ada di rak biasa harus dipindah ke rak reject (menu Cari → Pindah lokasi).":""}`);qSel.clear();renderQC();}
+  if(!qSel.size){msg("qcMsg","bad","Pilih palet atau nomor material dulu.");return;}
+  const st=b.dataset.qc;
+  const items=[...qSel].map(([id,set])=>{const p=S.pal.get(id);return {id,nums:p&&set.size>=p.nums.length?null:[...set].sort((x,y)=>x-y)};});
+  const partial=items.some(i=>i.nums);
+  if(st==="Reject"&&partial&&!confirm("Sebagian isi palet akan di-Reject dan dipisah menjadi palet baru (nomor berakhiran R). Lanjutkan?"))return;
+  const r=await act({action:"qc",items,status:st},"qcMsg");
+  if(r.ok){msg("qcMsg",/dipecah|harus dipindah/.test(r.msg)?"wait":"ok",esc(r.msg)+" Cap label fisik sesuai status ini.");qSel.clear();renderQC();}
 }));
 $("btnScanQC").addEventListener("click",()=>openScanner({title:"Scan untuk QC",sub:"Scan QR palet",continuous:false,onCode:(txt)=>{
   const p=parseQR(txt);if(p.err)return {ok:false,html:`GAGAL<small>${esc(p.err)}</small>`};
-  setTimeout(()=>{$("qBatch").value=p.batch;qSel.clear();if(p.id&&S.pal.has(p.id))qSel.add(p.id);renderQC();},50);return {ok:true};
+  setTimeout(()=>{$("qBatch").value=p.batch;qSel.clear();const q=p.id&&S.pal.get(p.id);if(q)qSel.set(q.id,new Set(q.nums));renderQC();},50);return {ok:true};
 }}));
 
 /* =================== PENGATURAN =================== */
