@@ -85,6 +85,21 @@ input,select,textarea{font:500 16px var(--ui);color:var(--ink);background:var(--
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .grid label,.f label{font-size:12px;color:var(--muted);display:grid;gap:4px}
 .grid .full{grid-column:1/-1}
+.form3{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end}
+.form3 label:first-child{grid-column:1/-1}
+.form3 input{width:100%;box-sizing:border-box}
+.form3 label{display:grid;gap:4px;font-size:13px}
+/* ---------- CETAK DAFTAR KELUAR (A4) ---------- */
+.rep{font-family:Arial,Helvetica,sans-serif;color:#000;background:#fff;padding:1mm;box-sizing:border-box}
+.rep h1{font-size:16pt;margin:0 0 2mm}
+.rep .sub{font-size:10.5pt;margin:0 0 5mm}
+.rep table{width:calc(100% - .5mm);border-collapse:collapse;font-size:11pt}
+.rep th,.rep td{border:0.3mm solid #000;padding:1.6mm 2.5mm;text-align:left}
+.rep th{background:#E6E6E6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rep td.n,.rep th.n{text-align:right;white-space:nowrap}
+.rep thead{display:table-header-group}
+.rep tr{break-inside:avoid}
+.rep tfoot td{font-weight:700}
 .form2{display:grid;grid-template-columns:3fr 2fr auto;gap:8px;align-items:end;margin-top:12px}
 .form2 label{font-size:12px;color:var(--muted);display:grid;gap:4px}
 .or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin:16px 0 0}
@@ -164,7 +179,7 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
   #printArea{display:block!important}
 }
 </style>
-<style>@page{size:A4 portrait;margin:0}</style>
+<style id="pageCss">@page{size:A4 portrait;margin:0}</style>
 </head>
 <body>
 
@@ -200,7 +215,7 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
       <div class="acts" style="margin-top:10px"><button class="btn ok" id="btnConfirmIn" disabled>Konfirmasi</button><button class="btn ghost" id="btnClearIn" disabled>Kosongkan</button></div>
     </div>
     <div id="inResult"></div>
-    <div class="sec"><h3><span>Menunggu ditaruh</span><span id="cntWait">0</span></h3><div id="listWait"></div></div>
+    <div class="sec"><h3><span>Menunggu diletakkan</span><span id="cntWait">0</span></h3><div id="listWait"></div></div>
     <div class="sec" id="secMis" hidden><h3><span>Perlu dipindahkan (status QC berubah)</span><span id="cntMis">0</span></h3><div id="listMis"></div></div>
     <div class="sec"><h3><span>Baru disimpan</span></h3><div id="listStored"></div></div>
   </section>
@@ -222,6 +237,16 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
       <div class="acts" style="margin-top:10px"><button class="btn pick" id="btnMapOut" disabled>Lihat di peta</button><button class="btn warn" id="btnConfirmOut" disabled>Konfirmasi keluar</button><button class="btn ghost" id="btnClearOut" disabled>Kosongkan</button></div>
     </div>
     <div class="sec"><h3><span>Riwayat keluar</span></h3><div id="listOut"></div></div>
+    <div class="sec"><h3><span>Cetak palet keluar (cocokkan dengan alokasi)</span><span id="kCount"></span></h3>
+      <p class="small" style="margin:0 0 8px">Pilih tanggal dan jam muat. Semua palet yang dikonfirmasi keluar di rentang itu akan tampil: Batch, Nomor Material, Quantity.</p>
+      <div class="form3">
+        <label>Tanggal<input type="date" id="kTgl"></label>
+        <label>Dari jam<input type="time" id="kDari" value="00:00"></label>
+        <label>Sampai jam<input type="time" id="kSampai" value="23:59"></label>
+      </div>
+      <div class="acts" style="margin:10px 0"><button class="btn pri" id="kShow">Tampilkan</button><button class="btn" id="kPrint" disabled>Cetak</button></div>
+      <div id="kResult"></div>
+    </div>
   </section>
 
   <!-- CARI -->
@@ -248,7 +273,7 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
   <section id="tab-peta" hidden>
     <h2>Peta rak</h2>
     <div class="seg" id="segGud"></div>
-    <div class="legend"><span><i style="background:var(--accent);border-color:#1B1F24"></i>Taruh di sini</span><span><i style="background:var(--pick);border-color:var(--pick-t)"></i>Picking (akan keluar)</span><span><i style="background:var(--ok-bg)"></i>Release</span><span><i style="background:var(--ink-bg)"></i>Inkubasi</span><span><i style="background:var(--wait-bg)"></i>Campur</span><span><i style="background:var(--bad-bg);border-color:var(--bad)"></i>Reject</span><span><i style="background:#C2571A"></i>Hasil cari</span><span><i style="box-shadow:inset 0 0 0 2px var(--ov);border-color:var(--ov)"></i>Overstock (beda gudang asal)</span><span><i></i>Kosong</span></div>
+    <div class="legend"><span><i style="background:var(--accent);border-color:#1B1F24"></i>Letakkan di sini</span><span><i style="background:var(--pick);border-color:var(--pick-t)"></i>Picking (akan keluar)</span><span><i style="background:var(--ok-bg)"></i>Release</span><span><i style="background:var(--ink-bg)"></i>Inkubasi</span><span><i style="background:var(--wait-bg)"></i>Campur</span><span><i style="background:var(--bad-bg);border-color:var(--bad)"></i>Reject</span><span><i style="background:#C2571A"></i>Hasil cari</span><span><i style="box-shadow:inset 0 0 0 2px var(--ov);border-color:var(--ov)"></i>Overstock (beda gudang asal, kecuali rak Inkubasi/Reject)</span><span><i></i>Kosong</span></div>
     <div id="cellInfo" class="msg wait" hidden></div>
     <div class="mapbox" id="map"></div>
   </section>
@@ -299,9 +324,8 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
     <!-- QC -->
     <div id="adm-qc" hidden>
       <h2>Status QC</h2>
-      <p class="hint">Scan QR atau isi No Batch. <b>Centang palet</b> untuk memilih semua isinya, atau <b>ketuk nomor material</b> tertentu kalau hanya sebagian yang statusnya berbeda. Lalu tekan Release, Reject, atau Inkubasi.</p>
-      <div class="info" style="margin-bottom:10px">Kalau sebagian isi palet di-<b>Reject</b>, item itu otomatis <b>dipisah jadi palet baru</b> (nomor palet berakhiran R) yang harus ditaruh di rak reject. Cetak ulang label kedua palet.</div>
-      <button class="big dark" id="btnScanQC">Scan QR palet</button>
+      <p class="hint">Isi No Batch (manual). <b>Centang palet</b> untuk memilih semua isinya, atau <b>ketuk nomor material</b> tertentu kalau hanya sebagian yang statusnya berbeda. Lalu tekan Release, Reject, atau Inkubasi.</p>
+      <div class="info" style="margin-bottom:10px">Kalau sebagian isi palet di-<b>Reject</b>, item itu otomatis <b>dipisah jadi palet baru</b> (nomor palet berakhiran R) yang harus diletakkan di rak reject. Cetak ulang label kedua palet.</div>
       <div class="form2" style="grid-template-columns:1fr auto"><label>No Batch<input id="qBatch" autocomplete="off" autocapitalize="characters" placeholder="BOLF382043"></label><button class="btn ghost" id="qClear">Hapus</button></div>
       <div id="qcMsg"></div>
       <div class="acts" style="margin:10px 0"><button class="btn sm" id="qAll">Pilih semua</button><button class="btn sm ghost" id="qNone">Batal pilih</button></div>
@@ -317,12 +341,13 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
       <div class="acts" style="margin-top:10px"><button class="btn" id="btnChangeApi">Ganti link server</button><button class="btn" id="btnReloadMaster">Muat ulang master data</button></div>
       <div class="sec"><h3><span>Aturan pemindahan rak</span></h3>
         <div class="info"><ul>
-          <li><b>Rak Reject</b>: hanya palet berstatus Reject. Palet Reject tidak boleh ditaruh di rak lain.</li>
+          <li><b>Rak Reject</b>: hanya palet berstatus Reject. Palet Reject tidak boleh diletakkan di rak lain.</li>
           <li><b>Keluar dari rak Reject</b>: hanya setelah status QC diubah (Release / Inkubasi) lewat Admin &gt; QC. Setelah itu muncul di daftar "Perlu dipindahkan".</li>
           <li><b>Rak Preloading</b>: hanya palet Release (semua isi Release). Palet Inkubasi / Campur tidak boleh.</li>
           <li><b>Preloading ke rak Simpan</b>: boleh (dikembalikan). Kalau status QC palet di preloading berubah bukan Release, wajib dikembalikan ke rak Simpan.</li>
           <li><b>Reject ke Preloading</b>: tidak bisa langsung. Ubah QC ke Release dulu.</li>
-          <li><b>Gedung</b>: bebas. Palet boleh di SD17 atau SD18 (overstock), hanya diberi tanda warna biru-hijau.</li>
+          <li><b>Rak Inkubasi</b> (khusus SD18): untuk palet yang belum Release. Palet Reject tetap harus di rak reject.</li>
+          <li><b>Gedung</b>: bebas. Palet produk SD17 yang disimpan di SD18 (atau sebaliknya) diberi tanda <b>Overstock</b> biru-hijau. <b>Pengecualian</b>: palet di rak <b>Inkubasi</b> atau <b>Reject</b> tidak dihitung overstock.</li>
         </ul></div>
       </div>
       <div class="sec"><h3><span>Data contoh</span></h3>
@@ -330,7 +355,7 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
         <button class="btn warn" id="btnReset">Hapus data contoh</button> <span id="resetMsg" class="small"></span>
       </div>
       <div class="sec"><h3><span>Master data</span></h3>
-        <p class="small">Produk, lokasi, fungsi rak (Simpan/Reject/Preloading) dan kepala dokumen label diubah langsung di Google Sheet: sheet Master Produk, Master Lokasi, Master Rak, Pengaturan. Lalu tekan "Muat ulang master data".</p>
+        <p class="small">Produk, lokasi, fungsi rak (Simpan/Inkubasi/Reject/Preloading) dan kepala dokumen label diubah langsung di Google Sheet: sheet Master Produk, Master Lokasi, Master Rak, Pengaturan. Lalu tekan "Muat ulang master data".</p>
         <div class="info" id="masterInfo"></div>
       </div>
     </div>
@@ -429,7 +454,8 @@ function applyData(d){if(!d)return;const m=new Map();(d.rows||[]).forEach(o=>{co
 function applyMaster(m){
   M.produk=m.produk||[];M.lokasi=m.lokasi||[];M.rak=m.rak||[];M.set=m.set||{};
   L.clear();LINK.clear();const rk=new Map();M.rak.forEach(r=>rk.set(r.gedung+"|"+r.rak,r));
-  M.lokasi.forEach(([code,ged,rak,kol,lv,link])=>{const r=rk.get(ged+"|"+rak)||{fungsi:"Simpan",urutan:99};if(link)LINK.set(link,code);
+  M.lokasi.forEach(([code,ged,rak,kol,lv,link])=>{const r0=rk.get(ged+"|"+rak)||{fungsi:"Simpan",urutan:99},fl=String(r0.fungsi||"").trim().toLowerCase(),
+      r={fungsi:fl==="reject"?"Reject":fl==="preloading"?"Preloading":fl==="inkubasi"?"Inkubasi":"Simpan",urutan:r0.urutan};if(link)LINK.set(link,code);
     L.set(code,{code,ged,rak,kol,lv,li:LVORD.indexOf(lv),fungsi:r.fungsi,urutan:r.urutan});});
   ORDER={};
   [...L.values()].sort((a,b)=>a.urutan-b.urutan||+a.rak-+b.rak||a.li-b.li||+a.kol-+b.kol)
@@ -523,7 +549,7 @@ function findPal(batch,matStr,statuses,exact){
 
 /* =================== turunan & rekomendasi =================== */
 let D={occ:new Map(),wait:[],stored:[],rek:new Map(),rekLoc:new Map(),pick:new Map(),free:0,mis:[],misRec:new Map()};
-/** Lokasi kosong pertama untuk palet: gedung asal dulu, kalau penuh pindah ke gedung lain (overstock). */
+/** Lokasi kosong pertama untuk palet: gedung asal dulu, kalau penuh pindah ke gedung lain (overstock; kecuali rak Reject/Inkubasi). */
 function freeLoc(p,used){
   const key=p.qc==="Reject"?"Reject":"Simpan",home=p.gudang||"SD18";
   const gs=[home,...GEDS.filter(g=>g!==home)];
@@ -548,24 +574,27 @@ const fmtTime=(t)=>{if(!t)return"";const d=new Date(t);return d.toLocaleDateStri
 function msg(el,cls,text){$(el).innerHTML=text?`<div class="msg ${cls}">${text}</div>`:"";}
 const qcB=(q)=>`<span class="qc ${esc(q)}">${esc(q)}</span>`;
 const qcP=(p)=>qcB(p.qc)+(p.qc==="Campur"&&p.qcItem?`<div class="small">${esc(p.qcItem)}</div>`:"");
-const ovB=(p)=>{if(p.status!=="simpan"||!p.lokasi)return"";const x=L.get(p.lokasi);return x&&p.gudang&&x.ged!==p.gudang?`<span class="ovb">Overstock ${esc(x.ged)}</span>`:"";};
+/** Overstock = gedung lokasi beda dengan gudang asal produk, KECUALI di rak Inkubasi / Reject (rak khusus SD18). */
+const NO_OV=["Reject","Inkubasi"];
+const isOv=(p,x)=>!!(x&&p&&p.gudang&&x.ged!==p.gudang&&!NO_OV.includes(x.fungsi));
+const ovB=(p)=>{if(p.status!=="simpan"||!p.lokasi)return"";const x=L.get(p.lokasi);return isOv(p,x)?`<span class="ovb">Overstock ${esc(x.ged)}</span>`:"";};
 const palTxt=(p)=>`<b>${esc(p.batch)}</b> · palet <span class="mono">${esc(p.palet)}</span> · no <span class="mono">${esc(p.mat)}</span>${ovB(p)}`;
-const where=(p)=>p.status==="label"?"Belum diterima gudang":p.status==="tunggu"?"Menunggu ditaruh":(p.lokasi||"-");
+const where=(p)=>p.status==="label"?"Belum diterima gudang":p.status==="tunggu"?"Menunggu diletakkan":(p.lokasi||"-");
 
 function render(){
   D=derive();
   $("stTerisi").textContent=D.occ.size;$("stKosong").textContent=D.free;$("stTunggu").textContent=D.wait.length;
   $("cntWait").textContent=D.wait.length;
-  $("listWait").innerHTML=D.wait.length?D.wait.map((p,i)=>{const loc=D.rek.get(p.id),x=loc&&L.get(loc),ov=x&&p.gudang&&x.ged!==p.gudang;
+  $("listWait").innerHTML=D.wait.length?D.wait.map((p,i)=>{const loc=D.rek.get(p.id),x=loc&&L.get(loc),ov=isOv(p,x);
     return `<div class="card" data-id="${esc(p.id)}">
       <div class="row"><span class="num">#${i+1} · ${esc(p.gudang)}</span><span>${qcP(p)}</span></div>
       <div class="meta">${palTxt(p)}<br><span class="small">${esc(p.nama)}</span></div>
-      <div class="row"><span class="small">Taruh di</span>${loc?`<span><span class="loc ${ov?"ov":""}">${loc}</span>${ov?`<span class="ovb">Overstock ${esc(x.ged)}</span>`:""}</span>`:`<span class="msg bad" style="margin:0">Rak penuh</span>`}</div>
+      <div class="row"><span class="small">Letakkan di</span>${loc?`<span><span class="loc ${ov?"ov":""}">${loc}</span>${ov?`<span class="ovb">Overstock ${esc(x.ged)}</span>`:""}</span>`:`<span class="msg bad" style="margin:0">Rak penuh</span>`}</div>
       <div data-confirm></div>
       <div class="acts"><button class="btn pri" data-act="rak" ${loc?"":"disabled"}>Scan label rak</button>
-        <button class="btn" data-act="place" ${loc?"":"disabled"}>Sudah ditaruh</button>
+        <button class="btn" data-act="place" ${loc?"":"disabled"}>Sudah diletakkan</button>
         <button class="btn ghost" data-act="cancel">Batal terima</button></div></div>`;}).join("")
-    :`<div class="empty">Tidak ada palet yang menunggu ditaruh.</div>`;
+    :`<div class="empty">Tidak ada palet yang menunggu diletakkan.</div>`;
   $("secMis").hidden=!D.mis.length;$("cntMis").textContent=D.mis.length;
   $("listMis").innerHTML=D.mis.map(p=>{const x=L.get(p.lokasi),why=locRule(p.qc,x.fungsi,x.fungsi),rec=D.misRec.get(p.id);
     return `<div class="card" data-mid="${esc(p.id)}">
@@ -604,9 +633,9 @@ function renderInResult(){
   const items=LASTIN.map(id=>S.pal.get(id)).filter(p=>p&&(p.status==="tunggu"||p.status==="simpan"));
   if(!items.length){$("inResult").innerHTML="";return;}
   const nw=items.filter(p=>p.status==="tunggu").length;
-  $("inResult").innerHTML=`<div class="sec"><h3><span>Rekomendasi peletakan</span><span>${items.length-nw} dari ${items.length} sudah ditaruh</span></h3>
-    <p class="small" style="margin:0 0 8px">Taruh palet di lokasi kuning, lalu <b>ceklis</b> satu per satu. Di peta, kotak kuning = taruh di sini.</p>
-    <div class="tw"><table class="t"><thead><tr><th>#</th><th>Palet</th><th>QC</th><th>Taruh di</th><th>Ditaruh</th></tr></thead><tbody>${items.map((p,i)=>{const done=p.status==="simpan",loc=done?p.lokasi:D.rek.get(p.id);
+  $("inResult").innerHTML=`<div class="sec"><h3><span>Rekomendasi peletakan</span><span>${items.length-nw} dari ${items.length} sudah diletakkan</span></h3>
+    <p class="small" style="margin:0 0 8px">Letakkan palet di lokasi kuning, lalu <b>ceklis</b> satu per satu. Di peta, kotak kuning = letakkan di sini.</p>
+    <div class="tw"><table class="t"><thead><tr><th>#</th><th>Palet</th><th>QC</th><th>Letakkan di</th><th>Sudah</th></tr></thead><tbody>${items.map((p,i)=>{const done=p.status==="simpan",loc=done?p.lokasi:D.rek.get(p.id);
       return `<tr><td class="num">${i+1}</td><td>${palTxt(p)}</td><td>${qcP(p)}</td><td>${loc?`<span class="loc sm ${done?"done":""}">${esc(loc)}</span>`:`<span class="qc Reject">Rak penuh</span>`}</td>
         <td><input type="checkbox" data-placeck="${esc(p.id)}" ${done?"checked disabled":""} ${!done&&!loc?"disabled":""} style="width:26px;height:26px"></td></tr>`;}).join("")}</tbody></table></div>
     <div class="acts" style="margin-top:10px"><button class="btn pri" id="btnMapRek">Lihat di peta</button>${nw?`<button class="btn ok" id="btnPlaceAll">Ceklis semua (${nw} palet)</button>`:""}</div></div>`;
@@ -747,7 +776,7 @@ function renderMap(){
         else if(S.cari.has(c))cls="f";else if(op){const q=op.qc;cls=q==="Release"?"sR":q==="Reject"?"sX":q==="Campur"?"sC":"sI";}
         else if(D.rekLoc.has(c)){cls="r";t="#"+D.rekLoc.get(c).n;}
         const hp=op||(D.rekLoc.has(c)?D.rekLoc.get(c).p:null);
-        if(hp&&hp.gudang&&hp.gudang!==g)cls+=" ov";
+        if(isOv(hp,L.get(c)))cls+=" ov";
         h+=`<button class="cell ${cls}" data-loc="${c}" aria-label="${c}">${t}</button>`;}
       h+=`</div>`;});
   });
@@ -824,7 +853,7 @@ function scanInOne(text){
   const tag=`${esc(p.batch)} no ${esc(p.mat)}`,q=S.pal.get(p.id);
   if(!q)return {ok:false,html:`GAGAL<small>${tag}: label tidak ditemukan / sudah keluar / dibatalkan</small>`,short:`GAGAL · ${tag} · tidak ditemukan`};
   if(Q.inn.includes(p.id))return {ok:false,html:`SUDAH ADA<small>${tag} sudah di antrean</small>`,short:`DOBEL · ${tag}`};
-  if(q.status!=="label"){const w=q.status==="tunggu"?"sudah diterima, menunggu ditaruh":"sudah tersimpan di "+q.lokasi;
+  if(q.status!=="label"){const w=q.status==="tunggu"?"sudah diterima, menunggu diletakkan":"sudah tersimpan di "+q.lokasi;
     return {ok:false,html:`GAGAL<small>${tag}: ${esc(w)}</small>`,short:`GAGAL · ${tag} · ${esc(w)}`};}
   Q.inn.push(p.id);saveQ();renderQ();
   return {ok:true,html:`SUKSES · ${tag}<small>${q.qc==="Reject"?"REJECT · ":""}Masuk antrean #${Q.inn.length}</small>`,short:`${tag} → antrean #${Q.inn.length}`};
@@ -850,7 +879,7 @@ $("iFind").addEventListener("click",()=>{
   const res=findPal(b,g,["label"]);
   if(!res.length){INRES=null;
     const any=findPal(b,g,null);
-    $("inFindResult").innerHTML=`<div class="msg bad">GAGAL: ${any.length?esc(any[0].batch+" no "+any[0].mat+": "+(any[0].status==="tunggu"?"sudah diterima, menunggu ditaruh":"sudah tersimpan di "+any[0].lokasi)):"label tidak ditemukan / sudah keluar / dibatalkan"}.</div>`;return;}
+    $("inFindResult").innerHTML=`<div class="msg bad">GAGAL: ${any.length?esc(any[0].batch+" no "+any[0].mat+": "+(any[0].status==="tunggu"?"sudah diterima, menunggu diletakkan":"sudah tersimpan di "+any[0].lokasi)):"label tidak ditemukan / sudah keluar / dibatalkan"}.</div>`;return;}
   INRES={ids:res.map(p=>p.id)};renderInRes();
 });
 $("inFindResult").addEventListener("click",e=>{
@@ -1112,6 +1141,7 @@ function labelHtml(p){
   </table>`;
 }
 function printLabels(list){
+  $("pageCss").textContent="@page{size:A4 portrait;margin:0}";
   let pg="";for(let i=0;i<list.length;i+=4)pg+=`<div class="page">${list.slice(i,i+4).map(p=>`<div class="sheet">${labelHtml(p)}</div>`).join("")}</div>`;
   $("printArea").innerHTML=pg;
   setTimeout(()=>window.print(),400);
@@ -1159,10 +1189,53 @@ document.querySelectorAll("[data-qc]").forEach(b=>b.addEventListener("click",asy
   const r=await act({action:"qc",items,status:st},"qcMsg");
   if(r.ok){msg("qcMsg",/dipecah|harus dipindah/.test(r.msg)?"wait":"ok",esc(r.msg)+" Cap label fisik sesuai status ini.");qSel.clear();renderQC();}
 }));
-$("btnScanQC").addEventListener("click",()=>openScanner({title:"Scan untuk QC",sub:"Scan QR palet",continuous:false,onCode:(txt)=>{
-  const p=parseQR(txt);if(p.err)return {ok:false,html:`GAGAL<small>${esc(p.err)}</small>`};
-  setTimeout(()=>{$("qBatch").value=p.batch;qSel.clear();const q=p.id&&S.pal.get(p.id);if(q)qSel.set(q.id,new Set(q.nums));renderQC();},50);return {ok:true};
-}}));
+
+/* =================== CETAK PALET KELUAR (per tanggal & jam) =================== */
+const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());};
+const addDay=(iso)=>{const d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+1);return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());};
+const hariTgl=(iso)=>new Date(iso+"T12:00:00").toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+$("kTgl").value=todayISO();
+let KEL={rows:[],judul:""};
+function kRange(){
+  const t=$("kTgl").value,a=$("kDari").value||"00:00",b=$("kSampai").value||"23:59";
+  if(!t)return null;
+  const tb=b<a?addDay(t):t;               // lewat tengah malam (mis. 22:00 - 02:00)
+  return {dari:t+" "+a,sampai:tb+" "+b,judul:hariTgl(t)+", jam "+a+" – "+b+(tb!==t?" (hari berikutnya)":"")};
+}
+const sortKel=(rows)=>rows.slice().sort((x,y)=>String(x.batch).localeCompare(String(y.batch))||(x.matA||0)-(y.matA||0)||palNum(x)-palNum(y));
+function kTotals(rows){const m=new Map();rows.forEach(p=>{const u=p.satuan||"";m.set(u,(m.get(u)||0)+(Number(p.jumlah)||0));});
+  return [...m].map(([u,n])=>n.toLocaleString("id-ID")+(u?" "+esc(u):"")).join(" + ");}
+function kTable(rows){
+  return `<table><thead><tr><th class="n">No</th><th>Batch</th><th>Nomor Material</th><th class="n">Quantity</th></tr></thead><tbody>${
+    rows.map((p,i)=>`<tr><td class="n">${i+1}</td><td>${esc(p.batch)}</td><td>${esc(p.mat)}</td><td class="n">${esc(p.jumlah)} ${esc(p.satuan||"")}</td></tr>`).join("")
+  }</tbody><tfoot><tr><td colspan="3">Total ${rows.length} palet</td><td class="n">${kTotals(rows)}</td></tr></tfoot></table>`;
+}
+$("kShow").addEventListener("click",async()=>{
+  const r=kRange();if(!r){msg("kResult","bad","Pilih tanggal dulu.");return;}
+  $("kShow").disabled=true;$("kPrint").disabled=true;msg("kResult","wait","Mengambil data…");
+  try{
+    const res=await fetch(apiUrl()+"?action=keluar&dari="+encodeURIComponent(r.dari)+"&sampai="+encodeURIComponent(r.sampai)+"&t="+Date.now(),{redirect:"follow"});
+    const d=await res.json();
+    if(!d||d.ok===false||!Array.isArray(d.rows))throw new Error(d&&d.msg||"Server belum diperbarui ke versi 3.6");
+    KEL={rows:sortKel(d.rows.map(fromRow)),judul:r.judul};
+    $("kCount").textContent=KEL.rows.length+" palet";
+    $("kResult").innerHTML=KEL.rows.length?`<div class="small" style="margin-bottom:6px">${esc(r.judul)}</div><div class="rep" style="overflow-x:auto">${kTable(KEL.rows)}</div>`
+      :`<div class="empty">Tidak ada palet keluar pada ${esc(r.judul)}.</div>`;
+    $("kPrint").disabled=!KEL.rows.length;
+  }catch(e){msg("kResult","bad","Gagal mengambil data: "+esc(e.message));$("kCount").textContent="";}
+  $("kShow").disabled=false;
+});
+["kTgl","kDari","kSampai"].forEach(id=>$(id).addEventListener("change",()=>{$("kPrint").disabled=true;}));
+$("kPrint").addEventListener("click",()=>{
+  if(!KEL.rows.length)return;
+  const css=$("pageCss"),old=css.textContent;
+  css.textContent="@page{size:A4 portrait;margin:12mm}";
+  $("printArea").innerHTML=`<div class="rep"><h1>Daftar Palet Keluar</h1>
+    <p class="sub">${esc(KEL.judul)} · ${KEL.rows.length} palet · dicetak ${esc(new Date().toLocaleString("id-ID",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}))}</p>${kTable(KEL.rows)}</div>`;
+  const back=()=>{css.textContent=old;window.removeEventListener("afterprint",back);};
+  window.addEventListener("afterprint",back);
+  setTimeout(()=>window.print(),300);
+});
 
 /* =================== PENGATURAN =================== */
 $("btnReset").addEventListener("click",async()=>{
