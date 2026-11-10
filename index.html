@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Scan Palet">
+<meta name="apple-mobile-web-app-title" content="ScanLoc">
 <meta name="theme-color" content="#1E2A36">
-<title>Scan Palet SD17 & SD18</title>
+<title>ScanLoc</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap">
 <script>
@@ -103,6 +103,21 @@ input,select,textarea{font:500 16px var(--ui);color:var(--ink);background:var(--
 .rep thead{display:table-header-group}
 .rep tr{break-inside:avoid}
 .rep tfoot td{font-weight:700}
+.rep h2{font-size:12pt;margin:6mm 0 2mm}
+.rep .sub{font-size:10.5pt;margin:0 0 5mm}
+.rep tr.grp td{background:#EAF0FB;font-weight:700;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rep tr.sub td{font-style:italic;color:#333}
+.rep tr.psub td{font-weight:700}
+.rep table.info{margin-bottom:2mm}
+.rep table.info td{width:33.3%;vertical-align:top}
+.rep table.info span{display:block;font-size:8.5pt;color:#555}
+.rep table.info b{font-size:12pt}
+.rep table.sig{margin-top:10mm;table-layout:fixed}
+.rep table.sig td{text-align:center;font-weight:600}
+.rep table.sig tr:nth-child(2) td{height:22mm}
+.rep table.sig tr:nth-child(3) td{text-align:left;font-weight:400;font-size:9pt}
+.shipbox{background:var(--blue-bg);border:1px solid var(--blue);border-radius:12px;padding:10px 12px;margin:0 0 12px}
+.shipbox .form3{margin-top:8px}
 .form2{display:grid;grid-template-columns:3fr 2fr auto;gap:8px;align-items:end;margin-top:12px}
 .form2 label{font-size:12px;color:var(--muted);display:grid;gap:4px}
 .or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin:16px 0 0}
@@ -187,7 +202,7 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
 <body>
 
 <header class="top"><div class="in">
-  <h1>SCAN PALET <span>SD17 · SD18</span></h1>
+  <h1>ScanLoc</h1>
   <div class="stats"><span><b id="stTerisi">0</b>terisi</span><span><b id="stKosong">0</b>kosong</span><span><b id="stTunggu">0</b>menunggu</span></div>
   <div class="conn" id="conn">Menghubungkan ke Google Sheets…</div>
 </div></header>
@@ -227,6 +242,14 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
   <section id="tab-keluar" hidden>
     <h2>Barang keluar</h2>
     <p class="hint">Hanya palet <b>Release</b> yang boleh keluar. Palet <b>Reject</b> boleh keluar kalau sudah di rak reject. Scan atau isi manual beberapa palet ke <b>Daftar keluar</b>, lihat lokasinya di peta (warna <b>Picking</b>), lalu klik Konfirmasi keluar.</p>
+    <div class="shipbox">
+      <div class="small"><b>Data shipment</b> (sesuai allocation sheet). Semua palet yang dikonfirmasi keluar dicatat ke shipment ini.</div>
+      <div class="form3">
+        <label>Shipment No<input id="sNo" placeholder="Cont 1" autocomplete="off"></label>
+        <label>Lot No<input id="sLot" placeholder="L-YK34708UM1" autocomplete="off" autocapitalize="characters"></label>
+        <label>PO No<input id="sPO" placeholder="YK-BOF-006" autocomplete="off" autocapitalize="characters"></label>
+      </div>
+    </div>
     <button class="big out" id="btnScanOut"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>Scan QR palet keluar</button>
     <div class="or">atau isi manual</div>
     <div class="form2">
@@ -240,12 +263,19 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
       <div class="acts" style="margin-top:10px"><button class="btn pick" id="btnMapOut" disabled>Lihat di peta</button><button class="btn pri" id="btnConfirmOut" disabled>Konfirmasi keluar</button><button class="btn ghost" id="btnClearOut" disabled>Kosongkan</button></div>
     </div>
     <div class="sec"><h3><span>Riwayat keluar</span></h3><div id="listOut"></div></div>
-    <div class="sec"><h3><span>Cetak palet keluar (cocokkan dengan alokasi)</span><span id="kCount"></span></h3>
-      <p class="small" style="margin:0 0 8px">Pilih tanggal dan jam muat. Semua palet yang dikonfirmasi keluar di rentang itu akan tampil: Batch, Nomor Material, Quantity.</p>
-      <div class="form3">
-        <label>Tanggal<input type="date" id="kTgl"></label>
-        <label>Dari jam<input type="time" id="kDari" value="00:00"></label>
-        <label>Sampai jam<input type="time" id="kSampai" value="23:59"></label>
+    <div class="sec"><h3><span>Cetak daftar muat (cocokkan dengan allocation sheet)</span><span id="kCount"></span></h3>
+      <div class="seg" id="kMode"><button data-km="ship" aria-pressed="true">Per shipment</button><button data-km="time" aria-pressed="false">Per tanggal &amp; jam</button></div>
+      <div id="kShipBox">
+        <div class="form2" style="grid-template-columns:1fr auto;margin-top:0"><label>Shipment<select id="kShip"><option value="">Memuat…</option></select></label><button class="btn ghost" id="kShipReload">Muat ulang</button></div>
+        <p class="small" style="margin:6px 0 0">Isi cetakan: Shipment No, Lot No, PO No, ringkasan per produk, rincian per batch (Nomor Material, Quantity), total, dan kolom tanda tangan.</p>
+      </div>
+      <div id="kTimeBox" hidden>
+        <p class="small" style="margin:0 0 8px">Pilih tanggal dan jam muat. Semua palet yang dikonfirmasi keluar di rentang itu akan tampil: Batch, Nomor Material, Quantity.</p>
+        <div class="form3">
+          <label>Tanggal<input type="date" id="kTgl"></label>
+          <label>Dari jam<input type="time" id="kDari" value="00:00"></label>
+          <label>Sampai jam<input type="time" id="kSampai" value="23:59"></label>
+        </div>
       </div>
       <div class="acts" style="margin:10px 0"><button class="btn pri" id="kShow">Tampilkan</button><button class="btn" id="kPrint" disabled>Cetak</button></div>
       <div id="kResult"></div>
@@ -318,7 +348,7 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
       <div class="sec"><h3><span>Cetak label (A4, 4 label per lembar)</span><span id="prCount"></span></h3>
         <div class="form2" style="grid-template-columns:1fr auto;margin-top:0"><input id="hFilter" placeholder="Filter No Batch" autocomplete="off" autocapitalize="characters">
           <label style="display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap"><input type="checkbox" id="hShowAll" style="width:18px;height:18px"> Tampilkan yang sudah dicetak</label></div>
-        <div class="acts" style="margin:10px 0"><button class="btn sm" id="hAll">Pilih semua</button><button class="btn sm ghost" id="hNone">Batal pilih</button><button class="btn sm pri" id="hPrint">Cetak terpilih</button></div>
+        <div class="acts" style="margin:10px 0"><button class="btn sm" id="hAll">Pilih semua</button><button class="btn sm ghost" id="hNone">Batal pilih</button><button class="btn sm pri" id="hPrint">Cetak terpilih</button><button class="btn sm red" id="hVoid">Batalkan terpilih</button></div>
         <div class="tw"><table class="t"><thead><tr><th></th><th>Batch</th><th>Palet</th><th>No Material</th><th>Cetak</th><th></th></tr></thead><tbody id="hBody"></tbody></table></div>
         <p class="small">Setelan print: kertas A4, Margins None, Scale 100%, centang Background graphics.</p>
       </div>
@@ -450,7 +480,8 @@ function fromRow(o){return {id:o.ID,item:o.Item,nama:o.NamaProduk,batch:o.Batch,
   jumlah:o.Jumlah,satuan:o.Satuan,gudang:o.Gudang,prod:o.TglProduksi,exp:o.TglKadaluarsa,lot:o.NoLot,mesin:o.KodeMesin,kemas:o.WaktuKemas,
   ket:o.Keterangan,oleh:o.DiinputOleh,qr:o.QR,status:o.Status,qc:o.StatusQC||"Inkubasi",qcItem:o.QCItem||"",lokasi:o.Lokasi,alasan:o.AlasanBatal,
   tLabel:ts(o.WaktuLabel),tMasuk:ts(o.WaktuMasuk),tSimpan:ts(o.WaktuSimpan),tKeluar:ts(o.WaktuKeluar),
-  nums:matNums(o.NoMaterial)||[],cetak:+o.JmlCetak||0,tCetak:ts(o.WaktuCetak)};}
+  nums:matNums(o.NoMaterial)||[],cetak:+o.JmlCetak||0,tCetak:ts(o.WaktuCetak),
+  wKeluar:o.WaktuKeluar||"",ship:{shipment:o.ShipmentNo||"",lot:o.LotNo||"",po:o.PONo||""}};}
 function applyData(d){if(!d)return;const m=new Map();(d.rows||[]).forEach(o=>{const p=fromRow(o);m.set(p.id,p);});
   S.pal=m;S.out=(d.out||[]).map(fromRow);S.batal=(d.batal||[]).map(fromRow);pruneQ();render();
   $("conn").textContent="Tersambung · data di Google Sheets · diperbarui "+new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"});}
@@ -494,7 +525,7 @@ async function batchAct(body,el){
   $("busy").hidden=false;
   for(let i=0;i<items.length;i++){
     $("busy").textContent=`Memproses ${i+1} dari ${items.length}…`;
-    const it=items[i],q={action:SINGLE[body.action],id:it.id};if(it.lokasi)q.lokasi=it.lokasi;
+    const it=items[i],q={action:SINGLE[body.action],id:it.id};if(it.lokasi)q.lokasi=it.lokasi;if(body.ship)q.ship=body.ship;
     const x=await act(q,null,true);
     if(x.ok)done.push(it.id);else failed.push({id:it.id,msg:x.msg});
   }
@@ -608,7 +639,8 @@ function render(){
       <div class="acts"><button class="btn acc" data-mv="scan">Scan label rak</button><button class="btn" data-mv="ok" ${rec?"":"disabled"}>Sudah dipindah</button></div></div>`;}).join("");
   const recent=[...D.stored].sort((a,b)=>b.tSimpan-a.tSimpan).slice(0,5);
   $("listStored").innerHTML=recent.length?recent.map(p=>`<div class="card"><div class="row"><span class="meta">${palTxt(p)}</span><span class="loc sm done">${esc(p.lokasi)}</span></div></div>`).join(""):`<div class="empty">Belum ada.</div>`;
-  $("listOut").innerHTML=S.out.length?S.out.map(p=>`<div class="card"><div class="row"><span class="meta">${palTxt(p)}<br><span class="small">${fmtTime(p.tKeluar)}</span></span><span class="loc sm">${esc(p.lokasi||"-")}</span></div></div>`).join(""):`<div class="empty">Belum ada palet keluar.</div>`;
+  $("listOut").innerHTML=S.out.length?S.out.map(p=>`<div class="card" data-oid="${esc(p.id)}"><div class="row"><span class="meta">${palTxt(p)}<br><span class="small">${fmtTime(p.tKeluar)} · ${p.ship.shipment?`<b>${esc(p.ship.shipment)}</b> · PO ${esc(p.ship.po||"-")}`:"tanpa shipment"}</span></span><span class="loc sm">${esc(p.lokasi||"-")}</span></div>
+    <div class="acts" style="margin-top:6px"><button class="btn sm ghost" data-reship>Ubah ke shipment aktif</button></div></div>`).join(""):`<div class="empty">Belum ada palet keluar.</div>`;
   renderQ();renderInResult();if(OUTRES)renderOutRes();renderInRes();
   renderCari();renderMv();renderMap();renderHistory();renderQC();renderPreview();
 }
@@ -623,7 +655,7 @@ function renderQ(){
     return `<tr><td class="num">${i+1}</td><td>${p?palTxt(p):esc(id)}</td><td>${p?qcP(p):""}</td><td><button class="btn sm ghost" data-rmin="${esc(id)}">Hapus</button></td></tr>`;}).join("")}</tbody></table></div>`
     :`<div class="empty">Belum ada palet di antrean. Scan QR atau isi manual.</div>`;
   $("cntOutQ").textContent=no;
-  $("btnConfirmOut").disabled=!no;$("btnConfirmOut").textContent=no?`Konfirmasi keluar ${no} palet`:"Konfirmasi keluar";
+  $("btnConfirmOut").disabled=!no;$("btnConfirmOut").textContent=no?`Konfirmasi keluar ${no} palet`+(shipNow().shipment?` → ${shipNow().shipment}`:""):"Konfirmasi keluar";
   $("btnMapOut").disabled=!no;$("btnClearOut").disabled=!no;
   $("listOutQ").innerHTML=no?Q.out.map((id,i)=>{const p=S.pal.get(id);
     return `<div class="card"><div class="row"><span class="num">Picking #${i+1}</span>${p?qcP(p):""}</div>
@@ -972,11 +1004,26 @@ $("oFind").addEventListener("click",()=>{const b=$("oBatch").value.trim(),g=$("o
   if(!b){$("outResult").innerHTML=`<div class="msg bad">Isi No Batch (No Material boleh kosong).</div>`;return;}
   if(g&&!matNums(g)){$("outResult").innerHTML=`<div class="msg bad">No Material ditulis seperti 01-14, 07, atau 01-11, 13.</div>`;return;}
   showOut(findPal(b,g,g?null:["simpan"]),g?`Batch ${esc(b)} no ${esc(g)}`:`Batch ${esc(b)} di rak`);});
+/* ---------- data shipment aktif (diingat di perangkat ini) ---------- */
+function shipNow(){return {shipment:$("sNo").value.trim(),lot:$("sLot").value.trim(),po:$("sPO").value.trim()};}
+(function(){let v={};try{v=JSON.parse(lsGet("scanlocShip")||"{}");}catch(e){}
+  $("sNo").value=v.shipment||"";$("sLot").value=v.lot||"";$("sPO").value=v.po||"";})();
+["sNo","sLot","sPO"].forEach(id=>$(id).addEventListener("input",()=>{lsSet("scanlocShip",JSON.stringify(shipNow()));renderQ();}));
+$("listOut").addEventListener("click",async e=>{
+  if(!e.target.closest("[data-reship]"))return;const id=e.target.closest("[data-oid]").dataset.oid,p=S.out.find(x=>x.id===id);if(!p)return;
+  const sh=shipNow();if(!sh.shipment){$("outResult").innerHTML=`<div class="msg bad">Isi Data shipment di atas dulu (Shipment No wajib), lalu ketuk lagi.</div>`;window.scrollTo(0,0);return;}
+  if(!confirm(`Ubah shipment palet ${p.batch} no ${p.mat} menjadi ${sh.shipment} / Lot ${sh.lot||"-"} / PO ${sh.po||"-"}?`))return;
+  const r=await act({action:"ship",ids:[id],ship:sh},"outResult");
+  if(r.ok){$("outResult").innerHTML=`<div class="msg ok">${esc(r.msg)}</div>`;loadShips(true);}
+});
 async function confirmOut(){
   const ids=Q.out.filter(id=>{const p=S.pal.get(id);return p&&p.status==="simpan";});
   if(!ids.length){$("outResult").innerHTML=`<div class="msg bad">Daftar keluar kosong.</div>`;return;}
+  const ship=shipNow();
+  if(!ship.shipment&&!confirm("Shipment No masih kosong. Tetap keluarkan palet tanpa data shipment?"))return;
   const snap=new Map(ids.map(id=>[id,S.pal.get(id)]));
-  const r=await batchAct({action:"outBatch",ids},"outResult");if(!r.ok)return;
+  const r=await batchAct({action:"outBatch",ids,ship},"outResult");if(!r.ok)return;
+  loadShips(true);
   OUTRES=null;
   const locs=(r.done||[]).map(id=>snap.get(id)).filter(Boolean).map(p=>`<span class="loc sm done">${esc(p.lokasi)}</span>`).join(" ");
   const nf=(r.failed||[]).length;
@@ -1112,6 +1159,15 @@ $("hPrint").addEventListener("click",async()=>{
   await act({action:"printed",ids},"msgProd",true);
   msg("msgProd","ok",`${ids.length} label dikirim ke printer.`);
 });
+$("hVoid").addEventListener("click",async()=>{
+  const sel=[...hSel].map(id=>S.pal.get(id)).filter(Boolean),can=sel.filter(p=>p.status==="label");
+  if(!sel.length){msg("msgProd","bad","Centang label yang mau dibatalkan dulu (atau tekan Pilih semua).");return;}
+  if(!can.length){msg("msgProd","bad","Label terpilih sudah diterima gudang, tidak bisa dibatalkan.");return;}
+  const al=prompt(`Batalkan ${can.length} label`+(sel.length>can.length?` (${sel.length-can.length} lainnya sudah diterima gudang, dilewati)`:"")+`?\nTulis alasan pembatalan:`,"");
+  if(al===null)return;
+  const r=await act({action:"voidBatch",ids:can.map(p=>p.id),alasan:al.trim()||"-"},"msgProd");
+  if(r.ok){hSel.clear();renderHistory();msg("msgProd","wait",esc(r.msg));}
+});
 $("hBody").addEventListener("click",async e=>{
   const tr=e.target.closest("[data-hid]");if(!tr||!e.target.closest("[data-void]"))return;const p=S.pal.get(tr.dataset.hid);if(!p)return;
   const cell=e.target.closest("td");
@@ -1193,12 +1249,13 @@ document.querySelectorAll("[data-qc]").forEach(b=>b.addEventListener("click",asy
   if(r.ok){msg("qcMsg",/dipecah|harus dipindah/.test(r.msg)?"wait":"ok",esc(r.msg)+" Cap label fisik sesuai status ini.");qSel.clear();renderQC();}
 }));
 
-/* =================== CETAK PALET KELUAR (per tanggal & jam) =================== */
+/* =================== CETAK DAFTAR MUAT (per shipment / per tanggal & jam) =================== */
 const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());};
 const addDay=(iso)=>{const d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+1);return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());};
 const hariTgl=(iso)=>new Date(iso+"T12:00:00").toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+const jamDari=(t)=>String(t||"").slice(11,16);
 $("kTgl").value=todayISO();
-let KEL={rows:[],judul:""};
+let KEL={rows:[],title:"",body:""},KMODE="ship",SHIPS=[];
 function kRange(){
   const t=$("kTgl").value,a=$("kDari").value||"00:00",b=$("kSampai").value||"23:59";
   if(!t)return null;
@@ -1208,33 +1265,82 @@ function kRange(){
 const sortKel=(rows)=>rows.slice().sort((x,y)=>String(x.batch).localeCompare(String(y.batch))||(x.matA||0)-(y.matA||0)||palNum(x)-palNum(y));
 function kTotals(rows){const m=new Map();rows.forEach(p=>{const u=p.satuan||"";m.set(u,(m.get(u)||0)+(Number(p.jumlah)||0));});
   return [...m].map(([u,n])=>n.toLocaleString("id-ID")+(u?" "+esc(u):"")).join(" + ");}
+/** Tabel sederhana (mode tanggal & jam): Batch, Nomor Material, Quantity. */
 function kTable(rows){
   return `<table><thead><tr><th class="n">No</th><th>Batch</th><th>Nomor Material</th><th class="n">Quantity</th></tr></thead><tbody>${
     rows.map((p,i)=>`<tr><td class="n">${i+1}</td><td>${esc(p.batch)}</td><td>${esc(p.mat)}</td><td class="n">${esc(p.jumlah)} ${esc(p.satuan||"")}</td></tr>`).join("")
   }</tbody><tfoot><tr><td colspan="3">Total ${rows.length} palet</td><td class="n">${kTotals(rows)}</td></tr></tfoot></table>`;
 }
+/** Laporan per shipment: kepala (Shipment/Lot/PO), ringkasan per produk, rincian per produk & batch, total, tanda tangan. */
+function shipReport(rows,sh){
+  const first=rows[0],last=rows[rows.length-1];
+  const tAw=first&&first.wKeluar||"",tAk=last&&last.wKeluar||"";
+  const tgl=tAw?hariTgl(tAw.slice(0,10))+", "+jamDari(tAw)+(tAk.slice(0,10)!==tAw.slice(0,10)?" – "+hariTgl(tAk.slice(0,10))+", ":" – ")+jamDari(tAk):"-";
+  const prods=new Map();rows.forEach(p=>{const k=p.item||"-";if(!prods.has(k))prods.set(k,{item:k,nama:p.nama,rows:[]});prods.get(k).rows.push(p);});
+  const P=[...prods.values()].sort((a,b)=>String(a.item).localeCompare(String(b.item)));
+  let no=0,det="";
+  P.forEach(pr=>{
+    pr.rows=sortKel(pr.rows);
+    det+=`<tr class="grp"><td colspan="4">${esc(pr.item)} — ${esc(pr.nama||"")}</td></tr>`;
+    const bt=new Map();pr.rows.forEach(p=>{if(!bt.has(p.batch))bt.set(p.batch,[]);bt.get(p.batch).push(p);});
+    bt.forEach((list,b)=>{
+      list.forEach(p=>{det+=`<tr><td class="n">${++no}</td><td>${esc(p.batch)}</td><td>${esc(p.mat)}</td><td class="n">${esc(p.jumlah)} ${esc(p.satuan||"")}</td></tr>`;});
+      if(bt.size>1||list.length>1)det+=`<tr class="sub"><td></td><td colspan="2">Subtotal batch ${esc(b)} (${list.length} palet)</td><td class="n">${kTotals(list)}</td></tr>`;
+    });
+    det+=`<tr class="psub"><td></td><td colspan="2">Total ${esc(pr.item)} (${pr.rows.length} palet)</td><td class="n">${kTotals(pr.rows)}</td></tr>`;
+  });
+  return `<table class="info"><tr><td><span>Shipment No</span><b>${esc(sh.shipment||"-")}</b></td><td><span>Lot No</span><b>${esc(sh.lot||"-")}</b></td><td><span>PO No</span><b>${esc(sh.po||"-")}</b></td></tr>
+      <tr><td colspan="3"><span>Waktu muat</span><b>${esc(tgl)}</b></td></tr></table>
+    <h2>Ringkasan per produk</h2>
+    <table><thead><tr><th>Item Code</th><th>Nama Produk</th><th class="n">Palet</th><th class="n">Quantity</th></tr></thead><tbody>${
+      P.map(pr=>`<tr><td>${esc(pr.item)}</td><td>${esc(pr.nama||"")}</td><td class="n">${pr.rows.length}</td><td class="n">${kTotals(pr.rows)}</td></tr>`).join("")
+    }</tbody><tfoot><tr><td colspan="2">Total</td><td class="n">${rows.length}</td><td class="n">${kTotals(rows)}</td></tr></tfoot></table>
+    <h2>Rincian palet</h2>
+    <table><thead><tr><th class="n">No</th><th>Batch</th><th>Nomor Material</th><th class="n">Quantity</th></tr></thead><tbody>${det}</tbody>
+      <tfoot><tr><td colspan="3">Total ${rows.length} palet</td><td class="n">${kTotals(rows)}</td></tr></tfoot></table>
+    <table class="sig"><tr><td>Operator</td><td>Checker</td><td>Supervisor</td></tr><tr><td></td><td></td><td></td></tr><tr><td>Nama:</td><td>Nama:</td><td>Nama:</td></tr></table>`;
+}
+async function loadShips(keep){
+  try{
+    const res=await fetch(apiUrl()+"?action=shipments&t="+Date.now(),{redirect:"follow"});const d=await res.json();
+    if(!d||!Array.isArray(d.list))throw new Error("Server belum diperbarui ke versi 3.8");
+    SHIPS=d.list;const cur=keep?$("kShip").value:"";
+    $("kShip").innerHTML=SHIPS.length?SHIPS.map(x=>`<option value="${esc(x.key)}">${esc(x.shipment||"-")} · PO ${esc(x.po||"-")} · Lot ${esc(x.lot||"-")} — ${x.palet} palet, ${esc(fmtTime(ts(x.akhir)))}</option>`).join("")
+      :`<option value="">Belum ada shipment</option>`;
+    if(cur&&SHIPS.some(x=>x.key===cur))$("kShip").value=cur;
+  }catch(e){$("kShip").innerHTML=`<option value="">Gagal memuat (${esc(e.message)})</option>`;SHIPS=[];}
+}
+$("kMode").addEventListener("click",e=>{const b=e.target.closest("[data-km]");if(!b)return;KMODE=b.dataset.km;
+  document.querySelectorAll("#kMode button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+  $("kShipBox").hidden=KMODE!=="ship";$("kTimeBox").hidden=KMODE!=="time";$("kPrint").disabled=true;$("kResult").innerHTML="";$("kCount").textContent="";
+  if(KMODE==="ship")loadShips(true);});
+$("kShipReload").addEventListener("click",()=>loadShips(true));
 $("kShow").addEventListener("click",async()=>{
-  const r=kRange();if(!r){msg("kResult","bad","Pilih tanggal dulu.");return;}
+  let url,ttl,sh=null;
+  if(KMODE==="ship"){const k=$("kShip").value;sh=SHIPS.find(x=>x.key===k);if(!sh){msg("kResult","bad","Pilih shipment dulu.");return;}
+    url="?action=keluar&ship="+encodeURIComponent(k);ttl="Daftar Muat";}
+  else{const r=kRange();if(!r){msg("kResult","bad","Pilih tanggal dulu.");return;}
+    url="?action=keluar&dari="+encodeURIComponent(r.dari)+"&sampai="+encodeURIComponent(r.sampai);ttl="Daftar Palet Keluar";sh={judul:r.judul};}
   $("kShow").disabled=true;$("kPrint").disabled=true;msg("kResult","wait","Mengambil data…");
   try{
-    const res=await fetch(apiUrl()+"?action=keluar&dari="+encodeURIComponent(r.dari)+"&sampai="+encodeURIComponent(r.sampai)+"&t="+Date.now(),{redirect:"follow"});
-    const d=await res.json();
-    if(!d||d.ok===false||!Array.isArray(d.rows))throw new Error(d&&d.msg||"Server belum diperbarui ke versi 3.6");
-    KEL={rows:sortKel(d.rows.map(fromRow)),judul:r.judul};
-    $("kCount").textContent=KEL.rows.length+" palet";
-    $("kResult").innerHTML=KEL.rows.length?`<div class="small" style="margin-bottom:6px">${esc(r.judul)}</div><div class="rep" style="overflow-x:auto">${kTable(KEL.rows)}</div>`
-      :`<div class="empty">Tidak ada palet keluar pada ${esc(r.judul)}.</div>`;
-    $("kPrint").disabled=!KEL.rows.length;
+    const res=await fetch(apiUrl()+url+"&t="+Date.now(),{redirect:"follow"});const d=await res.json();
+    if(!d||d.ok===false||!Array.isArray(d.rows))throw new Error(d&&d.msg||"Server belum diperbarui ke versi 3.8");
+    const rows=d.rows.map(fromRow);
+    const body=KMODE==="ship"?shipReport(rows,sh):`<p class="sub">${esc(sh.judul)}</p>${kTable(sortKel(rows))}`;
+    KEL={rows,title:ttl,body};
+    $("kCount").textContent=rows.length+" palet";
+    $("kResult").innerHTML=rows.length?`<div class="rep" style="overflow-x:auto">${body}</div>`:`<div class="empty">Tidak ada palet keluar${sh.judul?" pada "+esc(sh.judul):""}.</div>`;
+    $("kPrint").disabled=!rows.length;
   }catch(e){msg("kResult","bad","Gagal mengambil data: "+esc(e.message));$("kCount").textContent="";}
   $("kShow").disabled=false;
 });
-["kTgl","kDari","kSampai"].forEach(id=>$(id).addEventListener("change",()=>{$("kPrint").disabled=true;}));
+["kTgl","kDari","kSampai","kShip"].forEach(id=>$(id).addEventListener("change",()=>{$("kPrint").disabled=true;}));
 $("kPrint").addEventListener("click",()=>{
   if(!KEL.rows.length)return;
   const css=$("pageCss"),old=css.textContent;
   css.textContent="@page{size:A4 portrait;margin:12mm}";
-  $("printArea").innerHTML=`<div class="rep"><h1>Daftar Palet Keluar</h1>
-    <p class="sub">${esc(KEL.judul)} · ${KEL.rows.length} palet · dicetak ${esc(new Date().toLocaleString("id-ID",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}))}</p>${kTable(KEL.rows)}</div>`;
+  $("printArea").innerHTML=`<div class="rep"><h1>ScanLoc — ${esc(KEL.title)}</h1>
+    <p class="sub">${KEL.rows.length} palet · dicetak ${esc(new Date().toLocaleString("id-ID",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}))}</p>${KEL.body}</div>`;
   const back=()=>{css.textContent=old;window.removeEventListener("afterprint",back);};
   window.addEventListener("afterprint",back);
   setTimeout(()=>window.print(),300);
@@ -1258,6 +1364,7 @@ function showTab(t){
   document.querySelectorAll("nav.tabs [data-tab]").forEach(x=>x.setAttribute("aria-selected",x.dataset.tab===t?"true":"false"));
   document.querySelectorAll("main > section").forEach(s=>s.hidden=s.id!=="tab-"+t);
   if(t==="admin")$("apiInfo").innerHTML=apiUrl()?"Server: <b>"+esc(apiUrl().slice(0,70))+"…</b>":"Belum ada link server.";
+  if(t==="keluar"&&KMODE==="ship")loadShips(true);
   lsSet("sd18tab",t);window.scrollTo(0,0);
 }
 document.querySelectorAll("nav.tabs [data-tab]").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
