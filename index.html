@@ -15,16 +15,18 @@ const API_URL = "https://script.google.com/macros/s/AKfycbw_EHZ-aSY8A9Sav6Hf63WK
 </script>
 <style>
 :root{
-  --bg:#EDF0F3; --surface:#FFFFFF; --ink:#1B1F24; --muted:#5E6873; --line:#D3D9E0;
-  --accent:#F2B705; --accent-ink:#1B1F24; --head:#1E2A36;
-  --ok:#22663B; --ok-bg:#D3ECDA; --wait-bg:#FFE9A8; --bad:#A3271A; --bad-bg:#FAD6CF;
+  --bg:#F2F4F7; --surface:#FFFFFF; --ink:#1B1F24; --muted:#5E6873; --line:#D3D9E0;
+  --accent:#EC0087; --accent-ink:#FFFFFF; --accent-bg:#FDE6F2; --head:#1340C1;
+  --blue:#1340C1; --blue-bg:#EAF0FB; --orange:#C2571A;
+  --ok:#22663B; --ok-bg:#D3ECDA; --wait-bg:#FFF1C2; --bad:#B42318; --bad-bg:#FAD6CF;
   --find:#9A4512; --find-bg:#F9D3B6; --ink-bg:#D6E4F5; --ink-t:#1D4E89; --noloc:#8D96A0; --empty:#FFFFFF;
   --pick:#6D28D9; --pick-bg:#E6DAFA; --pick-t:#4C1D95; --pick-ink:#FFFFFF;
   --ov:#0E7490; --ov-bg:#CFF0F7;
   --ui:"Barlow",system-ui,-apple-system,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#12171C; --surface:#1B232B; --ink:#E8EDF2; --muted:#9BA6B1; --line:#2D3842; --head:#0B1015;
+  --bg:#12171C; --surface:#1B232B; --ink:#E8EDF2; --muted:#9BA6B1; --line:#2D3842; --head:#0F2F8F;
+  --accent:#FF3DA8; --accent-ink:#FFFFFF; --accent-bg:#4A1233; --blue:#6E92FF; --blue-bg:#16264D; --orange:#E07A3C;
   --ok:#8FD3A4; --ok-bg:#1E3B29; --wait-bg:#4A3D0D; --bad:#F2A497; --bad-bg:#4A1F1A;
   --find:#F6B48A; --find-bg:#4D2A14; --ink-bg:#1B3350; --ink-t:#A9C8F0; --noloc:#3A444E; --empty:#222C35;
   --pick:#9D6BFF; --pick-bg:#34234F; --pick-t:#D8C2FF; --pick-ink:#12081F;
@@ -37,24 +39,25 @@ body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;
 header.top{position:sticky;top:0;z-index:5;background:var(--head);color:#F4F6F8;padding-top:env(safe-area-inset-top,0px)}
 header.top .in{max-width:760px;margin:0 auto;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;justify-content:space-between}
 header h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.02em}
-header h1 span{color:var(--accent)}
+header h1 span{color:#FFC2E3}
 .stats{display:flex;gap:12px;font-size:13px;font-variant-numeric:tabular-nums}
 .stats b{font-family:var(--mono);font-size:15px;margin-right:3px}
-.conn{font-size:12px;color:#9FB0C0;width:100%}
+.conn{font-size:12px;color:#C9D5F5;width:100%}
 h2{font-size:20px;margin:6px 0 4px}
 .hint{color:var(--muted);font-size:14px;margin:0 0 12px}
 .big{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:62px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font:700 19px var(--ui);cursor:pointer}
-.big.out{background:#C2571A;color:#fff}.big.dark{background:var(--head);color:#fff}
+.big.out{background:var(--orange);color:#fff}.big.dark{background:var(--blue);color:#fff}
 .big svg{width:26px;height:26px}
 button{font-family:var(--ui)}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 input,select,textarea{font:500 16px var(--ui);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;min-width:0}
 .btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:10px 14px;font-weight:600;font-size:15px;cursor:pointer}
-.btn.pri{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.btn.pri{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn.acc{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .btn.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
-.btn.warn{background:#C2571A;color:#fff;border-color:#C2571A}
+.btn.warn{background:var(--orange);color:#fff;border-color:var(--orange)}
 .btn.red{background:#B42318;color:#fff;border-color:#B42318}
-.btn.blue{background:#1D4E89;color:#fff;border-color:#1D4E89}
+.btn.blue{background:var(--blue);color:#fff;border-color:var(--blue)}
 .btn.pick{background:var(--pick);color:var(--pick-ink);border-color:var(--pick)}
 .btn.ghost{background:transparent}
 .btn.sm{padding:6px 10px;font-size:13px}
@@ -70,7 +73,7 @@ input,select,textarea{font:500 16px var(--ui);color:var(--ink);background:var(--
 .mono{font-family:var(--mono);font-weight:700;color:var(--ink)}
 .num{font-family:var(--mono);font-size:13px;color:var(--muted)}
 .small{font-size:12px;color:var(--muted)}
-.loc{display:inline-flex;align-items:center;font-family:var(--mono);font-weight:700;font-size:21px;letter-spacing:.03em;background:var(--accent);color:var(--accent-ink);padding:4px 10px;border-radius:6px;border:2px solid #1B1F24}
+.loc{display:inline-flex;align-items:center;font-family:var(--mono);font-weight:700;font-size:21px;letter-spacing:.03em;background:var(--blue-bg);color:var(--blue);padding:4px 10px;border-radius:6px;border:2px solid var(--blue)}
 .loc.sm{font-size:14px;padding:2px 8px;border-width:1.5px}
 .loc.done{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
 .loc.find{background:var(--find-bg);color:var(--find);border-color:var(--find)}
@@ -106,7 +109,7 @@ input,select,textarea{font:500 16px var(--ui);color:var(--ink);background:var(--
 .or::before,.or::after{content:"";flex:1;border-top:1px solid var(--line)}
 .seg{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 14px}
 .seg button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 16px;font-weight:600;font-size:14px;cursor:pointer}
-.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .info{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--muted)}
 .info b{color:var(--ink)}
 .info ul{margin:6px 0 0;padding-left:18px}
@@ -126,8 +129,8 @@ table.t th{font-size:12px;color:var(--muted);font-weight:600}
 .cell.sI{background:var(--ink-bg);border-color:transparent;color:var(--ink-t)}
 .cell.sC{background:var(--wait-bg);border-color:transparent;color:var(--ink)}
 .cell.sX{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
-.cell.r{background:var(--accent);border-color:#1B1F24;color:#1B1F24;font-weight:700}
-.cell.f{background:#C2571A;color:#fff;border-color:transparent}
+.cell.r{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
+.cell.f{background:var(--orange);color:#fff;border-color:transparent}
 .cell.pk{background:var(--pick);color:var(--pick-ink);border-color:var(--pick-t);border-width:2px;font-weight:700}
 .cell.x{background:var(--noloc);border-color:transparent;cursor:default}
 .cell.ov{border-color:var(--ov);box-shadow:inset 0 0 0 2px var(--ov)}
@@ -140,8 +143,8 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surfa
 nav.tabs .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
 nav.tabs button{border:0;background:none;padding:10px 2px 12px;font:600 13px var(--ui);color:var(--muted);cursor:pointer;display:grid;justify-items:center;gap:3px}
 nav.tabs button svg{width:22px;height:22px}
-nav.tabs button[aria-selected="true"]{color:var(--ink)}
-nav.tabs button[aria-selected="true"] svg{color:#C28F00}
+nav.tabs button[aria-selected="true"]{color:var(--ink);box-shadow:inset 0 3px 0 var(--accent)}
+nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
 .busy{position:fixed;inset:0;z-index:30;background:rgba(10,14,18,.45);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600}
 .scanner{position:fixed;inset:0;z-index:20;background:#0B0F13;color:#fff;display:flex;flex-direction:column;padding:calc(10px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px))}
 .scanner .sh{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
@@ -156,7 +159,7 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
 .scanlist .g{color:#8FD3A4}.scanlist .r{color:#F2A497}
 .scanner .acts{max-width:560px;width:100%;margin:10px auto 0}
 .scanner .btn{background:#26323D;color:#fff;border-color:#33414E}
-.scanner .btn.ok{background:var(--accent);color:#111;border-color:var(--accent)}
+.scanner .btn.ok{background:var(--accent);color:#fff;border-color:var(--accent)}
 .setup{background:var(--wait-bg);border-radius:12px;padding:14px;margin-bottom:14px;display:grid;gap:8px}
 /* ---------- LABEL CETAK: A4, 4 label per lembar ---------- */
 #printArea{display:none}
@@ -234,7 +237,7 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
     <div id="outResult"></div>
     <div class="sec"><h3><span>Daftar keluar (Picking)</span><span id="cntOutQ">0</span></h3>
       <div id="listOutQ"></div>
-      <div class="acts" style="margin-top:10px"><button class="btn pick" id="btnMapOut" disabled>Lihat di peta</button><button class="btn warn" id="btnConfirmOut" disabled>Konfirmasi keluar</button><button class="btn ghost" id="btnClearOut" disabled>Kosongkan</button></div>
+      <div class="acts" style="margin-top:10px"><button class="btn pick" id="btnMapOut" disabled>Lihat di peta</button><button class="btn pri" id="btnConfirmOut" disabled>Konfirmasi keluar</button><button class="btn ghost" id="btnClearOut" disabled>Kosongkan</button></div>
     </div>
     <div class="sec"><h3><span>Riwayat keluar</span></h3><div id="listOut"></div></div>
     <div class="sec"><h3><span>Cetak palet keluar (cocokkan dengan alokasi)</span><span id="kCount"></span></h3>
@@ -273,7 +276,7 @@ nav.tabs button[aria-selected="true"] svg{color:#C28F00}
   <section id="tab-peta" hidden>
     <h2>Peta rak</h2>
     <div class="seg" id="segGud"></div>
-    <div class="legend"><span><i style="background:var(--accent);border-color:#1B1F24"></i>Letakkan di sini</span><span><i style="background:var(--pick);border-color:var(--pick-t)"></i>Picking (akan keluar)</span><span><i style="background:var(--ok-bg)"></i>Release</span><span><i style="background:var(--ink-bg)"></i>Inkubasi</span><span><i style="background:var(--wait-bg)"></i>Campur</span><span><i style="background:var(--bad-bg);border-color:var(--bad)"></i>Reject</span><span><i style="background:#C2571A"></i>Hasil cari</span><span><i style="box-shadow:inset 0 0 0 2px var(--ov);border-color:var(--ov)"></i>Overstock (beda gudang asal, kecuali rak Inkubasi/Reject)</span><span><i></i>Kosong</span></div>
+    <div class="legend"><span><i style="background:var(--blue);border-color:var(--blue)"></i>Letakkan di sini</span><span><i style="background:var(--pick);border-color:var(--pick-t)"></i>Picking (akan keluar)</span><span><i style="background:var(--ok-bg)"></i>Release</span><span><i style="background:var(--ink-bg)"></i>Inkubasi</span><span><i style="background:var(--wait-bg)"></i>Campur</span><span><i style="background:var(--bad-bg);border-color:var(--bad)"></i>Reject</span><span><i style="background:var(--orange)"></i>Hasil cari</span><span><i style="box-shadow:inset 0 0 0 2px var(--ov);border-color:var(--ov)"></i>Overstock (beda gudang asal, kecuali rak Inkubasi/Reject)</span><span><i></i>Kosong</span></div>
     <div id="cellInfo" class="msg wait" hidden></div>
     <div class="mapbox" id="map"></div>
   </section>
@@ -591,7 +594,7 @@ function render(){
       <div class="meta">${palTxt(p)}<br><span class="small">${esc(p.nama)}</span></div>
       <div class="row"><span class="small">Letakkan di</span>${loc?`<span><span class="loc ${ov?"ov":""}">${loc}</span>${ov?`<span class="ovb">Overstock ${esc(x.ged)}</span>`:""}</span>`:`<span class="msg bad" style="margin:0">Rak penuh</span>`}</div>
       <div data-confirm></div>
-      <div class="acts"><button class="btn pri" data-act="rak" ${loc?"":"disabled"}>Scan label rak</button>
+      <div class="acts"><button class="btn acc" data-act="rak" ${loc?"":"disabled"}>Scan label rak</button>
         <button class="btn" data-act="place" ${loc?"":"disabled"}>Sudah diletakkan</button>
         <button class="btn ghost" data-act="cancel">Batal terima</button></div></div>`;}).join("")
     :`<div class="empty">Tidak ada palet yang menunggu diletakkan.</div>`;
@@ -602,7 +605,7 @@ function render(){
       <div class="meta">${palTxt(p)}</div>
       <div class="msg bad" style="margin:0">${esc(why)}</div>
       <div class="row"><span class="small">Pindah ke</span>${rec?`<span class="loc">${rec}</span>`:`<span class="msg bad" style="margin:0">Rak penuh</span>`}</div>
-      <div class="acts"><button class="btn pri" data-mv="scan">Scan label rak</button><button class="btn" data-mv="ok" ${rec?"":"disabled"}>Sudah dipindah</button></div></div>`;}).join("");
+      <div class="acts"><button class="btn acc" data-mv="scan">Scan label rak</button><button class="btn" data-mv="ok" ${rec?"":"disabled"}>Sudah dipindah</button></div></div>`;}).join("");
   const recent=[...D.stored].sort((a,b)=>b.tSimpan-a.tSimpan).slice(0,5);
   $("listStored").innerHTML=recent.length?recent.map(p=>`<div class="card"><div class="row"><span class="meta">${palTxt(p)}</span><span class="loc sm done">${esc(p.lokasi)}</span></div></div>`).join(""):`<div class="empty">Belum ada.</div>`;
   $("listOut").innerHTML=S.out.length?S.out.map(p=>`<div class="card"><div class="row"><span class="meta">${palTxt(p)}<br><span class="small">${fmtTime(p.tKeluar)}</span></span><span class="loc sm">${esc(p.lokasi||"-")}</span></div></div>`).join(""):`<div class="empty">Belum ada palet keluar.</div>`;
@@ -634,7 +637,7 @@ function renderInResult(){
   if(!items.length){$("inResult").innerHTML="";return;}
   const nw=items.filter(p=>p.status==="tunggu").length;
   $("inResult").innerHTML=`<div class="sec"><h3><span>Rekomendasi peletakan</span><span>${items.length-nw} dari ${items.length} sudah diletakkan</span></h3>
-    <p class="small" style="margin:0 0 8px">Letakkan palet di lokasi kuning, lalu <b>ceklis</b> satu per satu. Di peta, kotak kuning = letakkan di sini.</p>
+    <p class="small" style="margin:0 0 8px">Letakkan palet di lokasi biru, lalu <b>ceklis</b> satu per satu. Di peta, kotak biru = letakkan di sini.</p>
     <div class="tw"><table class="t"><thead><tr><th>#</th><th>Palet</th><th>QC</th><th>Letakkan di</th><th>Sudah</th></tr></thead><tbody>${items.map((p,i)=>{const done=p.status==="simpan",loc=done?p.lokasi:D.rek.get(p.id);
       return `<tr><td class="num">${i+1}</td><td>${palTxt(p)}</td><td>${qcP(p)}</td><td>${loc?`<span class="loc sm ${done?"done":""}">${esc(loc)}</span>`:`<span class="qc Reject">Rak penuh</span>`}</td>
         <td><input type="checkbox" data-placeck="${esc(p.id)}" ${done?"checked disabled":""} ${!done&&!loc?"disabled":""} style="width:26px;height:26px"></td></tr>`;}).join("")}</tbody></table></div>
@@ -895,7 +898,7 @@ async function confirmIn(){
   const r=await batchAct({action:"receiveBatch",ids},"msgIn");if(!r.ok)return;
   LASTIN=r.done||[];Q.inn=Q.inn.filter(id=>!LASTIN.includes(id));saveQ();INRES=null;render();
   const nf=(r.failed||[]).length;
-  msg("msgIn",nf?"wait":"ok",`${LASTIN.length} palet diterima. Rekomendasi peletakan ada di bawah (kuning di peta).`+(nf?`<br>Gagal ${nf}:<br>${failTxt(r.failed)}`:"")+legacyNote(r));
+  msg("msgIn",nf?"wait":"ok",`${LASTIN.length} palet diterima. Rekomendasi peletakan ada di bawah (kotak biru di peta).`+(nf?`<br>Gagal ${nf}:<br>${failTxt(r.failed)}`:"")+legacyNote(r));
   $("inResult").scrollIntoView({behavior:"smooth",block:"start"});
 }
 $("listWait").addEventListener("click",async e=>{
