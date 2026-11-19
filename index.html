@@ -149,6 +149,15 @@ table.t th{font-size:12px;color:var(--muted);font-weight:600}
 .cell.pk{background:var(--pick);color:var(--pick-ink);border-color:var(--pick-t);border-width:2px;font-weight:700}
 .cell.x{background:var(--noloc);border-color:transparent;cursor:default}
 .cell.ov{border-color:var(--ov);box-shadow:inset 0 0 0 2px var(--ov)}
+/* ---------- LORONG (peta) ---------- */
+.arow{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.alane{flex:1 1 150px;min-height:36px;border-radius:6px;border:1.5px dashed var(--muted);background:var(--empty);color:var(--ink);font:600 12px var(--mono);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 10px;cursor:pointer;text-align:left}
+.alane b{font-weight:700;white-space:nowrap}
+.alane .sm2{font:500 11px var(--ui);opacity:.9;text-align:right}
+.alane.fill{border-style:solid;border-color:var(--blue);background:var(--blue-bg);color:var(--blue)}
+.alane.f{border-style:solid;background:var(--orange);color:#fff;border-color:var(--orange)}
+.alane.pk{border-style:solid;background:var(--pick);color:var(--pick-ink);border-color:var(--pick-t)}
+.alane.ov{box-shadow:inset 0 0 0 2px var(--ov)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{min-width:46px;height:38px;border-radius:8px;border:2px solid transparent;font:700 14px var(--mono);cursor:pointer;padding:0 8px}
 .chip.cR{background:var(--ok-bg);color:var(--ok)} .chip.cI{background:var(--ink-bg);color:var(--ink-t)} .chip.cX{background:var(--bad-bg);color:var(--bad)}
@@ -233,7 +242,9 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
       <div class="acts" style="margin-top:10px"><button class="btn ok" id="btnConfirmIn" disabled>Konfirmasi</button><button class="btn ghost" id="btnClearIn" disabled>Kosongkan</button></div>
     </div>
     <div id="inResult"></div>
-    <div class="sec"><h3><span>Menunggu diletakkan</span><span id="cntWait">0</span></h3><div id="listWait"></div></div>
+    <div class="sec"><h3><span>Menunggu diletakkan</span><span id="cntWait">0</span></h3>
+      <div class="acts" style="margin:0 0 10px"><button class="btn pick" id="btnLane">Letakkan di lorong (scan lorong, lalu scan palet)</button></div>
+      <div id="listWait"></div></div>
     <div class="sec" id="secMis" hidden><h3><span>Perlu dipindahkan (status QC berubah)</span><span id="cntMis">0</span></h3><div id="listMis"></div></div>
     <div class="sec"><h3><span>Baru disimpan</span></h3><div id="listStored"></div></div>
   </section>
@@ -296,7 +307,7 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
     <div id="cariMsg"></div>
     <div id="cariList"></div>
     <div class="sec"><h3><span>Antrean pindah (borongan)</span><span id="cntMvQ">0</span></h3>
-      <p class="small" style="margin:0 0 8px">Tambahkan palet dari hasil cari, lalu isi rak tujuan: <b>scan berurutan</b> (palet pertama di antrean dapat rak yang pertama di-scan, dst.) atau <b>ketik kode rak</b> manual. Lalu Konfirmasi.</p>
+      <p class="small" style="margin:0 0 8px">Tambahkan palet dari hasil cari, lalu isi rak tujuan: <b>scan berurutan</b> (palet pertama di antrean dapat rak yang pertama di-scan, dst.) atau <b>ketik kode rak</b> manual. Lorong boleh dipakai banyak palet. Lalu Konfirmasi.</p>
       <div id="listMvQ"></div>
       <div class="acts" style="margin-top:10px"><button class="btn pick" id="btnScanMvTo" disabled>Scan rak tujuan berurutan</button><button class="btn ok" id="btnConfirmMv" disabled>Konfirmasi pindah</button><button class="btn ghost" id="btnClearMv" disabled>Kosongkan</button></div>
     </div>
@@ -306,7 +317,7 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
   <section id="tab-peta" hidden>
     <h2>Peta rak</h2>
     <div class="seg" id="segGud"></div>
-    <div class="legend"><span><i style="background:var(--blue);border-color:var(--blue)"></i>Letakkan di sini</span><span><i style="background:var(--pick);border-color:var(--pick-t)"></i>Picking (akan keluar)</span><span><i style="background:var(--ok-bg)"></i>Release</span><span><i style="background:var(--ink-bg)"></i>Inkubasi</span><span><i style="background:var(--wait-bg)"></i>Campur</span><span><i style="background:var(--bad-bg);border-color:var(--bad)"></i>Reject</span><span><i style="background:var(--orange)"></i>Hasil cari</span><span><i style="box-shadow:inset 0 0 0 2px var(--ov);border-color:var(--ov)"></i>Overstock (beda gudang asal, kecuali rak Inkubasi/Reject)</span><span><i></i>Kosong</span></div>
+    <div class="legend"><span><i style="background:var(--blue);border-color:var(--blue)"></i>Letakkan di sini</span><span><i style="background:var(--pick);border-color:var(--pick-t)"></i>Picking (akan keluar)</span><span><i style="background:var(--ok-bg)"></i>Release</span><span><i style="background:var(--ink-bg)"></i>Inkubasi</span><span><i style="background:var(--wait-bg)"></i>Campur</span><span><i style="background:var(--bad-bg);border-color:var(--bad)"></i>Reject</span><span><i style="background:var(--orange)"></i>Hasil cari</span><span><i style="box-shadow:inset 0 0 0 2px var(--ov);border-color:var(--ov)"></i>Overstock (beda gudang asal, kecuali rak Inkubasi/Reject)</span><span><i style="border:1.5px dashed var(--muted)"></i>Lorong (1 kode, banyak palet)</span><span><i></i>Kosong</span></div>
     <div id="cellInfo" class="msg wait" hidden></div>
     <div class="mapbox" id="map"></div>
   </section>
@@ -380,6 +391,7 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
           <li><b>Preloading ke rak Simpan</b>: boleh (dikembalikan). Kalau status QC palet di preloading berubah bukan Release, wajib dikembalikan ke rak Simpan.</li>
           <li><b>Reject ke Preloading</b>: tidak bisa langsung. Ubah QC ke Release dulu.</li>
           <li><b>Rak Inkubasi</b> (khusus SD18): untuk palet yang belum Release. Palet Reject tetap harus di rak reject.</li>
+          <li><b>Lorong</b> (FG17-L01 s/d FG18-L08): 1 lorong = 1 kode, boleh berisi banyak palet dan banyak produk tanpa batas. Boleh untuk status Release / Inkubasi / Campur, <b>tidak untuk Reject</b>. Letakkan dengan tombol <b>Letakkan di lorong</b> di menu Masuk (scan label lorong, lalu scan palet).</li>
           <li><b>Gedung</b>: bebas. Palet produk SD17 yang disimpan di SD18 (atau sebaliknya) diberi tanda <b>Overstock</b> biru-hijau. <b>Pengecualian</b>: palet di rak <b>Inkubasi</b> atau <b>Reject</b> tidak dihitung overstock.</li>
         </ul></div>
       </div>
@@ -388,7 +400,7 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
         <button class="btn warn" id="btnReset">Hapus data contoh</button> <span id="resetMsg" class="small"></span>
       </div>
       <div class="sec"><h3><span>Master data</span></h3>
-        <p class="small">Produk, lokasi, fungsi rak (Simpan/Inkubasi/Reject/Preloading) dan kepala dokumen label diubah langsung di Google Sheet: sheet Master Produk, Master Lokasi, Master Rak, Pengaturan. Lalu tekan "Muat ulang master data".</p>
+        <p class="small">Produk, lokasi, fungsi rak (Simpan/Inkubasi/Reject/Preloading) dan kepala dokumen label diubah langsung di Google Sheet: sheet Master Produk, Master Lokasi, Master Rak, Pengaturan. Lorong ditambahkan di Master Lokasi (Rak = L01, Kolom dan Level = "-"). Lalu tekan "Muat ulang master data".</p>
         <div class="info" id="masterInfo"></div>
       </div>
     </div>
@@ -428,12 +440,15 @@ const LVORD="ABCDEFG";
 const M={produk:[],lokasi:[],rak:[],set:{}};
 const L=new Map();
 const LINK=new Map();
+const isLane=(c)=>{const x=L.get(c);return !!(x&&x.lane);};   // lorong: 1 kode, banyak palet
 let GEDS=[];
 function resolveLoc(txt){
   const t=String(txt||"").trim();
   const m=t.match(/\/d\/([A-Za-z0-9_-]{10,})/)||t.match(/[?&]id=([A-Za-z0-9_-]{10,})/);
   if(m)return LINK.get(m[1])||"";
   const u=t.toUpperCase();if(L.has(u))return u;
+  const a=u.match(/^FG\s*[-_\/. ]?\s*(\d{2})\s*[-_\/. ]?\s*L\s*[-_\/. ]?\s*(\d{1,2})$/);
+  if(a){const c=`FG${a[1]}-L${String(a[2]).padStart(2,"0")}`;if(L.has(c))return c;}
   const k=u.match(/^FG\s*[-_\/. ]?\s*(\d{2})\s*[-_\/. ]?\s*(\d{1,2})\s*[-_\/. ]?\s*(\d{1,2})\s*[-_\/. ]?\s*([A-G])$/);
   if(k){const c=`FG${k[1]}-${String(k[2]).padStart(2,"0")}-${String(k[3]).padStart(2,"0")}-${k[4]}`;if(L.has(c))return c;}
   return "";
@@ -488,18 +503,22 @@ function applyData(d){if(!d)return;const m=new Map();(d.rows||[]).forEach(o=>{co
 function applyMaster(m){
   M.produk=m.produk||[];M.lokasi=m.lokasi||[];M.rak=m.rak||[];M.set=m.set||{};
   L.clear();LINK.clear();const rk=new Map();M.rak.forEach(r=>rk.set(r.gedung+"|"+r.rak,r));
-  M.lokasi.forEach(([code,ged,rak,kol,lv,link])=>{const r0=rk.get(ged+"|"+rak)||{fungsi:"Simpan",urutan:99},fl=String(r0.fungsi||"").trim().toLowerCase(),
-      r={fungsi:fl==="reject"?"Reject":fl==="preloading"?"Preloading":fl==="inkubasi"?"Inkubasi":"Simpan",urutan:r0.urutan};if(link)LINK.set(link,code);
+  M.lokasi.forEach(([code,ged,rak,kol,lv,link])=>{
+    if(link)LINK.set(link,code);
+    if(/^FG\d{2}-L\d{2}$/.test(code)){L.set(code,{code,ged,rak,kol:"",lv:"",li:-1,fungsi:"Lorong",urutan:0,lane:true});return;}
+    const r0=rk.get(ged+"|"+rak)||{fungsi:"Simpan",urutan:99},fl=String(r0.fungsi||"").trim().toLowerCase(),
+      r={fungsi:fl==="reject"?"Reject":fl==="preloading"?"Preloading":fl==="inkubasi"?"Inkubasi":"Simpan",urutan:r0.urutan};
     L.set(code,{code,ged,rak,kol,lv,li:LVORD.indexOf(lv),fungsi:r.fungsi,urutan:r.urutan});});
   ORDER={};
-  [...L.values()].sort((a,b)=>a.urutan-b.urutan||+a.rak-+b.rak||a.li-b.li||+a.kol-+b.kol)
+  [...L.values()].filter(x=>!x.lane).sort((a,b)=>a.urutan-b.urutan||+a.rak-+b.rak||a.li-b.li||+a.kol-+b.kol)
     .forEach(x=>{const k=x.ged+"|"+x.fungsi;(ORDER[k]=ORDER[k]||[]).push(x.code);});
   const geds=[...new Set(M.lokasi.map(x=>x[1]))].sort();GEDS=geds;
   if(!geds.includes(S.gud))S.gud=geds[geds.length-1]||"SD18";
   $("segGud").innerHTML=geds.map(g=>`<button data-gud="${g}" aria-pressed="${g===S.gud}">${g}</button>`).join("");
   $("pItem").innerHTML=M.produk.map(p=>`<option value="${esc(p.item)}">${esc(p.item)} — ${esc(p.nama)}</option>`).join("");
   const last=lsGet("lastItem");if(last&&M.produk.some(p=>p.item===last))$("pItem").value=last;
-  $("masterInfo").innerHTML=`<b>${M.produk.length}</b> produk · <b>${M.lokasi.length}</b> lokasi (<b>${LINK.size}</b> sudah punya link QR label) · gudang ${geds.join(", ")} · rak reject: ${M.rak.filter(r=>r.fungsi==="Reject").map(r=>r.gedung+"-"+r.rak).join(", ")||"-"}`;
+  const nLane=[...L.values()].filter(x=>x.lane).length;
+  $("masterInfo").innerHTML=`<b>${M.produk.length}</b> produk · <b>${M.lokasi.length-nLane}</b> lokasi rak + <b>${nLane}</b> lorong (<b>${LINK.size}</b> sudah punya link QR label) · gudang ${geds.join(", ")} · rak reject: ${M.rak.filter(r=>r.fungsi==="Reject").map(r=>r.gedung+"-"+r.rak).join(", ")||"-"}`;
   onItemChange(true);render();
 }
 async function loadMaster(){try{applyMaster(await apiGet("master"));}catch(e){$("conn").textContent="Master data gagal dimuat. Cek link server lalu muat ulang.";}}
@@ -582,8 +601,8 @@ function findPal(batch,matStr,statuses,exact){
 }
 
 /* =================== turunan & rekomendasi =================== */
-let D={occ:new Map(),wait:[],stored:[],rek:new Map(),rekLoc:new Map(),pick:new Map(),free:0,mis:[],misRec:new Map()};
-/** Lokasi kosong pertama untuk palet: gedung asal dulu, kalau penuh pindah ke gedung lain (overstock; kecuali rak Reject/Inkubasi). */
+let D={occ:new Map(),lane:new Map(),pickLane:new Map(),wait:[],stored:[],rek:new Map(),rekLoc:new Map(),pick:new Map(),free:0,mis:[],misRec:new Map()};
+/** Lokasi kosong pertama untuk palet: gedung asal dulu, kalau penuh pindah ke gedung lain (overstock; kecuali rak Reject/Inkubasi). Lorong tidak pernah direkomendasikan otomatis. */
 function freeLoc(p,used){
   const key=p.qc==="Reject"?"Reject":"Simpan",home=p.gudang||"SD18";
   const gs=[home,...GEDS.filter(g=>g!==home)];
@@ -591,17 +610,25 @@ function freeLoc(p,used){
   return null;
 }
 function derive(){
-  const occ=new Map(),wait=[],stored=[];
-  for(const p of S.pal.values()){if(p.status==="simpan"&&p.lokasi){occ.set(p.lokasi,p.id);stored.push(p);}else if(p.status==="tunggu")wait.push(p);}
+  const occ=new Map(),lane=new Map(),wait=[],stored=[];
+  for(const p of S.pal.values()){
+    if(p.status==="simpan"&&p.lokasi){
+      stored.push(p);
+      if(isLane(p.lokasi)){const a=lane.get(p.lokasi)||[];a.push(p);lane.set(p.lokasi,a);}
+      else occ.set(p.lokasi,p.id);
+    }else if(p.status==="tunggu")wait.push(p);}
   const ord=(id)=>{const i=LASTIN.indexOf(id);return i<0?1e9:i;};
   wait.sort((a,b)=>a.tMasuk-b.tMasuk||ord(a.id)-ord(b.id)||a.id.localeCompare(b.id));
   const used=new Set(occ.keys()),rek=new Map(),rekLoc=new Map();
   wait.forEach((p,i)=>{const loc=freeLoc(p,used);if(loc){used.add(loc);rekLoc.set(loc,{n:i+1,p});}rek.set(p.id,loc);});
   const mis=stored.filter(p=>{const x=L.get(p.lokasi);return x&&locRule(p.qc,x.fungsi,x.fungsi);});
   const misRec=new Map();mis.forEach(p=>{const loc=freeLoc(p,used);if(loc){used.add(loc);misRec.set(p.id,loc);}});
-  const pick=new Map();Q.out.forEach((id,i)=>{const p=S.pal.get(id);if(p&&p.status==="simpan"&&p.lokasi)pick.set(p.lokasi,i+1);});
+  const pick=new Map(),pickLane=new Map();
+  Q.out.forEach((id,i)=>{const p=S.pal.get(id);if(p&&p.status==="simpan"&&p.lokasi){
+    if(isLane(p.lokasi)){const a=pickLane.get(p.lokasi)||[];a.push(i+1);pickLane.set(p.lokasi,a);}
+    else pick.set(p.lokasi,i+1);}});
   let free=0;Object.keys(ORDER).forEach(k=>{if(k.endsWith("|Simpan"))free+=ORDER[k].filter(c=>!occ.has(c)).length;});
-  return {occ,wait,stored,rek,rekLoc,pick,free,mis,misRec};
+  return {occ,lane,pickLane,wait,stored,rek,rekLoc,pick,free,mis,misRec};
 }
 const fmtDate=(iso)=>iso?ddmmyyyy(iso):"-";
 const fmtTime=(t)=>{if(!t)return"";const d=new Date(t);return d.toLocaleDateString("id-ID",{day:"2-digit",month:"short"})+" "+d.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});};
@@ -617,7 +644,7 @@ const where=(p)=>p.status==="label"?"Belum diterima gudang":p.status==="tunggu"?
 
 function render(){
   D=derive();
-  $("stTerisi").textContent=D.occ.size;$("stKosong").textContent=D.free;$("stTunggu").textContent=D.wait.length;
+  $("stTerisi").textContent=D.occ.size+[...D.lane.values()].reduce((s,a)=>s+a.length,0);$("stKosong").textContent=D.free;$("stTunggu").textContent=D.wait.length;
   $("cntWait").textContent=D.wait.length;
   $("listWait").innerHTML=D.wait.length?D.wait.map((p,i)=>{const loc=D.rek.get(p.id),x=loc&&L.get(loc),ov=isOv(p,x);
     return `<div class="card" data-id="${esc(p.id)}">
@@ -741,7 +768,7 @@ $("cariList").addEventListener("click",e=>{
 function mvErr(id){
   const p=S.pal.get(id),t=MVT[id];if(!p||!t)return "";
   const e=checkLoc(p,t,true);if(e)return e;
-  if(Q.mv.some(o=>o!==id&&MVT[o]===t))return t+" dobel dengan palet lain di antrean";
+  if(!isLane(t)&&Q.mv.some(o=>o!==id&&MVT[o]===t))return t+" dobel dengan palet lain di antrean";
   return "";
 }
 function renderMv(){
@@ -765,7 +792,7 @@ function scanMvTo(text){
   const loc=resolveLoc(text);if(!loc)return {ok:false,html:`GAGAL<small>${esc(locErr(text))}</small>`,short:"GAGAL · "+esc(locErr(text))};
   const id=Q.mv.find(x=>!MVT[x]);if(!id)return {ok:false,html:`SEMUA SUDAH PUNYA TUJUAN<small>Tekan Konfirmasi</small>`,short:"Semua palet sudah punya tujuan"};
   const p=S.pal.get(id),tag=`${esc(p.batch)} no ${esc(p.mat)}`;
-  const e=checkLoc(p,loc,true)||(Q.mv.some(o=>MVT[o]===loc)?loc+" sudah dipakai palet lain di antrean":"");
+  const e=checkLoc(p,loc,true)||(!isLane(loc)&&Q.mv.some(o=>MVT[o]===loc)?loc+" sudah dipakai palet lain di antrean":"");
   if(e)return {ok:false,html:`GAGAL<small>${tag}: ${esc(e)}</small>`,short:`GAGAL · ${tag} · ${esc(e)}`};
   MVT[id]=loc;saveQ();renderMv();
   const nx=S.pal.get(Q.mv.find(x=>!MVT[x]));
@@ -792,15 +819,28 @@ function checkLoc(p,loc,move){
   const from=move&&p.lokasi&&L.get(p.lokasi)?L.get(p.lokasi).fungsi:"";
   const rule=locRule(p.qc,x.fungsi,from);if(rule)return rule;
   if(move&&p.lokasi===loc)return "Palet sudah di "+loc;
-  if(D.occ.has(loc))return loc+" sudah terisi palet lain";
+  if(!x.lane&&D.occ.has(loc))return loc+" sudah terisi palet lain";
   return "";
 }
 
 /* =================== PETA =================== */
+function laneBtn(x){
+  const c=x.code,ps=D.lane.get(c)||[];
+  let cls="alane";
+  if(D.pickLane.has(c))cls+=" pk";else if(S.cari.has(c))cls+=" f";else if(ps.length)cls+=" fill";
+  if(ps.some(p=>isOv(p,x)))cls+=" ov";
+  const cnt={};ps.forEach(p=>{cnt[p.qc]=(cnt[p.qc]||0)+1;});
+  const sm=ps.length?`${ps.length} palet · `+Object.keys(cnt).map(k=>k+" "+cnt[k]).join(" · "):"kosong";
+  const pk=D.pickLane.has(c)?` · Picking P${D.pickLane.get(c).join(",P")}`:"";
+  return `<button class="${cls}" data-loc="${c}" aria-label="${c}"><b>${c}</b><span class="sm2">${esc(sm)}${esc(pk)}</span></button>`;
+}
 function renderMap(){
   const g=S.gud,racks={};
-  for(const x of L.values())if(x.ged===g){(racks[x.rak]=racks[x.rak]||{cells:new Set(),maxK:0,lvs:new Set(),fungsi:x.fungsi});racks[x.rak].cells.add(x.code);racks[x.rak].maxK=Math.max(racks[x.rak].maxK,+x.kol);racks[x.rak].lvs.add(x.lv);}
-  const pre=g.replace("SD","FG");let h="";
+  for(const x of L.values())if(x.ged===g&&!x.lane){(racks[x.rak]=racks[x.rak]||{cells:new Set(),maxK:0,lvs:new Set(),fungsi:x.fungsi});racks[x.rak].cells.add(x.code);racks[x.rak].maxK=Math.max(racks[x.rak].maxK,+x.kol);racks[x.rak].lvs.add(x.lv);}
+  const lanes=[...L.values()].filter(x=>x.ged===g&&x.lane).sort((a,b)=>a.code.localeCompare(b.code));
+  /* lorong ganjil (L01, L03, ...) di bawah rak yang sama nomornya; lorong genap (L02, L04, ...) di atas rak berikutnya, jadi satu celah dengan lorong ganjil sebelumnya */
+  const afterRak=(c)=>{const n=+String(c).slice(-2);return pad(n%2?n:Math.max(1,n-1));};
+  const placed=new Set(),pre=g.replace("SD","FG");let h="";
   Object.keys(racks).sort((a,b)=>+a-+b).forEach(r=>{const R=racks[r],lvs=[...R.lvs].sort().reverse();
     h+=`<div class="rn">RACK ${r}${R.fungsi!=="Simpan"?`<em>${esc(R.fungsi.toUpperCase())}</em>`:""}</div>`;
     lvs.forEach(lv=>{h+=`<div class="rrow"><span class="lv">${lv}</span>`;
@@ -814,13 +854,23 @@ function renderMap(){
         if(isOv(hp,L.get(c)))cls+=" ov";
         h+=`<button class="cell ${cls}" data-loc="${c}" aria-label="${c}">${t}</button>`;}
       h+=`</div>`;});
+    const grp=lanes.filter(x=>afterRak(x.code)===r);
+    if(grp.length){grp.forEach(x=>placed.add(x.code));h+=`<div class="arow">${grp.map(laneBtn).join("")}</div>`;}
   });
+  const rest=lanes.filter(x=>!placed.has(x.code));
+  if(rest.length)h+=`<div class="arow">${rest.map(laneBtn).join("")}</div>`;
   $("map").innerHTML=h||`<div class="empty">Master lokasi belum dimuat.</div>`;
 }
 $("segGud").addEventListener("click",e=>{const b=e.target.closest("[data-gud]");if(!b)return;S.gud=b.dataset.gud;
   document.querySelectorAll("#segGud button").forEach(x=>x.setAttribute("aria-pressed",x===b));$("cellInfo").hidden=true;renderMap();});
 $("map").addEventListener("click",e=>{
   const b=e.target.closest("[data-loc]");if(!b)return;const c=b.dataset.loc,id=D.occ.get(c),info=$("cellInfo"),x=L.get(c);info.hidden=false;
+  if(x&&x.lane){
+    const ps=D.lane.get(c)||[];info.className=ps.length?"msg ok":"msg wait";
+    info.innerHTML=`<span class="loc sm ${ps.length?"done":""}">${c}</span> Lorong · ${ps.length} palet`+
+      ps.map(p=>`<div style="margin-top:8px;font-weight:500">${palTxt(p)} ${qcP(p)}<br><span class="small">${esc(p.nama)} · produksi ${fmtDate(p.prod)} · gudang asal ${esc(p.gudang)}</span></div>`).join("")+
+      (D.pickLane.has(c)?`<br><b>PICKING ${D.pickLane.get(c).map(n=>"#"+n).join(", ")}</b> · akan diambil, belum dikonfirmasi keluar`:"");
+    return;}
   if(id){const p=S.pal.get(id);info.className="msg ok";info.innerHTML=`<span class="loc sm done">${c}</span> ${palTxt(p)} ${qcP(p)}<br><span class="small">${esc(p.nama)} · produksi ${fmtDate(p.prod)} · gudang asal ${esc(p.gudang)}</span>${D.pick.has(c)?`<br><b>PICKING #${D.pick.get(c)}</b> · akan diambil, belum dikonfirmasi keluar`:""}`;}
   else{info.className="msg wait";info.innerHTML=`<span class="loc sm">${c}</span> Kosong · rak ${esc(x?x.fungsi:"")}${D.rekLoc.has(c)?` · rekomendasi palet menunggu #${D.rekLoc.get(c).n}`:""}`;}
 });
@@ -832,7 +882,7 @@ function beep(ok){try{const A=window.AudioContext||window.webkitAudioContext;if(
   if(navigator.vibrate)navigator.vibrate(ok?60:[80,60,80]);}
 function flash(cls,html){const f=$("flash");f.className="flash "+cls;f.innerHTML=html;}
 function updScan(){const b=$("scConfirm");
-  if(mode&&mode.confirm){const n=mode.count();b.hidden=false;b.textContent=`Konfirmasi (${n})`;b.disabled=!n;$("scSub").textContent=`Antrean: ${n} palet`;$("scDone").className="btn";}
+  if(mode&&mode.confirm){const n=mode.count();b.hidden=false;b.textContent=`Konfirmasi (${n})`;b.disabled=!n;$("scSub").textContent=mode.sub2?mode.sub2():`Antrean: ${n} palet`;$("scDone").className="btn";}
   else{b.hidden=true;$("scDone").className="btn ok";}}
 async function openScanner(opt){
   mode=opt;onCode=opt.onCode;lastText="";lastAt=0;coolUntil=0;busyScan=false;
@@ -847,7 +897,7 @@ async function openScanner(opt){
     await qr.start({facingMode:"environment"},
       {fps:15,qrbox:(w,h)=>({width:Math.floor(w*0.9),height:Math.floor(Math.min(w,h)*0.8)}),aspectRatio:1.0,disableFlip:true,
        videoConstraints:{facingMode:"environment",width:{ideal:1280},height:{ideal:1280}}},handleDecode,()=>{});
-    flash("",opt.continuous?"Arahkan kamera ke QR palet. Kamera tetap menyala untuk palet berikutnya.":"Arahkan kamera ke kode");
+    flash("",opt.hello||(opt.continuous?"Arahkan kamera ke QR palet. Kamera tetap menyala untuk palet berikutnya.":"Arahkan kamera ke kode"));
   }catch(e){flash("bad","Kamera tidak bisa dibuka. Izinkan akses kamera di Safari, atau ketuk Ambil foto.");}
 }
 async function handleDecode(text){
@@ -894,6 +944,53 @@ function scanInOne(text){
   return {ok:true,html:`SUKSES · ${tag}<small>${q.qc==="Reject"?"REJECT · ":""}Masuk antrean #${Q.inn.length}</small>`,short:`${tag} → antrean #${Q.inn.length}`};
 }
 $("btnScanIn").addEventListener("click",()=>openScanner({title:"Scan masuk",sub:"",continuous:true,confirm:true,count:()=>Q.inn.length,onCode:scanInOne,onConfirm:confirmIn}));
+
+/* ---- letakkan di lorong: scan label lorong dulu, lalu scan palet-palet yang diletakkan di situ ---- */
+let LANE_T="",LANEQ=[];
+function scanLane(text){
+  const loc=resolveLoc(text);
+  if(loc){
+    if(!isLane(loc))return {ok:false,html:`GAGAL<small>${esc(loc)} bukan lorong. Scan label lorong (FGxx-Lxx)</small>`,short:`GAGAL · ${esc(loc)} bukan lorong`};
+    LANE_T=loc;
+    return {ok:true,html:`LORONG ${esc(loc)}<small>Sekarang scan palet yang diletakkan di lorong ini</small>`,short:`Lorong → ${esc(loc)}`};
+  }
+  if(!LANE_T)return {ok:false,html:`SCAN LORONG DULU<small>Scan label lorong (FGxx-Lxx), baru scan palet</small>`,short:"GAGAL · belum scan lorong"};
+  const p=parseQR(text);
+  if(p.err)return {ok:false,html:`GAGAL<small>${esc(p.err)}</small>`,short:"GAGAL · "+esc(p.err)};
+  let ex=p.id?S.pal.get(p.id):null;
+  if(!ex){const c=findPal(p.batch,p.mat);
+    if(c.length===1)ex=c[0];
+    else return {ok:false,html:`GAGAL<small>${esc(p.batch)} no ${esc(p.mat)}: ${c.length?"lebih dari satu palet cocok":"tidak ditemukan"}</small>`,short:`GAGAL · ${esc(p.batch)} no ${esc(p.mat)}`};}
+  const tag=`${esc(ex.batch)} no ${esc(ex.mat)}`;
+  if(LANEQ.some(x=>x.id===ex.id))return {ok:false,html:`SUDAH ADA<small>${tag} sudah di antrean</small>`,short:`DOBEL · ${tag}`};
+  if(!["label","tunggu","simpan"].includes(ex.status))return {ok:false,html:`GAGAL<small>${tag}: tidak aktif</small>`,short:`GAGAL · ${tag}`};
+  const chk=checkLoc(ex,LANE_T,ex.status==="simpan");
+  if(chk)return {ok:false,html:`GAGAL<small>${tag}: ${esc(chk)}</small>`,short:`GAGAL · ${tag} · ${esc(chk)}`};
+  LANEQ.push({id:ex.id,lokasi:LANE_T});
+  const what=ex.status==="simpan"?"pindah dari "+ex.lokasi:ex.status==="label"?"diterima + diletakkan":"diletakkan";
+  return {ok:true,html:`SUKSES · ${tag}<small>${esc(what)} → ${esc(LANE_T)} · antrean #${LANEQ.length}</small>`,short:`${tag} → ${esc(LANE_T)}`};
+}
+async function confirmLane(){
+  const q=LANEQ.slice();
+  if(!q.length){msg("msgIn","bad","Antrean lorong kosong.");return;}
+  const recv=q.filter(x=>{const p=S.pal.get(x.id);return p&&p.status==="label";}).map(x=>x.id);
+  if(recv.length){const r0=await batchAct({action:"receiveBatch",ids:recv},"msgIn");if(!r0.ok)return;}
+  const pl=q.filter(x=>{const p=S.pal.get(x.id);return p&&p.status==="tunggu";});
+  const mv=q.filter(x=>{const p=S.pal.get(x.id);return p&&p.status==="simpan";});
+  let ok=0;const fail=[];
+  if(pl.length){const r=await batchAct({action:"placeBatch",items:pl},"msgIn");ok+=(r.done||[]).length;(r.failed||[]).forEach(f=>fail.push(f));}
+  if(mv.length){const r=await batchAct({action:"moveBatch",items:mv},"msgIn");ok+=(r.done||[]).length;(r.failed||[]).forEach(f=>fail.push(f));}
+  LANEQ=[];LANE_T="";
+  const lanes=[...new Set(q.map(x=>x.lokasi))].join(", ");
+  msg("msgIn",fail.length?"wait":"ok",`${ok} palet disimpan di lorong ${esc(lanes)}.`+(fail.length?`<br>Gagal ${fail.length}:<br>${failTxt(fail)}`:""));
+}
+$("btnLane").addEventListener("click",()=>{
+  LANE_T="";LANEQ=[];
+  openScanner({title:"Letakkan di lorong",sub:"",continuous:true,confirm:true,count:()=>LANEQ.length,
+    sub2:()=>(LANE_T?"Lorong "+LANE_T+" · ":"Belum ada lorong · ")+LANEQ.length+" palet",
+    hello:"1) Scan label LORONG  2) Scan semua palet di lorong itu  3) Konfirmasi. Ganti lorong dengan scan label lorong lain.",
+    onCode:scanLane,onConfirm:confirmLane});
+});
 
 /* ---- manual (jika tidak bisa scan) ---- */
 function renderInRes(){
