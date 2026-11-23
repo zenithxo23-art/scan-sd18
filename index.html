@@ -234,6 +234,16 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
 }
 </style>
 <style id="pageCss">@page{size:A4 portrait;margin:0}</style>
+<style>
+.page{width:210mm;height:297mm;display:grid;grid-template-columns:90mm 90mm;grid-template-rows:140mm 140mm;justify-content:center;align-content:center;page-break-after:always;break-after:page;background:#fff;overflow:hidden}
+.sheet{width:90mm;height:140mm;padding:4mm;box-sizing:border-box;overflow:hidden;outline:0.2mm dashed #aaa;outline-offset:-2mm}
+.lab td{padding:0 2mm}
+.lab .g{font-size:4.6mm;font-style:normal;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.lab .k{font-size:3mm;padding:0;margin-bottom:1.5mm}
+.lab .v{font-size:5.2mm;padding:0}
+.lab .qr{padding:1.5mm}
+.lab .qr span{font-size:2.4mm}
+</style>
 </head>
 <body>
 
@@ -1359,6 +1369,18 @@ function labelHtml(p){
     <tr style="height:12%">${v(p.jumlah)}${v(p.satuan)}</tr>
     <tr style="height:9.5%">${k("Tanggal Produksi")}${k("Tanggal Kadaluwarsa")}</tr>
     <tr style="height:12%">${v(ddmmyyyy(p.prod))}${v(ddmmyyyy(p.exp))}</tr>
+  </table>`;
+}
+  function labelHtml(p){
+  const f=(k,v)=>`<td class="f"><div class="k">${k}</div><div class="v">${esc(v||"-")}</div></td>`;
+  return `<table class="lab">
+    <colgroup><col style="width:56%"><col style="width:44%"></colgroup>
+    <tr style="height:15%"><td class="g" colspan="2">${esc(p.nama)}</td></tr>
+    <tr style="height:17%">${f("Item Code",p.item)}<td class="qr" rowspan="5">${qrSvg(p.qr||buildQR(p))}<span>${esc(p.batch)} · P${esc(p.palet)}</span></td></tr>
+    <tr style="height:17%">${f("Nomor Batch",p.batch)}</tr>
+    <tr style="height:17%">${f("Nomor Palet",p.palet)}</tr>
+    <tr style="height:17%">${f("Tanggal Produksi",ddmmyyyy(p.prod))}</tr>
+    <tr style="height:17%">${f("Tanggal Kadaluwarsa",ddmmyyyy(p.exp))}</tr>
   </table>`;
 }
 /* =================== CETAK LABEL LOKASI (rak & lorong, bisa dipilih) =================== */
