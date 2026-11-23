@@ -194,6 +194,22 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
 #printArea{display:none}
 .page{width:210mm;height:297mm;display:grid;grid-template-columns:105mm 105mm;grid-template-rows:148.5mm 148.5mm;page-break-after:always;break-after:page;background:#fff;overflow:hidden}
 .page:last-child{page-break-after:auto;break-after:auto}
+.lbf{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;align-items:end}
+.lbf label{font-size:12px;color:var(--muted);display:grid;gap:4px}
+.lbf select,.lbf input{width:100%;box-sizing:border-box}
+.lbl-lv{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;align-items:center}
+.lbl-lv label{display:flex;align-items:center;gap:6px;color:var(--ink);font-size:14px}
+.lbl-lv input{width:20px;height:20px}
+.lbgrid{display:flex;flex-wrap:wrap;gap:6px;max-height:340px;overflow:auto;padding:2px}
+.lbgrid label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:6px 9px;font:600 12px var(--mono);background:var(--surface);cursor:pointer}
+.lbgrid label.on{border-color:var(--blue);background:var(--blue-bg);color:var(--blue)}
+.lbgrid input{width:16px;height:16px}
+/* label lokasi cetak: 2 kolom x 9 baris di A4 */
+.lbpage{width:210mm;height:297mm;box-sizing:border-box;padding:10.5mm 10mm;display:grid;grid-template-columns:95mm 95mm;grid-template-rows:repeat(9,30.66mm);page-break-after:always;break-after:page;background:#fff}
+.loclbl{box-sizing:border-box;margin:1.2mm 2mm;display:grid;grid-template-columns:1fr 27mm;border:0.45mm solid #000;background:#fff;color:#000;outline:0.15mm dashed #bbb;outline-offset:1mm}
+.loclbl .c{display:flex;align-items:center;justify-content:center;font:700 19pt Arial,Helvetica,sans-serif;letter-spacing:.01em;padding:0 2mm;white-space:nowrap}
+.loclbl .q{border-left:0.45mm solid #000;display:flex;align-items:center;justify-content:center;padding:1.2mm}
+.loclbl .q svg{width:100%;height:100%}
 .lanelbl{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5mm;text-align:center;font-family:Arial,Helvetica,sans-serif;color:#000}
 .lanelbl .t1{font-size:14pt;font-weight:700;letter-spacing:.1em}
 .lanelbl .code{font-size:30pt;font-weight:800;letter-spacing:.02em}
@@ -405,13 +421,23 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
           <li><b>Preloading ke rak Simpan</b>: boleh (dikembalikan). Kalau status QC palet di preloading berubah bukan Release, wajib dikembalikan ke rak Simpan.</li>
           <li><b>Reject ke Preloading</b>: tidak bisa langsung. Ubah QC ke Release dulu.</li>
           <li><b>Rak Inkubasi</b> (khusus SD18): untuk palet yang belum Release. Palet Reject tetap harus di rak reject.</li>
-          <li><b>Lorong</b> (FG17-L01 s/d FG18-L08): 1 lorong = 1 kode, boleh berisi banyak palet dan banyak produk tanpa batas. Boleh untuk status Release / Inkubasi / Campur, <b>tidak untuk Reject</b>. Letakkan dengan tombol <b>Letakkan di lorong</b> di menu Masuk (scan label lorong, lalu scan palet).</li>
+          <li><b>Lorong</b> (FG17-L01 s/d FG18-L08): 1 lorong = 1 kode, boleh berisi banyak palet dan banyak produk tanpa batas. Boleh untuk status Release / Inkubasi / Campur, <b>tidak untuk Reject</b>. Letakkan dengan tombol <b>Letakkan di lorong</b> di menu Masuk (scan label lorong, lalu scan palet). Label lorong dicetak di bagian <b>Cetak label lokasi</b> (pilih Lorong).</li>
           <li><b>Gedung</b>: bebas. Palet produk SD17 yang disimpan di SD18 (atau sebaliknya) diberi tanda <b>Overstock</b> biru-hijau. <b>Pengecualian</b>: palet di rak <b>Inkubasi</b> atau <b>Reject</b> tidak dihitung overstock.</li>
         </ul></div>
       </div>
-      <div class="sec"><h3><span>Label lorong</span></h3>
-        <p class="small">Cetak label QR untuk semua lorong (FG17-L01 … FG18-L08) dari Master Lokasi. A4, 4 label per halaman. Tempel di tiang / lantai lorong.</p>
-        <button class="btn pri" id="btnLaneLabels">Cetak label lorong</button> <span id="laneLblMsg" class="small"></span>
+      <div class="sec"><h3><span>Cetak label lokasi (rak &amp; lorong)</span><span id="lbCount"></span></h3>
+        <p class="small" style="margin:0 0 8px">Pilih gedung, jenis, lalu saring rak / level / kolom. Centang label yang mau dicetak (atau Pilih semua). Kertas A4, 18 label per halaman (9 × 3 cm), garis potong tipis.</p>
+        <div class="seg" id="lbGud" style="margin:0 0 8px"><button data-v="SD17" aria-pressed="false">SD17</button><button data-v="SD18" aria-pressed="true">SD18</button></div>
+        <div class="seg" id="lbJenis" style="margin:0 0 8px"><button data-v="rak" aria-pressed="true">Rak</button><button data-v="lorong" aria-pressed="false">Lorong</button></div>
+        <div class="lbf" id="lbRakBox">
+          <label>Rak<select id="lbRak"></select></label>
+          <label>Kolom dari<input id="lbK1" type="number" min="1" inputmode="numeric" placeholder="1"></label>
+          <label>Kolom sampai<input id="lbK2" type="number" min="1" inputmode="numeric" placeholder="semua"></label>
+          <div class="lbl-lv" id="lbLv"></div>
+        </div>
+        <div class="acts" style="margin:10px 0 6px"><button class="btn sm" id="lbAll">Pilih semua</button><button class="btn sm" id="lbNone">Kosongkan</button><button class="btn pri" id="lbPrint" disabled>Cetak</button></div>
+        <div id="lbMsg" class="small"></div>
+        <div class="lbgrid" id="lbList"></div>
       </div>
       <div class="sec"><h3><span>Data contoh</span></h3>
         <p class="small">Palet bertanda contoh di Google Sheet hanya untuk demo. Hapus kalau mau mulai dari gudang kosong.</p>
@@ -550,6 +576,7 @@ function applyMaster(m){
   const nLane=[...L.values()].filter(x=>x.lane).length;
   $("masterInfo").innerHTML=`<b>${M.produk.length}</b> produk · <b>${M.lokasi.length-nLane}</b> lokasi rak + <b>${nLane}</b> lorong (<b>${LINK.size}</b> sudah punya link QR label) · gudang ${geds.join(", ")} · rak reject: ${M.rak.filter(r=>r.fungsi==="Reject").map(r=>r.gedung+"-"+r.rak).join(", ")||"-"}`;
   onItemChange(true);render();
+  try{lbSetup();}catch(e){}
 }
 async function loadMaster(){try{applyMaster(await apiGet("master"));}catch(e){$("conn").textContent="Master data gagal dimuat. Cek link server lalu muat ulang.";}}
 async function refresh(){
@@ -1333,16 +1360,54 @@ function labelHtml(p){
     <tr style="height:12%">${v(ddmmyyyy(p.prod))}${v(ddmmyyyy(p.exp))}</tr>
   </table>`;
 }
-function printLaneLabels(){
-  const lanes=[...L.values()].filter(x=>x.lane).sort((a,b)=>a.code.localeCompare(b.code));
-  if(!lanes.length){$("laneLblMsg").textContent="Belum ada lorong di Master Lokasi.";return;}
-  if(!window.qrcode){$("laneLblMsg").textContent="Pembuat QR gagal dimuat. Cek internet, lalu buka ulang halaman.";return;}
-  $("pageCss").textContent="@page{size:A4 portrait;margin:0}";
-  let pg="";for(let i=0;i<lanes.length;i+=4)pg+=`<div class="page">${lanes.slice(i,i+4).map(x=>`<div class="sheet lanelbl"><div class="t1">LORONG · ${esc(x.ged)}</div><div class="qrw">${qrSvg(x.code)}</div><div class="code">${esc(x.code)}</div><div class="t2">1 kode untuk banyak palet · scan dengan tombol "Letakkan di lorong"</div></div>`).join("")}</div>`;
-  $("printArea").innerHTML=pg;$("laneLblMsg").textContent=lanes.length+" label lorong siap dicetak.";
-  setTimeout(()=>window.print(),400);
+/* =================== CETAK LABEL LOKASI (rak & lorong, bisa dipilih) =================== */
+const LB={gud:"SD18",jenis:"rak",sel:new Set()};
+function lbCandidates(){
+  const all=[...L.values()].filter(x=>x.ged===LB.gud&&(LB.jenis==="lorong"?x.lane:!x.lane));
+  if(LB.jenis==="lorong")return all.sort((a,b)=>a.code.localeCompare(b.code));
+  const rak=$("lbRak").value,k1=+$("lbK1").value||1,k2=+$("lbK2").value||999;
+  const lvs=[...document.querySelectorAll("#lbLv input:checked")].map(i=>i.value);
+  return all.filter(x=>(!rak||x.rak===rak)&&+x.kol>=k1&&+x.kol<=k2&&lvs.includes(x.lv))
+    .sort((a,b)=>+a.rak-+b.rak||LVORD.indexOf(b.lv)-LVORD.indexOf(a.lv)||+a.kol-+b.kol);
 }
-$("btnLaneLabels").addEventListener("click",printLaneLabels);
+function lbSetup(){
+  const racks=[...new Set([...L.values()].filter(x=>x.ged===LB.gud&&!x.lane).map(x=>x.rak))].sort((a,b)=>+a-+b);
+  const cur=$("lbRak").value;
+  $("lbRak").innerHTML=`<option value="">Semua rak</option>`+racks.map(r=>`<option value="${r}">Rak ${r}</option>`).join("");
+  if(racks.includes(cur))$("lbRak").value=cur;
+  const lvs=[...new Set([...L.values()].filter(x=>x.ged===LB.gud&&!x.lane).map(x=>x.lv))].sort().reverse();
+  const old=new Set([...document.querySelectorAll("#lbLv input")].filter(i=>!i.checked).map(i=>i.value));
+  $("lbLv").innerHTML=`<span class="small" style="color:var(--muted)">Level:</span>`+lvs.map(v=>`<label><input type="checkbox" value="${v}" ${old.has(v)?"":"checked"}> ${v}</label>`).join("");
+  $("lbRakBox").hidden=LB.jenis!=="rak";
+  lbRender(true);
+}
+function lbRender(reset){
+  const c=lbCandidates();
+  if(reset==="all")LB.sel=new Set(c.map(x=>x.code));
+  else LB.sel=new Set([...LB.sel].filter(k=>c.some(x=>x.code===k)));
+  $("lbList").innerHTML=c.length?c.map(x=>`<label class="${LB.sel.has(x.code)?"on":""}"><input type="checkbox" data-lb="${x.code}" ${LB.sel.has(x.code)?"checked":""}>${x.code}</label>`).join("")
+    :`<div class="empty">Tidak ada lokasi sesuai saringan${LB.jenis==="lorong"?" (lorong belum ada di Master Lokasi)":""}.</div>`;
+  $("lbCount").textContent=LB.sel.size?LB.sel.size+" dipilih":"";
+  $("lbPrint").disabled=!LB.sel.size;$("lbPrint").textContent=LB.sel.size?`Cetak ${LB.sel.size} label`:"Cetak";
+}
+function lbSeg(id,key){$(id).addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;LB[key]=b.dataset.v;
+  document.querySelectorAll("#"+id+" button").forEach(x=>x.setAttribute("aria-pressed",x===b));$("lbMsg").textContent="";lbSetup();});}
+lbSeg("lbGud","gud");lbSeg("lbJenis","jenis");
+["lbRak","lbK1","lbK2"].forEach(id=>$(id).addEventListener("change",()=>lbRender(true)));
+$("lbLv").addEventListener("change",()=>lbRender(true));
+$("lbList").addEventListener("change",e=>{const i=e.target.closest("[data-lb]");if(!i)return;
+  if(i.checked)LB.sel.add(i.dataset.lb);else LB.sel.delete(i.dataset.lb);i.parentElement.classList.toggle("on",i.checked);lbRender(false);});
+$("lbAll").addEventListener("click",()=>lbRender("all"));
+$("lbNone").addEventListener("click",()=>{LB.sel.clear();lbRender(false);});
+$("lbPrint").addEventListener("click",()=>{
+  const list=lbCandidates().filter(x=>LB.sel.has(x.code));if(!list.length)return;
+  if(!window.qrcode){$("lbMsg").textContent="Pembuat QR gagal dimuat. Cek internet, lalu buka ulang halaman.";return;}
+  $("pageCss").textContent="@page{size:A4 portrait;margin:0}";
+  let pg="";for(let i=0;i<list.length;i+=18)pg+=`<div class="lbpage">${list.slice(i,i+18).map(x=>`<div class="loclbl"><div class="c">${esc(x.code)}</div><div class="q">${qrSvg(x.code)}</div></div>`).join("")}</div>`;
+  $("printArea").innerHTML=pg;$("lbMsg").textContent=`${list.length} label siap dicetak (${Math.ceil(list.length/18)} halaman A4).`;
+  setTimeout(()=>window.print(),400);
+});
+try{if(L.size)lbSetup();}catch(e){}
 function printLabels(list){
   $("pageCss").textContent="@page{size:A4 portrait;margin:0}";
   let pg="";for(let i=0;i<list.length;i+=4)pg+=`<div class="page">${list.slice(i,i+4).map(p=>`<div class="sheet">${labelHtml(p)}</div>`).join("")}</div>`;
