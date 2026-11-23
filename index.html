@@ -135,8 +135,13 @@ table.t th{font-size:12px;color:var(--muted);font-weight:600}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin-bottom:10px}
 .legend i{display:inline-block;width:14px;height:14px;border-radius:3px;border:1px solid var(--line);vertical-align:-2px;margin-right:5px}
 .mapbox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px}
-.rn{font:700 12px var(--ui);letter-spacing:.06em;color:var(--muted);margin:10px 0 3px}
-.rn em{font-style:normal;color:var(--bad);margin-left:6px}
+.rn{font:700 12px var(--ui);letter-spacing:.06em;color:var(--ink);margin:0 0 6px;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.rn em.tag{font:700 10px var(--ui);letter-spacing:.04em;padding:2px 8px;border-radius:999px;color:#fff;background:var(--zc)}
+.rk{--zc:var(--line);width:max-content;border:2px solid var(--zc);border-radius:10px;padding:8px 10px 8px 6px;margin:0 0 10px;background:var(--surface)}
+.rk.zSlow{--zc:var(--blue)}.rk.zFast{--zc:#E8A317}.rk.zPreloading{--zc:#22863A}.rk.zReject{--zc:var(--bad)}.rk.zInkubasi{--zc:#6E59A5}
+.rk.zFast .rn em.tag{color:#3A2600}
+.rkpair{display:flex;flex-wrap:wrap;gap:0 10px;align-items:flex-start}
+.legend.area i{background:transparent;border-width:2px;border-radius:3px}
 .rrow{display:flex;gap:2px;margin-bottom:2px}
 .rrow .lv{width:22px;flex:none;font:600 11px var(--mono);color:var(--muted);display:flex;align-items:center}
 .cell{width:30px;height:24px;flex:none;border-radius:3px;border:1px solid var(--line);background:var(--empty);font:600 9px var(--mono);display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;padding:0}
@@ -189,6 +194,11 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
 #printArea{display:none}
 .page{width:210mm;height:297mm;display:grid;grid-template-columns:105mm 105mm;grid-template-rows:148.5mm 148.5mm;page-break-after:always;break-after:page;background:#fff;overflow:hidden}
 .page:last-child{page-break-after:auto;break-after:auto}
+.lanelbl{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5mm;text-align:center;font-family:Arial,Helvetica,sans-serif;color:#000}
+.lanelbl .t1{font-size:14pt;font-weight:700;letter-spacing:.1em}
+.lanelbl .code{font-size:30pt;font-weight:800;letter-spacing:.02em}
+.lanelbl .qrw{width:62mm;height:62mm}.lanelbl .qrw svg{width:100%;height:100%}
+.lanelbl .t2{font-size:10pt}
 .sheet{width:105mm;height:148.5mm;background:#fff;color:#000;padding:7mm 6mm;box-sizing:border-box;overflow:hidden;outline:0.2mm dashed #aaa;outline-offset:-3mm}
 .lab{width:100%;height:100%;border-collapse:collapse;table-layout:fixed;font-family:Arial,Helvetica,sans-serif;color:#000}
 .lab td{border:0.35mm solid #000;padding:0 1.8mm;vertical-align:middle;text-align:left}
@@ -319,6 +329,7 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
     <div class="seg" id="segGud"></div>
     <div class="legend"><span><i style="background:var(--blue);border-color:var(--blue)"></i>Letakkan di sini</span><span><i style="background:var(--pick);border-color:var(--pick-t)"></i>Picking (akan keluar)</span><span><i style="background:var(--ok-bg)"></i>Release</span><span><i style="background:var(--ink-bg)"></i>Inkubasi</span><span><i style="background:var(--wait-bg)"></i>Campur</span><span><i style="background:var(--bad-bg);border-color:var(--bad)"></i>Reject</span><span><i style="background:var(--orange)"></i>Hasil cari</span><span><i style="box-shadow:inset 0 0 0 2px var(--ov);border-color:var(--ov)"></i>Overstock (beda gudang asal, kecuali rak Inkubasi/Reject)</span><span><i style="border:1.5px dashed var(--muted)"></i>Lorong (1 kode, banyak palet)</span><span><i></i>Kosong</span></div>
     <div id="cellInfo" class="msg wait" hidden></div>
+    <div class="legend area"><b style="color:var(--ink)">Area:</b><span><i style="border-color:var(--blue)"></i>Slow (SD17, cair)</span><span><i style="border-color:#E8A317"></i>Fast (SD18, padat)</span><span><i style="border-color:#22863A"></i>Pre-loading</span><span><i style="border-color:var(--bad)"></i>Reject</span></div>
     <div class="mapbox" id="map"></div>
   </section>
 
@@ -387,13 +398,20 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
         <div class="info"><ul>
           <li><b>Rak Reject</b>: hanya palet berstatus Reject. Palet Reject tidak boleh diletakkan di rak lain.</li>
           <li><b>Keluar dari rak Reject</b>: hanya setelah status QC diubah (Release / Inkubasi) lewat Admin &gt; QC. Setelah itu muncul di daftar "Perlu dipindahkan".</li>
+          <li><b>Area pre-loading SD18</b>: Rak 11, Rak 12, dan <b>Rak 01 kolom 01–18</b>. Rak 01 kolom 19–23 tetap area Fast.</li>
           <li><b>Rak Preloading</b>: hanya palet Release (semua isi Release). Palet Inkubasi / Campur tidak boleh.</li>
+          <li><b>Rekomendasi lokasi</b> dimulai dari rak terdekat loading gate: SD17 dari Rak 01, SD18 dari Rak 08 (lalu 07, 06, … 01). Di tiap rak: kolom 01 dan level A dulu.</li>
+          <li><b>Palet Inkubasi</b> disimpan di area sesuai kategori produk: Slow (SD17) atau Fast (SD18).</li>
           <li><b>Preloading ke rak Simpan</b>: boleh (dikembalikan). Kalau status QC palet di preloading berubah bukan Release, wajib dikembalikan ke rak Simpan.</li>
           <li><b>Reject ke Preloading</b>: tidak bisa langsung. Ubah QC ke Release dulu.</li>
           <li><b>Rak Inkubasi</b> (khusus SD18): untuk palet yang belum Release. Palet Reject tetap harus di rak reject.</li>
           <li><b>Lorong</b> (FG17-L01 s/d FG18-L08): 1 lorong = 1 kode, boleh berisi banyak palet dan banyak produk tanpa batas. Boleh untuk status Release / Inkubasi / Campur, <b>tidak untuk Reject</b>. Letakkan dengan tombol <b>Letakkan di lorong</b> di menu Masuk (scan label lorong, lalu scan palet).</li>
           <li><b>Gedung</b>: bebas. Palet produk SD17 yang disimpan di SD18 (atau sebaliknya) diberi tanda <b>Overstock</b> biru-hijau. <b>Pengecualian</b>: palet di rak <b>Inkubasi</b> atau <b>Reject</b> tidak dihitung overstock.</li>
         </ul></div>
+      </div>
+      <div class="sec"><h3><span>Label lorong</span></h3>
+        <p class="small">Cetak label QR untuk semua lorong (FG17-L01 … FG18-L08) dari Master Lokasi. A4, 4 label per halaman. Tempel di tiang / lantai lorong.</p>
+        <button class="btn pri" id="btnLaneLabels">Cetak label lorong</button> <span id="laneLblMsg" class="small"></span>
       </div>
       <div class="sec"><h3><span>Data contoh</span></h3>
         <p class="small">Palet bertanda contoh di Google Sheet hanya untuk demo. Hapus kalau mau mulai dari gudang kosong.</p>
@@ -455,6 +473,17 @@ function resolveLoc(txt){
 }
 function locErr(txt){return /drive\.google|\/d\//.test(String(txt))?"Label rak ini (link Drive) belum terdaftar di Master Lokasi kolom H (Link PDF Lokasi).":"Bukan kode rak yang dikenal: "+String(txt).slice(0,60);}
 let ORDER={};
+/* ---------- AREA RAK (sesuai Layout Warehouse terbaru) ----------
+   Rak yang dibagi per kolom. Rak lain mengikuti fungsi di sheet Master Rak.
+   Kategori: rak Simpan di SD17 = SLOW (produk cair), di SD18 = FAST (produk padat). */
+const ZONES={"SD18|01":[{k1:1,k2:18,fungsi:"Preloading"},{k1:19,k2:99,fungsi:"Simpan"}]};
+const zoneOf=(ged,rak,kol)=>(ZONES[ged+"|"+rak]||[]).find(z=>+kol>=z.k1&&+kol<=z.k2);
+/* Urutan rak dari LOADING GATE terdekat (dipakai untuk rekomendasi lokasi).
+   SD17: gate di kiri atas -> Rak 01 dulu. SD18: gate di bawah dekat Rak 08 -> Rak 08 dulu.
+   Di dalam rak: kolom 01 (sisi gate) dulu, level A dulu. */
+const GATE={SD17:["01","02","03","04","05","06","07","08","09"],SD18:["08","07","06","05","04","03","02","01","09","10","12","11"]};
+const gateRank=(ged,rak)=>{const i=(GATE[ged]||[]).indexOf(rak);return i<0?99:i;};
+const katOf=(ged)=>ged==="SD17"?"Slow":"Fast";
 const S={pal:new Map(),out:[],batal:[],cari:new Set(),gud:"SD18"};
 const lsGet=(k)=>{try{return localStorage.getItem(k);}catch(e){return null;}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
@@ -508,9 +537,10 @@ function applyMaster(m){
     if(/^FG\d{2}-L\d{2}$/.test(code)){L.set(code,{code,ged,rak,kol:"",lv:"",li:-1,fungsi:"Lorong",urutan:0,lane:true});return;}
     const r0=rk.get(ged+"|"+rak)||{fungsi:"Simpan",urutan:99},fl=String(r0.fungsi||"").trim().toLowerCase(),
       r={fungsi:fl==="reject"?"Reject":fl==="preloading"?"Preloading":fl==="inkubasi"?"Inkubasi":"Simpan",urutan:r0.urutan};
+    const z=zoneOf(ged,rak,kol);if(z)r.fungsi=z.fungsi;
     L.set(code,{code,ged,rak,kol,lv,li:LVORD.indexOf(lv),fungsi:r.fungsi,urutan:r.urutan});});
   ORDER={};
-  [...L.values()].filter(x=>!x.lane).sort((a,b)=>a.urutan-b.urutan||+a.rak-+b.rak||a.li-b.li||+a.kol-+b.kol)
+  [...L.values()].filter(x=>!x.lane).sort((a,b)=>gateRank(a.ged,a.rak)-gateRank(b.ged,b.rak)||a.urutan-b.urutan||+a.rak-+b.rak||a.li-b.li||+a.kol-+b.kol)
     .forEach(x=>{const k=x.ged+"|"+x.fungsi;(ORDER[k]=ORDER[k]||[]).push(x.code);});
   const geds=[...new Set(M.lokasi.map(x=>x[1]))].sort();GEDS=geds;
   if(!geds.includes(S.gud))S.gud=geds[geds.length-1]||"SD18";
@@ -842,9 +872,14 @@ function renderMap(){
   const afterRak=(c)=>{const n=+String(c).slice(-2);return pad(n%2?n:Math.max(1,n-1));};
   const placed=new Set(),pre=g.replace("SD","FG");let h="";
   Object.keys(racks).sort((a,b)=>+a-+b).forEach(r=>{const R=racks[r],lvs=[...R.lvs].sort().reverse();
-    h+=`<div class="rn">RACK ${r}${R.fungsi!=="Simpan"?`<em>${esc(R.fungsi.toUpperCase())}</em>`:""}</div>`;
+    const segs=ZONES[g+"|"+r]?ZONES[g+"|"+r].map(z=>({k1:z.k1,k2:Math.min(z.k2,R.maxK),fungsi:z.fungsi})).filter(z=>z.k1<=z.k2)
+      :[{k1:1,k2:R.maxK,fungsi:R.fungsi}];
+    if(segs.length>1)h+=`<div class="rkpair">`;
+    segs.forEach(sg=>{
+    const zc=sg.fungsi==="Simpan"?katOf(g):sg.fungsi,ztag={Slow:"SLOW",Fast:"FAST",Preloading:"PRE-LOADING",Reject:"REJECT",Inkubasi:"INKUBASI"}[zc]||zc.toUpperCase();
+    h+=`<div class="rk z${zc}"><div class="rn">RACK ${r}${segs.length>1?` · kol ${pad(sg.k1)}–${pad(sg.k2)}`:""}<em class="tag">${esc(ztag)}</em></div>`;
     lvs.forEach(lv=>{h+=`<div class="rrow"><span class="lv">${lv}</span>`;
-      for(let k=1;k<=R.maxK;k++){const c=`${pre}-${r}-${pad(k)}-${lv}`;
+      for(let k=sg.k1;k<=sg.k2;k++){const c=`${pre}-${r}-${pad(k)}-${lv}`;
         if(!R.cells.has(c)){h+=`<span class="cell x"></span>`;continue;}
         let cls="",t=pad(k);const id=D.occ.get(c),op=id?S.pal.get(id):null;
         if(D.pick.has(c)){cls="pk";t="P"+D.pick.get(c);}
@@ -854,6 +889,8 @@ function renderMap(){
         if(isOv(hp,L.get(c)))cls+=" ov";
         h+=`<button class="cell ${cls}" data-loc="${c}" aria-label="${c}">${t}</button>`;}
       h+=`</div>`;});
+    h+=`</div>`;});
+    if(segs.length>1)h+=`</div>`;
     const grp=lanes.filter(x=>afterRak(x.code)===r);
     if(grp.length){grp.forEach(x=>placed.add(x.code));h+=`<div class="arow">${grp.map(laneBtn).join("")}</div>`;}
   });
@@ -872,7 +909,7 @@ $("map").addEventListener("click",e=>{
       (D.pickLane.has(c)?`<br><b>PICKING ${D.pickLane.get(c).map(n=>"#"+n).join(", ")}</b> · akan diambil, belum dikonfirmasi keluar`:"");
     return;}
   if(id){const p=S.pal.get(id);info.className="msg ok";info.innerHTML=`<span class="loc sm done">${c}</span> ${palTxt(p)} ${qcP(p)}<br><span class="small">${esc(p.nama)} · produksi ${fmtDate(p.prod)} · gudang asal ${esc(p.gudang)}</span>${D.pick.has(c)?`<br><b>PICKING #${D.pick.get(c)}</b> · akan diambil, belum dikonfirmasi keluar`:""}`;}
-  else{info.className="msg wait";info.innerHTML=`<span class="loc sm">${c}</span> Kosong · rak ${esc(x?x.fungsi:"")}${D.rekLoc.has(c)?` · rekomendasi palet menunggu #${D.rekLoc.get(c).n}`:""}`;}
+  else{info.className="msg wait";info.innerHTML=`<span class="loc sm">${c}</span> Kosong · area ${esc(x?(x.fungsi==="Simpan"?katOf(x.ged):x.fungsi):"")}${D.rekLoc.has(c)?` · rekomendasi palet menunggu #${D.rekLoc.get(c).n}`:""}`;}
 });
 
 /* =================== PEMINDAI =================== */
@@ -1296,6 +1333,16 @@ function labelHtml(p){
     <tr style="height:12%">${v(ddmmyyyy(p.prod))}${v(ddmmyyyy(p.exp))}</tr>
   </table>`;
 }
+function printLaneLabels(){
+  const lanes=[...L.values()].filter(x=>x.lane).sort((a,b)=>a.code.localeCompare(b.code));
+  if(!lanes.length){$("laneLblMsg").textContent="Belum ada lorong di Master Lokasi.";return;}
+  if(!window.qrcode){$("laneLblMsg").textContent="Pembuat QR gagal dimuat. Cek internet, lalu buka ulang halaman.";return;}
+  $("pageCss").textContent="@page{size:A4 portrait;margin:0}";
+  let pg="";for(let i=0;i<lanes.length;i+=4)pg+=`<div class="page">${lanes.slice(i,i+4).map(x=>`<div class="sheet lanelbl"><div class="t1">LORONG · ${esc(x.ged)}</div><div class="qrw">${qrSvg(x.code)}</div><div class="code">${esc(x.code)}</div><div class="t2">1 kode untuk banyak palet · scan dengan tombol "Letakkan di lorong"</div></div>`).join("")}</div>`;
+  $("printArea").innerHTML=pg;$("laneLblMsg").textContent=lanes.length+" label lorong siap dicetak.";
+  setTimeout(()=>window.print(),400);
+}
+$("btnLaneLabels").addEventListener("click",printLaneLabels);
 function printLabels(list){
   $("pageCss").textContent="@page{size:A4 portrait;margin:0}";
   let pg="";for(let i=0;i<list.length;i+=4)pg+=`<div class="page">${list.slice(i,i+4).map(p=>`<div class="sheet">${labelHtml(p)}</div>`).join("")}</div>`;
