@@ -1513,33 +1513,6 @@ function shipReport(rows,sh){
   const P=[...prods.values()].sort((a,b)=>String(a.item).localeCompare(String(b.item)));
   let no=0,det="";
   P.forEach(pr=>{
-    pr.rows=sortKel(pr.rows);
-    det+=`<tr class="grp"><td colspan="4">${esc(pr.item)} — ${esc(pr.nama||"")}</td></tr>`;
-    const bt=new Map();pr.rows.forEach(p=>{if(!bt.has(p.batch))bt.set(p.batch,[]);bt.get(p.batch).push(p);});
-    bt.forEach((list,b)=>{
-      list.forEach(p=>{det+=`<tr><td class="n">${++no}</td><td>${esc(p.batch)}</td><td>${esc(p.mat)}</td><td class="n">${esc(p.jumlah)} ${esc(p.satuan||"")}</td></tr>`;});
-      if(bt.size>1||list.length>1)det+=`<tr class="sub"><td></td><td colspan="2">Subtotal batch ${esc(b)} (${list.length} palet)</td><td class="n">${kTotals(list)}</td></tr>`;
-    });
-    det+=`<tr class="psub"><td></td><td colspan="2">Total ${esc(pr.item)} (${pr.rows.length} palet)</td><td class="n">${kTotals(pr.rows)}</td></tr>`;
-  });
-  return `<table class="info"><tr><td><span>Shipment No</span><b>${esc(sh.shipment||"-")}</b></td><td><span>Lot No</span><b>${esc(sh.lot||"-")}</b></td><td><span>PO No</span><b>${esc(sh.po||"-")}</b></td></tr>
-      <tr><td colspan="3"><span>Waktu muat</span><b>${esc(tgl)}</b></td></tr></table>
-    <h2>Ringkasan per produk</h2>
-    <table><thead><tr><th>Item Code</th><th>Nama Produk</th><th class="n">Palet</th><th class="n">Quantity</th></tr></thead><tbody>${
-      P.map(pr=>`<tr><td>${esc(pr.item)}</td><td>${esc(pr.nama||"")}</td><td class="n">${pr.rows.length}</td><td class="n">${kTotals(pr.rows)}</td></tr>`).join("")
-    }</tbody><tfoot><tr><td colspan="2">Total</td><td class="n">${rows.length}</td><td class="n">${kTotals(rows)}</td></tr></tfoot></table>
-    <h2>Rincian palet</h2>
-    <table><thead><tr><th class="n">No</th><th>Batch</th><th>Nomor Material</th><th class="n">Quantity</th></tr></thead><tbody>${det}</tbody>
-      <tfoot><tr><td colspan="3">Total ${rows.length} palet</td><td class="n">${kTotals(rows)}</td></tr></tfoot></table>
-    <table class="sig"><tr><td>Operator</td><td>Checker</td><td>Supervisor</td></tr><tr><td></td><td></td><td></td></tr><tr><td>Nama:</td><td>Nama:</td><td>Nama:</td></tr></table>`;
-function shipReport(rows,sh){
-  const first=rows[0],last=rows[rows.length-1];
-  const tAw=first&&first.wKeluar||"",tAk=last&&last.wKeluar||"";
-  const tgl=tAw?hariTgl(tAw.slice(0,10))+", "+jamDari(tAw)+(tAk.slice(0,10)!==tAw.slice(0,10)?" – "+hariTgl(tAk.slice(0,10))+", ":" – ")+jamDari(tAk):"-";
-  const prods=new Map();rows.forEach(p=>{const k=p.item||"-";if(!prods.has(k))prods.set(k,{item:k,nama:p.nama,rows:[]});prods.get(k).rows.push(p);});
-  const P=[...prods.values()].sort((a,b)=>String(a.item).localeCompare(String(b.item)));
-  let no=0,det="";
-  P.forEach(pr=>{
     det+=`<tr class="grp"><td colspan="4">${esc(pr.item)} — ${esc(pr.nama||"")}</td></tr>`;
     sortKel(pr.rows).forEach(p=>{det+=`<tr><td class="n">${++no}</td><td>${esc(p.batch)}</td><td>${esc(p.mat)}</td><td class="n">${esc(p.jumlah)} ${esc(p.satuan||"")}</td></tr>`;});
   });
@@ -1548,8 +1521,7 @@ function shipReport(rows,sh){
     <h2>Rincian palet</h2>
     <table><thead><tr><th class="n">No</th><th>Batch</th><th>Nomor Material</th><th class="n">Quantity</th></tr></thead><tbody>${det}</tbody>
       <tfoot><tr><td colspan="3">Total ${rows.length} palet</td><td class="n">${kTotals(rows)}</td></tr></tfoot></table>
-    <table class="sig"><tr><td>Checker</td><td>Supervisor</td></tr><tr><td></td><td></td></tr><tr><td>Nama:</td><td>Nama:</td></tr></table>`;
-}
+    <table class="sig"><tr><td>Checker</td><td>Supervisor</td></tr><tr><td></td><td></td></tr></table>`;
 }
 async function loadShips(keep){
   try{
