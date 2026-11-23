@@ -204,11 +204,12 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
 .lbgrid label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:6px 9px;font:600 12px var(--mono);background:var(--surface);cursor:pointer}
 .lbgrid label.on{border-color:var(--blue);background:var(--blue-bg);color:var(--blue)}
 .lbgrid input{width:16px;height:16px}
-/* label lokasi cetak: 2 kolom x 9 baris di A4 */
-.lbpage{width:210mm;height:297mm;box-sizing:border-box;padding:10.5mm 10mm;display:grid;grid-template-columns:95mm 95mm;grid-template-rows:repeat(9,30.66mm);page-break-after:always;break-after:page;background:#fff}
-.loclbl{box-sizing:border-box;margin:1.2mm 2mm;display:grid;grid-template-columns:1fr 27mm;border:0.45mm solid #000;background:#fff;color:#000;outline:0.15mm dashed #bbb;outline-offset:1mm}
-.loclbl .c{display:flex;align-items:center;justify-content:center;font:700 19pt Arial,Helvetica,sans-serif;letter-spacing:.01em;padding:0 2mm;white-space:nowrap}
-.loclbl .q{border-left:0.45mm solid #000;display:flex;align-items:center;justify-content:center;padding:1.2mm}
+/* label lokasi cetak: ukuran 20 x 10 cm, 2 label per A4 */
+:root{--lbW:200mm;--lbH:100mm}
+.lbpage{width:210mm;height:297mm;box-sizing:border-box;padding:20mm 5mm;display:grid;grid-template-columns:var(--lbW);grid-template-rows:repeat(2,var(--lbH));row-gap:15mm;justify-content:center;page-break-after:always;break-after:page;background:#fff}
+.loclbl{box-sizing:border-box;width:var(--lbW);height:var(--lbH);display:grid;grid-template-columns:1fr var(--lbH);border:0.6mm solid #000;background:#fff;color:#000;outline:0.15mm dashed #bbb;outline-offset:2mm}
+.loclbl .c{display:flex;align-items:center;justify-content:center;font:700 34pt Arial,Helvetica,sans-serif;letter-spacing:.01em;padding:0 4mm;white-space:nowrap}
+.loclbl .q{border-left:0.6mm solid #000;display:flex;align-items:center;justify-content:center;padding:6mm}
 .loclbl .q svg{width:100%;height:100%}
 .lanelbl{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5mm;text-align:center;font-family:Arial,Helvetica,sans-serif;color:#000}
 .lanelbl .t1{font-size:14pt;font-weight:700;letter-spacing:.1em}
@@ -426,7 +427,7 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
         </ul></div>
       </div>
       <div class="sec"><h3><span>Cetak label lokasi (rak &amp; lorong)</span><span id="lbCount"></span></h3>
-        <p class="small" style="margin:0 0 8px">Pilih gedung, jenis, lalu saring rak / level / kolom. Centang label yang mau dicetak (atau Pilih semua). Kertas A4, 18 label per halaman (9 × 3 cm), garis potong tipis.</p>
+        <p class="small" style="margin:0 0 8px">Pilih gedung, jenis, lalu saring rak / level / kolom. Centang label yang mau dicetak (atau Pilih semua). Ukuran label 20 × 10 cm, 2 label per halaman A4, dengan garis potong tipis.</p>
         <div class="seg" id="lbGud" style="margin:0 0 8px"><button data-v="SD17" aria-pressed="false">SD17</button><button data-v="SD18" aria-pressed="true">SD18</button></div>
         <div class="seg" id="lbJenis" style="margin:0 0 8px"><button data-v="rak" aria-pressed="true">Rak</button><button data-v="lorong" aria-pressed="false">Lorong</button></div>
         <div class="lbf" id="lbRakBox">
@@ -1362,6 +1363,7 @@ function labelHtml(p){
 }
 /* =================== CETAK LABEL LOKASI (rak & lorong, bisa dipilih) =================== */
 const LB={gud:"SD18",jenis:"rak",sel:new Set()};
+const LB_PER_PAGE=2;   // jumlah label per halaman A4 (label 20 x 10 cm)
 function lbCandidates(){
   const all=[...L.values()].filter(x=>x.ged===LB.gud&&(LB.jenis==="lorong"?x.lane:!x.lane));
   if(LB.jenis==="lorong")return all.sort((a,b)=>a.code.localeCompare(b.code));
@@ -1403,8 +1405,8 @@ $("lbPrint").addEventListener("click",()=>{
   const list=lbCandidates().filter(x=>LB.sel.has(x.code));if(!list.length)return;
   if(!window.qrcode){$("lbMsg").textContent="Pembuat QR gagal dimuat. Cek internet, lalu buka ulang halaman.";return;}
   $("pageCss").textContent="@page{size:A4 portrait;margin:0}";
-  let pg="";for(let i=0;i<list.length;i+=18)pg+=`<div class="lbpage">${list.slice(i,i+18).map(x=>`<div class="loclbl"><div class="c">${esc(x.code)}</div><div class="q">${qrSvg(x.code)}</div></div>`).join("")}</div>`;
-  $("printArea").innerHTML=pg;$("lbMsg").textContent=`${list.length} label siap dicetak (${Math.ceil(list.length/18)} halaman A4).`;
+  let pg="";for(let i=0;i<list.length;i+=LB_PER_PAGE)pg+=`<div class="lbpage">${list.slice(i,i+LB_PER_PAGE).map(x=>`<div class="loclbl"><div class="c">${esc(x.code)}</div><div class="q">${qrSvg(x.code)}</div></div>`).join("")}</div>`;
+  $("printArea").innerHTML=pg;$("lbMsg").textContent=`${list.length} label siap dicetak (${Math.ceil(list.length/LB_PER_PAGE)} halaman A4).`;
   setTimeout(()=>window.print(),400);
 });
 try{if(L.size)lbSetup();}catch(e){}
