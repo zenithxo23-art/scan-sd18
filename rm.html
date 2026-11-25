@@ -179,7 +179,7 @@ $('nav').onclick = async e => {
   if (t === 'admin' && !adminPin) {
     const p = prompt('Masukkan PIN admin'); if (!p) return;
     const r = await post({action: 'cekpin', pin: p, petugas: ''}); 
-    if (!r.ok) return toast('PIN salah', false);
+    if (!r.ok) return toast(r.msg || 'Tidak bisa terhubung ke server', false);
     adminPin = p;
   }
   document.querySelectorAll('nav button,section').forEach(x => x.classList.remove('on'));
