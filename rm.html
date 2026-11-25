@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Stok Sparepart</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
 <style>
 :root{--bg:#f3f5f0;--card:#fff;--ink:#1d2a22;--mute:#667269;--line:#d9dfd5;--main:#2f6b45;--warn:#b4531a;--bad:#a32a2a}
 *{box-sizing:border-box}
@@ -50,9 +50,9 @@ th,td{padding:6px;border-bottom:1px solid var(--line);text-align:left;vertical-a
 @media print{
  body>*:not(#lbl){display:none!important}
  #lbl{display:block!important}
- .lb{display:flex;gap:.2cm;width:6cm;height:4cm;padding:.25cm;page-break-after:always;overflow:hidden;font-size:8pt;color:#000}
- .lt{flex:1;word-break:break-word}.lt b{font-size:9pt;display:block;margin-bottom:3px}
- .lq img,.lq canvas{width:2.4cm!important;height:2.4cm!important}
+ .lb{display:flex;flex-direction:column;justify-content:space-between;width:6cm;height:4cm;padding:.25cm;page-break-after:always;overflow:hidden;font-size:9pt;color:#000}
+ .lt{word-break:break-word}.lt b{font-size:11pt;display:block;margin-bottom:2px}
+ .lb svg{display:block;width:100%;height:2cm}
  @page{size:6cm 4cm;margin:0}
 }
 </style>
@@ -281,11 +281,15 @@ function cetak(b, n) {
   const box = $('lbl'); box.innerHTML = '';
   for (let i = 0; i < n; i++) {
     const d = document.createElement('div'); d.className = 'lb';
-    d.innerHTML = `<div class="lt"><b>${b.Nama}</b><div>${b.Kode}</div><small>${b.Barcode || b.Kode}</small></div><div class="lq"></div>`;
+    d.innerHTML = `<div class="lt"><b>${b.Nama}</b><div>Item code: ${b.Kode}</div></div><svg></svg>`;
     box.appendChild(d);
-    new QRCode(d.querySelector('.lq'), {text: String(b.Barcode || b.Kode), width: 90, height: 90});
+    const svg = d.querySelector('svg');
+    JsBarcode(svg, String(b.Barcode || b.Kode), {format: 'CODE128', width: 2, height: 60, margin: 0, displayValue: true, fontSize: 16});
+    const w = parseFloat(svg.getAttribute('width')), h = parseFloat(svg.getAttribute('height'));
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`); svg.removeAttribute('width'); svg.removeAttribute('height');
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
   }
-  setTimeout(() => window.print(), 600);
+  setTimeout(() => window.print(), 400);
 }
 
 /* stok */
