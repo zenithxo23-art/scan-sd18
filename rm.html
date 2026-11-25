@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scan Stok Sparepart</title>
-<script src="https://script.google.com/macros/s/AKfycbwClwR5vrbW0t9_qTU7_h6bU8vSUb5MT0dYYMh0bRu_0j6ivexSB5TUt2Ce-q47rMVz/exec"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <style>
 :root{--bg:#f3f5f0;--card:#fff;--ink:#1d2a22;--mute:#667269;--line:#d9dfd5;--main:#2f6b45;--warn:#b4531a;--bad:#a32a2a}
 *{box-sizing:border-box}
@@ -99,7 +99,7 @@ th,td{padding:6px;border-bottom:1px solid var(--line);text-align:left}
 
 <script>
 // GANTI dengan URL web app Apps Script (hasil Deploy)
-const API = 'GANTI_DENGAN_URL_WEB_APP';
+const API = 'https://script.google.com/macros/s/AKfycbwClwR5vrbW0t9_qTU7_h6bU8vSUb5MT0dYYMh0bRu_0j6ivexSB5TUt2Ce-q47rMVz/exec';
 
 let barang = [], dept = [], stok = [], sel = {m: null, k: null}, scanner = null;
 const $ = id => document.getElementById(id), val = id => $(id).value.trim();
