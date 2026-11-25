@@ -103,6 +103,7 @@ const API = 'https://script.google.com/macros/s/AKfycbwClwR5vrbW0t9_qTU7_h6bU8vS
 
 let barang = [], dept = [], stok = [], sel = {m: null, k: null}, scanner = null;
 const $ = id => document.getElementById(id), val = id => $(id).value.trim();
+const norm = s => String(s == null ? '' : s).trim().replace(/^0+/, '');
 const tot = kode => stok.filter(r => r.Kode === kode).reduce((a, r) => a + Number(r.Qty), 0);
 
 async function get(a) { return (await fetch(API + '?action=' + a)).json(); }
@@ -148,7 +149,7 @@ function stopScan() {
 function scan(p) {
   startScan(t => {
     $(p + '_q').value = t;
-    const b = barang.find(r => r.Barcode === t || r.Kode === t);
+    const b = barang.find(r => (norm(r.Barcode) && norm(r.Barcode) === norm(t)) || r.Kode === t);
     if (b) pick(p, b);
     else if (confirm('Barcode ' + t + ' belum terdaftar. Daftarkan sebagai barang baru?')) {
       $('n_bc').value = t; document.querySelector('[data-t=baru]').click();
