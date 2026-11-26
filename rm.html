@@ -96,7 +96,7 @@ th,td{padding:6px;border-bottom:1px solid var(--line);text-align:left;vertical-a
 </section>
 
 <section id="stok">
- <div class="row"><input id="s_q" placeholder="Cari item code, nama, lokasi" oninput="renderStok()"><button class="b g" onclick="load()">Muat ulang</button></div>
+ <div class="row"><input id="s_q" placeholder="Cari nama, item code, atau lokasi rak" oninput="renderStok()"><button class="b g" onclick="load()">Muat ulang</button></div>
  <div class="wrap" style="margin-top:10px"><table id="s_tab"></table></div>
 </section>
 
@@ -124,8 +124,16 @@ th,td{padding:6px;border-bottom:1px solid var(--line);text-align:left;vertical-a
  <div class="row"><input id="n_bc"><button class="b g" onclick="startScan(t=>$('n_bc').value=t)">Scan</button></div>
  <label>Punya tanggal kadaluarsa?</label>
  <select id="n_exp"><option>Tidak</option><option>Ya</option></select>
- <label>Lokasi rak <small>(opsional)</small></label><input id="n_lok">
+ <label>Lokasi rak <small>(contoh SP17-01-02-A. Boleh lebih dari satu, pisahkan dengan titik koma)</small></label><input id="n_lok" placeholder="SP17-01-02-A">
  <button class="b full" onclick="tambah()">Simpan barang</button>
+
+ <h3>Lokasi rak barang</h3>
+ <label>Cari barang <small>(untuk melihat atau mengubah lokasinya)</small></label>
+ <input id="l_q" oninput="cari('l')" placeholder="Nama atau item code">
+ <div id="l_hits"></div><div id="l_item" class="box hide"></div>
+ <label>Lokasi rak <small>(contoh SP17-01-02-A. Boleh lebih dari satu, pisahkan dengan titik koma)</small></label>
+ <input id="l_lok" placeholder="SP17-01-02-A">
+ <button class="b full" onclick="simpanLokasi()">Simpan lokasi</button>
 
  <h3>Cetak label barcode</h3>
  <label>Cari barang</label>
@@ -143,7 +151,7 @@ th,td{padding:6px;border-bottom:1px solid var(--line);text-align:left;vertical-a
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbwClwR5vrbW0t9_qTU7_h6bU8vSUb5MT0dYYMh0bRu_0j6ivexSB5TUt2Ce-q47rMVz/exec';
 
-let barang = [], dept = [], pics = [], stok = [], hist = [], sel = {m: null, k: null, a: null}, scanner = null, ses = {pic: '', pin: '', admin: false};
+let barang = [], dept = [], pics = [], stok = [], hist = [], sel = {m: null, k: null, a: null, l: null}, scanner = null, ses = {pic: '', pin: '', admin: false};
 const $ = id => document.getElementById(id), val = id => $(id).value.trim();
 const norm = s => String(s == null ? '' : s).trim().replace(/^0+/, '');
 const tot = kode => stok.filter(r => r.Kode === kode).reduce((a, r) => a + Number(r.Qty), 0);
@@ -179,7 +187,7 @@ async function load() {
     $('petugas').value = pics.includes(cur) ? cur : '';
     $('h_pic').innerHTML = '<option value="">Semua</option>' + pics.map(p => `<option>${p}</option>`).join('');
     renderStok();
-    ['m', 'k', 'a'].forEach(p => { if (sel[p]) pick(p, barang.find(b => b.Kode === sel[p].Kode)); });
+    ['m', 'k', 'a', 'l'].forEach(p => { if (sel[p]) pick(p, barang.find(b => b.Kode === sel[p].Kode)); });
   } catch (e) { toast('Gagal memuat data. Cek URL web app.', false); }
 }
 $('petugas').onchange = () => login(val('petugas'));
@@ -226,7 +234,7 @@ function cari(p) {
   sel[p] = null; $(p + '_item').classList.add('hide');
   if (q.length < 2) { box.innerHTML = ''; return; }
   const hit = barang.filter(b => [b.Kode, b.Nama, b.Barcode].join(' ').toLowerCase().includes(q)).slice(0, 6);
-  box.innerHTML = hit.map(b => `<div class="hit" data-k="${b.Kode}">${b.Nama}<br><small>${b.Kode} | stok ${tot(b.Kode)} ${b.Satuan}</small></div>`).join('')
+  box.innerHTML = hit.map(b => `<div class="hit" data-k="${b.Kode}">${b.Nama}<br><small>${b.Kode} | stok ${tot(b.Kode)} ${b.Satuan} | ${b.Lokasi || 'lokasi belum diatur'}</small></div>`).join('')
     || '<div class="box">Tidak ditemukan. Admin dapat mendaftarkannya di tab Admin.</div>';
   box.querySelectorAll('.hit').forEach(e => e.onclick = () => pick(p, barang.find(b => b.Kode === e.dataset.k)));
 }
@@ -237,7 +245,8 @@ function pick(p, b) {
   const exp = rows.filter(r => r.Expired).map(r => `<small>Kadaluarsa ${r.Expired}: ${r.Qty} ${b.Satuan}</small>`).join('');
   const box = $(p + '_item'); box.classList.remove('hide');
   box.innerHTML = `<b>${b.Nama}</b><small>Item code: ${b.Kode} | Lokasi: ${b.Lokasi || '-'}</small>` +
-    (p === 'a' ? `<small>Barcode: ${b.Barcode || '-'}</small>` : `<small>Stok saat ini: <b>${tot(b.Kode)} ${b.Satuan}</b></small>${exp}`);
+    (p === 'l' ? '' : p === 'a' ? `<small>Barcode: ${b.Barcode || '-'}</small>` : `<small>Stok saat ini: <b>${tot(b.Kode)} ${b.Satuan}</b></small>${exp}`);
+  if (p === 'l') $('l_lok').value = b.Lokasi || '';
   if ($(p + '_sat')) $(p + '_sat').textContent = '(' + b.Satuan + ')';
   if (p === 'm') $('m_exph').textContent = b['Ada Expired'] === 'Ya' ? '(wajib diisi)' : '(kosongkan jika tidak ada)';
 }
@@ -273,6 +282,12 @@ async function tambah() {
   await load();
   if (r.internal && confirm('Barang ini tidak punya barcode. Cetak label sekarang?')) cetak({Kode: r.kode, Nama: nama, Barcode: r.barcode}, 1);
 }
+async function simpanLokasi() {
+  if (!sel.l) return toast('Pilih barang dulu', false);
+  const r = await post({action: 'lokasi', kode: sel.l.Kode, lokasi: val('l_lok')});
+  toast(r.msg, r.ok);
+  if (r.ok) await load();
+}
 function cetakDipilih() {
   if (!sel.a) return toast('Pilih barang dulu', false);
   cetak(sel.a, Math.max(1, Number(val('a_n')) || 1));
@@ -301,10 +316,10 @@ function renderStok() {
     const last = rs.filter(r => r['Waktu Update']).sort((x, y) => y['Waktu Update'].localeCompare(x['Waktu Update']))[0];
     return {b, qty: tot(b.Kode), exp, last};
   }).filter(x => !q || [x.b.Kode, x.b.Nama, x.b.Lokasi].join(' ').toLowerCase().includes(q));
-  $('s_tab').innerHTML = '<tr><th>Barang</th><th>Stok</th><th>Lokasi</th><th>Kadaluarsa</th></tr>' +
+  $('s_tab').innerHTML = '<tr><th>Barang</th><th>Stok</th><th>Lokasi rak</th><th>Kadaluarsa</th></tr>' +
     l.map(x => `<tr><td>${x.b.Nama}<br><small>${x.b.Kode}</small></td>` +
       `<td>${x.qty} ${x.b.Satuan}${x.last ? `<br><small>${x.last['PIC Update']}, ${x.last['Waktu Update'].slice(0, 16)}</small>` : ''}</td>` +
-      `<td>${x.b.Lokasi || '-'}</td><td${x.exp && x.exp <= lim ? ' class="warn"' : ''}>${x.exp || '-'}</td></tr>`).join('');
+      `<td><b>${(x.b.Lokasi || '-').split(/;\s*/).join('<br>')}</b></td><td${x.exp && x.exp <= lim ? ' class="warn"' : ''}>${x.exp || '-'}</td></tr>`).join('');
 }
 
 /* history */
