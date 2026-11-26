@@ -22,6 +22,7 @@ const API_URL = "https://script.google.com/macros/s/AKfycbw_EHZ-aSY8A9Sav6Hf63WK
   --find:#9A4512; --find-bg:#F9D3B6; --ink-bg:#D6E4F5; --ink-t:#1D4E89; --noloc:#8D96A0; --empty:#FFFFFF;
   --pick:#6D28D9; --pick-bg:#E6DAFA; --pick-t:#4C1D95; --pick-ink:#FFFFFF;
   --ov:#0E7490; --ov-bg:#CFF0F7;
+  --hold:#E8590C; --hold-bg:#FFB366; --hold-t:#5A2A00;
   --ui:"Barlow",system-ui,-apple-system,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root{
@@ -30,7 +31,8 @@ const API_URL = "https://script.google.com/macros/s/AKfycbw_EHZ-aSY8A9Sav6Hf63WK
   --ok:#8FD3A4; --ok-bg:#1E3B29; --wait-bg:#4A3D0D; --bad:#F2A497; --bad-bg:#4A1F1A;
   --find:#F6B48A; --find-bg:#4D2A14; --ink-bg:#1B3350; --ink-t:#A9C8F0; --noloc:#3A444E; --empty:#222C35;
   --pick:#9D6BFF; --pick-bg:#34234F; --pick-t:#D8C2FF; --pick-ink:#12081F;
-  --ov:#22D3EE; --ov-bg:#0E3A44; color-scheme:dark}}
+  --ov:#22D3EE; --ov-bg:#0E3A44;
+  --hold:#FF922B; --hold-bg:#7A3E00; --hold-t:#FFD8A8; color-scheme:dark}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;min-height:100%}
@@ -58,6 +60,7 @@ input,select,textarea{font:500 16px var(--ui);color:var(--ink);background:var(--
 .btn.warn{background:var(--orange);color:#fff;border-color:var(--orange)}
 .btn.red{background:#B42318;color:#fff;border-color:#B42318}
 .btn.blue{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn.hold{background:var(--hold);color:#fff;border-color:var(--hold)}
 .btn.pick{background:var(--pick);color:var(--pick-ink);border-color:var(--pick)}
 .btn.ghost{background:transparent}
 .btn.sm{padding:6px 10px;font-size:13px}
@@ -81,6 +84,7 @@ input,select,textarea{font:500 16px var(--ui);color:var(--ink);background:var(--
 .loc.ov{background:var(--ov-bg);color:var(--ov);border-color:var(--ov)}
 .qc{display:inline-block;font:700 11px var(--ui);letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:999px}
 .qc.Release{background:var(--ok-bg);color:var(--ok)} .qc.Inkubasi{background:var(--ink-bg);color:var(--ink-t)} .qc.Reject{background:var(--bad-bg);color:var(--bad)} .qc.Campur{background:var(--wait-bg);color:var(--ink)}
+.qc.OnHold{background:var(--hold-bg);color:var(--hold-t)}
 .ovb{display:inline-block;font:700 10px var(--ui);letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:999px;background:var(--ov-bg);color:var(--ov);border:1px solid var(--ov);margin-left:6px;vertical-align:1px}
 .acts{display:flex;flex-wrap:wrap;gap:8px}
 .acts .btn{flex:1 1 auto}
@@ -104,7 +108,6 @@ input,select,textarea{font:500 16px var(--ui);color:var(--ink);background:var(--
 .rep tr{break-inside:avoid}
 .rep tfoot td{font-weight:700}
 .rep h2{font-size:12pt;margin:6mm 0 2mm}
-.rep .sub{font-size:10.5pt;margin:0 0 5mm}
 .rep tr.grp td{background:#EAF0FB;font-weight:700;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .rep tr.sub td{font-style:italic;color:#333}
 .rep tr.psub td{font-weight:700}
@@ -141,7 +144,6 @@ table.t th{font-size:12px;color:var(--muted);font-weight:600}
 .rk.zSlow{--zc:var(--blue)}.rk.zFast{--zc:#E8A317}.rk.zPreloading{--zc:#22863A}.rk.zReject{--zc:var(--bad)}.rk.zInkubasi{--zc:#6E59A5}
 .rk.zFast .rn em.tag{color:#3A2600}
 .rkpair{display:flex;flex-wrap:wrap;gap:0 10px;align-items:flex-start}
-.legend.area i{background:transparent;border-width:2px;border-radius:3px}
 .rrow{display:flex;gap:2px;margin-bottom:2px}
 .rrow .lv{width:22px;flex:none;font:600 11px var(--mono);color:var(--muted);display:flex;align-items:center}
 .cell{width:30px;height:24px;flex:none;border-radius:3px;border:1px solid var(--line);background:var(--empty);font:600 9px var(--mono);display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;padding:0}
@@ -149,6 +151,7 @@ table.t th{font-size:12px;color:var(--muted);font-weight:600}
 .cell.sI{background:var(--ink-bg);border-color:transparent;color:var(--ink-t)}
 .cell.sC{background:var(--wait-bg);border-color:transparent;color:var(--ink)}
 .cell.sX{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.cell.sH{background:var(--hold-bg);border-color:var(--hold);color:var(--hold-t)}
 .cell.r{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
 .cell.f{background:var(--orange);color:#fff;border-color:transparent}
 .cell.pk{background:var(--pick);color:var(--pick-ink);border-color:var(--pick-t);border-width:2px;font-weight:700}
@@ -165,7 +168,7 @@ table.t th{font-size:12px;color:var(--muted);font-weight:600}
 .alane.ov{box-shadow:inset 0 0 0 2px var(--ov)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{min-width:46px;height:38px;border-radius:8px;border:2px solid transparent;font:700 14px var(--mono);cursor:pointer;padding:0 8px}
-.chip.cR{background:var(--ok-bg);color:var(--ok)} .chip.cI{background:var(--ink-bg);color:var(--ink-t)} .chip.cX{background:var(--bad-bg);color:var(--bad)}
+.chip.cR{background:var(--ok-bg);color:var(--ok)} .chip.cI{background:var(--ink-bg);color:var(--ink-t)} .chip.cX{background:var(--bad-bg);color:var(--bad)} .chip.cH{background:var(--hold-bg);color:var(--hold-t)}
 .chip.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--accent)}
 .chip.on::after{content:" ✓"}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -354,9 +357,8 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
   <section id="tab-peta" hidden>
     <h2>Peta rak</h2>
     <div class="seg" id="segGud"></div>
-    <div class="legend"><span><i style="background:var(--blue);border-color:var(--blue)"></i>Letakkan di sini</span><span><i style="background:var(--pick);border-color:var(--pick-t)"></i>Picking (akan keluar)</span><span><i style="background:var(--ok-bg)"></i>Release</span><span><i style="background:var(--ink-bg)"></i>Inkubasi</span><span><i style="background:var(--wait-bg)"></i>Campur</span><span><i style="background:var(--bad-bg);border-color:var(--bad)"></i>Reject</span><span><i style="background:var(--orange)"></i>Hasil cari</span><span><i style="box-shadow:inset 0 0 0 2px var(--ov);border-color:var(--ov)"></i>Overstock (beda gudang asal, kecuali rak Inkubasi/Reject)</span><span><i style="border:1.5px dashed var(--muted)"></i>Lorong (1 kode, banyak palet)</span><span><i></i>Kosong</span></div>
+    <div class="legend"><span><i style="background:var(--blue);border-color:var(--blue)"></i>Letakkan di sini</span><span><i style="background:var(--pick);border-color:var(--pick-t)"></i>Picking (akan keluar)</span><span><i style="background:var(--ok-bg)"></i>Release</span><span><i style="background:var(--ink-bg)"></i>Inkubasi</span><span><i style="background:var(--wait-bg)"></i>Campur</span><span><i style="background:var(--bad-bg);border-color:var(--bad)"></i>Reject</span><span><i style="background:var(--hold-bg);border-color:var(--hold)"></i>On Hold</span><span><i style="background:var(--orange)"></i>Hasil cari</span><span><i style="box-shadow:inset 0 0 0 2px var(--ov);border-color:var(--ov)"></i>Overstock (beda gudang asal, kecuali rak Inkubasi/Reject)</span><span><i style="border:1.5px dashed var(--muted)"></i>Lorong (1 kode, banyak palet)</span><span><i></i>Kosong</span></div>
     <div id="cellInfo" class="msg wait" hidden></div>
-    <div class="legend area"><b style="color:var(--ink)">Area:</b><span><i style="border-color:var(--blue)"></i>Slow (SD17, cair)</span><span><i style="border-color:#E8A317"></i>Fast (SD18, padat)</span><span><i style="border-color:#22863A"></i>Pre-loading</span><span><i style="border-color:var(--bad)"></i>Reject</span></div>
     <div class="mapbox" id="map"></div>
   </section>
 
@@ -406,14 +408,14 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
     <!-- QC -->
     <div id="adm-qc" hidden>
       <h2>Status QC</h2>
-      <p class="hint">Isi No Batch (manual). <b>Centang palet</b> untuk memilih semua isinya, atau <b>ketuk nomor material</b> tertentu kalau hanya sebagian yang statusnya berbeda. Lalu tekan Release, Reject, atau Inkubasi.</p>
+      <p class="hint">Isi No Batch (manual). <b>Centang palet</b> untuk memilih semua isinya, atau <b>ketuk nomor material</b> tertentu kalau hanya sebagian yang statusnya berbeda. Lalu tekan Release, Reject, Inkubasi, atau On Hold.</p>
       <div class="info" style="margin-bottom:10px">Kalau sebagian isi palet di-<b>Reject</b>, item itu otomatis <b>dipisah jadi palet baru</b> (nomor palet berakhiran R) yang harus diletakkan di rak reject. Cetak ulang label kedua palet.</div>
       <div class="form2" style="grid-template-columns:1fr auto"><label>No Batch<input id="qBatch" autocomplete="off" autocapitalize="characters" placeholder="BOLF382043"></label><button class="btn ghost" id="qClear">Hapus</button></div>
       <div id="qcMsg"></div>
       <div class="acts" style="margin:10px 0"><button class="btn sm" id="qAll">Pilih semua</button><button class="btn sm ghost" id="qNone">Batal pilih</button></div>
       <div id="qcList"></div>
       <div class="small" id="qSum" style="margin-top:6px"></div>
-      <div class="acts" style="margin-top:12px"><button class="btn ok" data-qc="Release">Release</button><button class="btn red" data-qc="Reject">Reject</button><button class="btn blue" data-qc="Inkubasi">Inkubasi</button></div>
+      <div class="acts" style="margin-top:12px"><button class="btn ok" data-qc="Release">Release</button><button class="btn red" data-qc="Reject">Reject</button><button class="btn blue" data-qc="Inkubasi">Inkubasi</button><button class="btn hold" data-qc="On Hold">On Hold</button></div>
     </div>
 
     <!-- Pengaturan -->
@@ -424,15 +426,16 @@ nav.tabs button[aria-selected="true"] svg{color:var(--accent)}
       <div class="sec"><h3><span>Aturan pemindahan rak</span></h3>
         <div class="info"><ul>
           <li><b>Rak Reject</b>: hanya palet berstatus Reject. Palet Reject tidak boleh diletakkan di rak lain.</li>
-          <li><b>Keluar dari rak Reject</b>: hanya setelah status QC diubah (Release / Inkubasi) lewat Admin &gt; QC. Setelah itu muncul di daftar "Perlu dipindahkan".</li>
+          <li><b>Keluar dari rak Reject</b>: hanya setelah status QC diubah (Release / Inkubasi / On Hold) lewat Admin &gt; QC. Setelah itu muncul di daftar "Perlu dipindahkan".</li>
           <li><b>Area pre-loading SD18</b>: Rak 11, Rak 12, dan <b>Rak 01 kolom 01–18</b>. Rak 01 kolom 19–23 tetap area Fast.</li>
-          <li><b>Rak Preloading</b>: hanya palet Release (semua isi Release). Palet Inkubasi / Campur tidak boleh.</li>
+          <li><b>Rak Preloading</b>: hanya palet Release (semua isi Release). Palet Inkubasi / On Hold / Campur tidak boleh.</li>
           <li><b>Rekomendasi lokasi</b> dimulai dari rak terdekat loading gate: SD17 dari Rak 01, SD18 dari Rak 08 (lalu 07, 06, … 01). Di tiap rak: kolom 01 dan level A dulu.</li>
           <li><b>Palet Inkubasi</b> disimpan di area sesuai kategori produk: Slow (SD17) atau Fast (SD18).</li>
+          <li><b>Palet On Hold</b>: belum boleh keluar (harus diubah ke Release dulu). Boleh disimpan di rak Simpan atau lorong, dan tampil <b>orange</b> di peta.</li>
           <li><b>Preloading ke rak Simpan</b>: boleh (dikembalikan). Kalau status QC palet di preloading berubah bukan Release, wajib dikembalikan ke rak Simpan.</li>
           <li><b>Reject ke Preloading</b>: tidak bisa langsung. Ubah QC ke Release dulu.</li>
           <li><b>Rak Inkubasi</b> (khusus SD18): untuk palet yang belum Release. Palet Reject tetap harus di rak reject.</li>
-          <li><b>Lorong</b> (FG17-L01 s/d FG18-L08): 1 lorong = 1 kode, boleh berisi banyak palet dan banyak produk tanpa batas. Boleh untuk status Release / Inkubasi / Campur, <b>tidak untuk Reject</b>. Letakkan dengan tombol <b>Letakkan di lorong</b> di menu Masuk (scan label lorong, lalu scan palet). Label lorong dicetak di bagian <b>Cetak label lokasi</b> (pilih Lorong).</li>
+          <li><b>Lorong</b> (FG17-L01 s/d FG18-L08): 1 lorong = 1 kode, boleh berisi banyak palet dan banyak produk tanpa batas. Boleh untuk status Release / Inkubasi / On Hold / Campur, <b>tidak untuk Reject</b>. Letakkan dengan tombol <b>Letakkan di lorong</b> di menu Masuk (scan label lorong, lalu scan palet). Label lorong dicetak di bagian <b>Cetak label lokasi</b> (pilih Lorong).</li>
           <li><b>Gedung</b>: bebas. Palet produk SD17 yang disimpan di SD18 (atau sebaliknya) diberi tanda <b>Overstock</b> biru-hijau. <b>Pengecualian</b>: palet di rak <b>Inkubasi</b> atau <b>Reject</b> tidak dihitung overstock.</li>
         </ul></div>
       </div>
@@ -701,7 +704,7 @@ function derive(){
 const fmtDate=(iso)=>iso?ddmmyyyy(iso):"-";
 const fmtTime=(t)=>{if(!t)return"";const d=new Date(t);return d.toLocaleDateString("id-ID",{day:"2-digit",month:"short"})+" "+d.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});};
 function msg(el,cls,text){$(el).innerHTML=text?`<div class="msg ${cls}">${text}</div>`:"";}
-const qcB=(q)=>`<span class="qc ${esc(q)}">${esc(q)}</span>`;
+const qcB=(q)=>`<span class="qc ${esc(q).replace(/\s/g,"")}">${esc(q)}</span>`;
 const qcP=(p)=>qcB(p.qc)+(p.qc==="Campur"&&p.qcItem?`<div class="small">${esc(p.qcItem)}</div>`:"");
 /** Overstock = gedung lokasi beda dengan gudang asal produk, KECUALI di rak Inkubasi / Reject (rak khusus SD18). */
 const NO_OV=["Reject","Inkubasi"];
@@ -921,7 +924,7 @@ function renderMap(){
         if(!R.cells.has(c)){h+=`<span class="cell x"></span>`;continue;}
         let cls="",t=pad(k);const id=D.occ.get(c),op=id?S.pal.get(id):null;
         if(D.pick.has(c)){cls="pk";t="P"+D.pick.get(c);}
-        else if(S.cari.has(c))cls="f";else if(op){const q=op.qc;cls=q==="Release"?"sR":q==="Reject"?"sX":q==="Campur"?"sC":"sI";}
+        else if(S.cari.has(c))cls="f";else if(op){const q=op.qc;cls=q==="Release"?"sR":q==="Reject"?"sX":q==="On Hold"?"sH":q==="Campur"?"sC":"sI";}
         else if(D.rekLoc.has(c)){cls="r";t="#"+D.rekLoc.get(c).n;}
         const hp=op||(D.rekLoc.has(c)?D.rekLoc.get(c).p:null);
         if(isOv(hp,L.get(c)))cls+=" ov";
@@ -1356,22 +1359,6 @@ function qrSvg(text){
   return `<svg viewBox="-2 -2 ${n+4} ${n+4}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"><rect x="-2" y="-2" width="${n+4}" height="${n+4}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
 }
 function labelHtml(p){
-  const v=(x,cls)=>`<td class="v${cls?" "+cls:""}" colspan="2">${esc(x||"-")}</td>`,k=(x)=>`<td class="k" colspan="2">${x}</td>`;
-  const matCls=String(p.mat).length>11?"sm":"";
-  return `<table class="lab">
-    <colgroup><col style="width:15.7%"><col style="width:15.7%"><col style="width:15.7%"><col style="width:21.4%"><col style="width:15.75%"><col style="width:15.75%"></colgroup>
-    <tr style="height:14%"><td class="g" colspan="4">${esc(p.nama)}</td><td class="g i" colspan="2">Barcode</td></tr>
-    <tr style="height:9.5%">${k("Item Code")}${k("Nomor Batch")}<td class="qr" colspan="2" rowspan="8">${qrSvg(p.qr||buildQR(p))}<span>${esc(p.batch)} · P${esc(p.palet)}</span></td></tr>
-    <tr style="height:12%">${v(p.item)}${v(p.batch)}</tr>
-    <tr style="height:9.5%">${k("Nomor Palet")}${k("Nomor Material")}</tr>
-    <tr style="height:12%">${v(p.palet)}${v(p.mat,matCls)}</tr>
-    <tr style="height:9.5%">${k("Jumlah")}${k("Satuan")}</tr>
-    <tr style="height:12%">${v(p.jumlah)}${v(p.satuan)}</tr>
-    <tr style="height:9.5%">${k("Tanggal Produksi")}${k("Tanggal Kadaluwarsa")}</tr>
-    <tr style="height:12%">${v(ddmmyyyy(p.prod))}${v(ddmmyyyy(p.exp))}</tr>
-  </table>`;
-}
-  function labelHtml(p){
   const f=(k,v)=>`<td class="f"><div class="k">${k}</div><div class="v">${esc(v||"-")}</div></td>`;
   return `<table class="lab">
     <colgroup><col style="width:56%"><col style="width:44%"></colgroup>
@@ -1441,10 +1428,10 @@ function printLabels(list){
 
 /* =================== ADMIN: QC (per nomor material) =================== */
 const qSel=new Map();          // id palet -> Set nomor material terpilih
-const QCC={Release:"cR",Inkubasi:"cI",Reject:"cX"};
+const QCC={Release:"cR",Inkubasi:"cI",Reject:"cX","On Hold":"cH"};
 function itemQC(p,n){
   let s=p.qc==="Campur"?"Inkubasi":p.qc;
-  String(p.qcItem||"").split(";").forEach(part=>{const m=part.trim().match(/^(\w+)=(.+)$/);if(m){const a=matNums(m[2]);if(a&&a.includes(n))s=m[1];}});
+  String(p.qcItem||"").split(";").forEach(part=>{const m=part.trim().match(/^([\w ]+)=(.+)$/);if(m){const a=matNums(m[2]);if(a&&a.includes(n))s=m[1].trim();}});
   return s;
 }
 function renderQC(){
