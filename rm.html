@@ -14,7 +14,7 @@ header{background:var(--main);color:#fff;padding:10px 14px;display:flex;justify-
 header h1{font-size:17px;margin:0}
 header select{width:130px;padding:6px;border:0;border-radius:6px}
 nav{display:flex;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-nav button{flex:1;padding:12px 2px;border:0;background:none;font:inherit;font-size:14px;color:var(--mute);border-bottom:3px solid transparent}
+nav button{flex:1;padding:12px 2px;border:0;background:none;font:inherit;font-size:13px;color:var(--mute);border-bottom:3px solid transparent}
 nav button.on{color:var(--main);border-color:var(--main);font-weight:600}
 main{padding:14px;max-width:640px;margin:auto}
 section{display:none}section.on{display:block}
@@ -64,6 +64,7 @@ th,td{padding:6px;border-bottom:1px solid var(--line);text-align:left;vertical-a
  <button data-t="keluar">Keluar</button>
  <button data-t="stok">Stok</button>
  <button data-t="history">History</button>
+ <button data-t="label">Label</button>
  <button data-t="admin">Admin</button>
 </nav>
 <main>
@@ -127,20 +128,17 @@ th,td{padding:6px;border-bottom:1px solid var(--line);text-align:left;vertical-a
  <label>Lokasi rak <small>(contoh SP17-01-02-A. Boleh lebih dari satu, pisahkan dengan titik koma)</small></label><input id="n_lok" placeholder="SP17-01-02-A">
  <button class="b full" onclick="tambah()">Simpan barang</button>
 
- <h3>Lokasi rak barang</h3>
- <label>Cari barang <small>(untuk melihat atau mengubah lokasinya)</small></label>
- <input id="l_q" oninput="cari('l')" placeholder="Nama atau item code">
- <div id="l_hits"></div><div id="l_item" class="box hide"></div>
- <label>Lokasi rak <small>(contoh SP17-01-02-A. Boleh lebih dari satu, pisahkan dengan titik koma)</small></label>
- <input id="l_lok" placeholder="SP17-01-02-A">
- <button class="b full" onclick="simpanLokasi()">Simpan lokasi</button>
+</section>
 
- <h3>Cetak label barcode</h3>
- <label>Cari barang</label>
- <input id="a_q" oninput="cari('a')" placeholder="Item code atau nama">
- <div id="a_hits"></div><div id="a_item" class="box hide"></div>
- <label>Jumlah label</label><input id="a_n" type="number" min="1" value="1">
- <button class="b full" onclick="cetakDipilih()">Cetak label</button>
+<section id="label">
+ <label>Cari barang <small>(nama atau item code)</small></label>
+ <div class="row"><input id="q_q" oninput="cari('q')"><button class="b g" onclick="scan('q')">Scan</button></div>
+ <div id="q_hits"></div><div id="q_item" class="box hide"></div>
+ <label>Jumlah label</label><input id="q_n" type="number" min="1" value="1">
+ <button class="b full" onclick="tambahAntrian()">Tambah ke antrian</button>
+ <h3>Antrian cetak <small id="q_total"></small></h3>
+ <div id="q_list"></div>
+ <div class="row" style="margin-top:12px"><button class="b g" onclick="kosongkanAntrian()">Kosongkan</button><button class="b" style="flex:2" onclick="cetakAntrian()">Cetak semua</button></div>
 </section>
 </main>
 
@@ -151,7 +149,7 @@ th,td{padding:6px;border-bottom:1px solid var(--line);text-align:left;vertical-a
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbwClwR5vrbW0t9_qTU7_h6bU8vSUb5MT0dYYMh0bRu_0j6ivexSB5TUt2Ce-q47rMVz/exec';
 
-let barang = [], dept = [], pics = [], stok = [], hist = [], sel = {m: null, k: null, a: null, l: null}, scanner = null, ses = {pic: '', pin: '', admin: false};
+let barang = [], dept = [], pics = [], stok = [], hist = [], sel = {m: null, k: null, q: null}, scanner = null, ses = {pic: '', pin: '', admin: false};
 const $ = id => document.getElementById(id), val = id => $(id).value.trim();
 const norm = s => String(s == null ? '' : s).trim().replace(/^0+/, '');
 const tot = kode => stok.filter(r => r.Kode === kode).reduce((a, r) => a + Number(r.Qty), 0);
@@ -163,14 +161,14 @@ async function post(d) {
   return (await fetch(API, {method: 'POST', body: JSON.stringify(d)})).json();
 }
 async function login(name) {
-  ses = {pic: '', pin: '', admin: false};
+  ses = {pic: '', pin: '', admin: false}; renderStok();
   if (!name) return;
   const pin = prompt('PIN untuk ' + name);
   if (!pin) { $('petugas').value = ''; return; }
   try {
     const r = await (await fetch(API, {method: 'POST', body: JSON.stringify({action: 'cekpin', petugas: name, pin})})).json();
     if (!r.ok) { $('petugas').value = ''; return toast(r.msg || 'PIN salah', false); }
-    ses = {pic: name, pin, admin: !!r.admin}; toast('Masuk sebagai ' + name);
+    ses = {pic: name, pin, admin: !!r.admin}; renderStok(); toast('Masuk sebagai ' + name);
   } catch (e) { $('petugas').value = ''; toast('Tidak bisa terhubung ke server', false); }
 }
 function toast(t, ok = true) {
@@ -187,7 +185,7 @@ async function load() {
     $('petugas').value = pics.includes(cur) ? cur : '';
     $('h_pic').innerHTML = '<option value="">Semua</option>' + pics.map(p => `<option>${p}</option>`).join('');
     renderStok();
-    ['m', 'k', 'a', 'l'].forEach(p => { if (sel[p]) pick(p, barang.find(b => b.Kode === sel[p].Kode)); });
+    ['m', 'k', 'q'].forEach(p => { if (sel[p]) pick(p, barang.find(b => b.Kode === sel[p].Kode)); });
   } catch (e) { toast('Gagal memuat data. Cek URL web app.', false); }
 }
 $('petugas').onchange = () => login(val('petugas'));
@@ -245,8 +243,7 @@ function pick(p, b) {
   const exp = rows.filter(r => r.Expired).map(r => `<small>Kadaluarsa ${r.Expired}: ${r.Qty} ${b.Satuan}</small>`).join('');
   const box = $(p + '_item'); box.classList.remove('hide');
   box.innerHTML = `<b>${b.Nama}</b><small>Item code: ${b.Kode} | Lokasi: ${b.Lokasi || '-'}</small>` +
-    (p === 'l' ? '' : p === 'a' ? `<small>Barcode: ${b.Barcode || '-'}</small>` : `<small>Stok saat ini: <b>${tot(b.Kode)} ${b.Satuan}</b></small>${exp}`);
-  if (p === 'l') $('l_lok').value = b.Lokasi || '';
+    (p === 'q' ? `<small>Barcode: ${b.Barcode || '-'}</small>` : `<small>Stok saat ini: <b>${tot(b.Kode)} ${b.Satuan}</b></small>${exp}`);
   if ($(p + '_sat')) $(p + '_sat').textContent = '(' + b.Satuan + ')';
   if (p === 'm') $('m_exph').textContent = b['Ada Expired'] === 'Ya' ? '(wajib diisi)' : '(kosongkan jika tidak ada)';
 }
@@ -280,31 +277,61 @@ async function tambah() {
   if (!r.ok) return;
   ['n_kode', 'n_nama', 'n_sat', 'n_bc', 'n_lok'].forEach(i => $(i).value = '');
   await load();
-  if (r.internal && confirm('Barang ini tidak punya barcode. Cetak label sekarang?')) cetak({Kode: r.kode, Nama: nama, Barcode: r.barcode}, 1);
+  if (r.internal) { addQueue({Kode: r.kode, Nama: nama, Barcode: r.barcode}, 1); toast(r.msg + '. Label masuk antrian cetak.'); }
 }
-async function simpanLokasi() {
-  if (!sel.l) return toast('Pilih barang dulu', false);
-  const r = await post({action: 'lokasi', kode: sel.l.Kode, lokasi: val('l_lok')});
+async function editLokasi(kode) {
+  const b = barang.find(x => x.Kode === kode); if (!b) return;
+  const v = prompt('Lokasi rak untuk ' + b.Nama + '\nContoh: SP17-01-02-A (pisahkan dengan titik koma jika lebih dari satu)', b.Lokasi || '');
+  if (v === null) return;
+  const r = await post({action: 'lokasi', kode, lokasi: v});
   toast(r.msg, r.ok);
   if (r.ok) await load();
 }
-function cetakDipilih() {
-  if (!sel.a) return toast('Pilih barang dulu', false);
-  cetak(sel.a, Math.max(1, Number(val('a_n')) || 1));
+
+/* label: antrian cetak */
+let queue = [];
+try { queue = JSON.parse(localStorage.getItem('labelQ') || '[]'); } catch (e) {}
+function saveQ() { try { localStorage.setItem('labelQ', JSON.stringify(queue)); } catch (e) {} renderQ(); }
+function addQueue(b, n) {
+  const x = queue.find(r => r.Kode === b.Kode);
+  if (x) x.n += n; else queue.push({Kode: b.Kode, Nama: b.Nama, Barcode: b.Barcode || b.Kode, n});
+  saveQ();
 }
-function cetak(b, n) {
+function tambahAntrian() {
+  if (!sel.q) return toast('Pilih barang dulu', false);
+  const n = Math.max(1, Math.floor(Number(val('q_n')) || 1));
+  addQueue(sel.q, n); toast(n + ' label ' + sel.q.Nama + ' masuk antrian');
+  sel.q = null; $('q_q').value = ''; $('q_item').classList.add('hide'); $('q_n').value = 1;
+}
+function renderQ() {
+  const t = queue.reduce((a, r) => a + r.n, 0);
+  $('q_total').textContent = queue.length ? '(' + queue.length + ' barang, ' + t + ' label)' : '';
+  $('q_list').innerHTML = queue.length ? queue.map((r, i) =>
+    `<div class="box"><div class="row" style="align-items:center"><div style="flex:3">${r.Nama}<small>${r.Kode} | ${r.Barcode}</small></div>` +
+    `<input type="number" min="1" value="${r.n}" style="flex:1" onchange="setQ(${i}, this.value)"><button class="b g" onclick="hapusQ(${i})">Hapus</button></div></div>`).join('')
+    : '<div class="box">Antrian kosong</div>';
+}
+function setQ(i, v) { queue[i].n = Math.max(1, Math.floor(Number(v) || 1)); saveQ(); }
+function hapusQ(i) { queue.splice(i, 1); saveQ(); }
+function kosongkanAntrian() { if (queue.length && confirm('Kosongkan antrian cetak?')) { queue = []; saveQ(); } }
+function cetakAntrian() {
+  if (!queue.length) return toast('Antrian masih kosong', false);
+  const list = []; queue.forEach(r => { for (let i = 0; i < r.n; i++) list.push(r); });
+  cetak(list);
+}
+function cetak(list) {
   const box = $('lbl'); box.innerHTML = '';
-  for (let i = 0; i < n; i++) {
+  list.forEach(b => {
     const d = document.createElement('div'); d.className = 'lb';
     d.innerHTML = `<div class="lt"><b>${b.Nama}</b><div>Item code: ${b.Kode}</div></div><svg></svg>`;
     box.appendChild(d);
     const svg = d.querySelector('svg');
     JsBarcode(svg, String(b.Barcode || b.Kode), {format: 'CODE128', width: 2, height: 60, margin: 0, displayValue: true, fontSize: 16});
-    const w = parseFloat(svg.getAttribute('width')), h = parseFloat(svg.getAttribute('height'));
-    svg.setAttribute('viewBox', `0 0 ${w} ${h}`); svg.removeAttribute('width'); svg.removeAttribute('height');
+    const w = parseFloat(svg.getAttribute('width')), ht = parseFloat(svg.getAttribute('height'));
+    svg.setAttribute('viewBox', `0 0 ${w} ${ht}`); svg.removeAttribute('width'); svg.removeAttribute('height');
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-  }
-  setTimeout(() => window.print(), 400);
+  });
+  setTimeout(() => window.print(), 500);
 }
 
 /* stok */
@@ -319,7 +346,7 @@ function renderStok() {
   $('s_tab').innerHTML = '<tr><th>Barang</th><th>Stok</th><th>Lokasi rak</th><th>Kadaluarsa</th></tr>' +
     l.map(x => `<tr><td>${x.b.Nama}<br><small>${x.b.Kode}</small></td>` +
       `<td>${x.qty} ${x.b.Satuan}${x.last ? `<br><small>${x.last['PIC Update']}, ${x.last['Waktu Update'].slice(0, 16)}</small>` : ''}</td>` +
-      `<td><b>${(x.b.Lokasi || '-').split(/;\s*/).join('<br>')}</b></td><td${x.exp && x.exp <= lim ? ' class="warn"' : ''}>${x.exp || '-'}</td></tr>`).join('');
+      `<td><b>${(x.b.Lokasi || '-').split(/;\s*/).join('<br>')}</b>${ses.admin ? `<br><button class="b g" style="padding:2px 8px;font-size:12px" data-k="${x.b.Kode}" onclick="editLokasi(this.dataset.k)">Ubah</button>` : ''}</td><td${x.exp && x.exp <= lim ? ' class="warn"' : ''}>${x.exp || '-'}</td></tr>`).join('');
 }
 
 /* history */
@@ -344,6 +371,7 @@ function renderHist() {
         `<td>${r.Jenis === 'MASUK' ? '+' : '-'}${r.Qty} ${r.Satuan}</td><td>${ket}</td><td>${r.PIC}</td></tr>`;
     }).join('');
 }
+renderQ();
 load();
 </script>
 </body>
